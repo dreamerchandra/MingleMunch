@@ -1,4 +1,11 @@
-import { Box, Button, ButtonGroup, Container, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Container,
+  Paper,
+  Typography
+} from '@mui/material';
 import { useCart } from './cart-activity';
 import { Product } from '../../types/Product';
 import { styled } from '@mui/system';
@@ -10,6 +17,15 @@ const StyledProduct = styled('div')(({ theme }) => ({
   justifyContent: 'space-between',
   gap: theme.spacing(2),
   width: '100%'
+}));
+
+const TotalWrapper = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing(8),
+  width: '100%',
+  marginTop: theme.spacing(2)
 }));
 
 export const Checkout: FC<{ revealCheckout: () => void }> = ({
@@ -25,6 +41,12 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
     }
     return old;
   }, [] as { product: Product; quantity: number }[]);
+  const subTotal = items.reduce(
+    (old, item) => old + item.product.itemPrice * item.quantity,
+    0
+  );
+  const tax = Number((subTotal * 0.18).toFixed(2));
+  const grandTotal = (subTotal + tax).toFixed(2);
   return (
     <Container
       component="main"
@@ -44,8 +66,9 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
           marginTop: 8,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          width: '100%'
+          width: '100%',
+          height: 'calc(40vh - 50px)',
+          overflow: 'auto'
         }}
       >
         {items.map((item) => (
@@ -73,7 +96,40 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
             </div>
           </StyledProduct>
         ))}
+        <Box
+          sx={{
+            marginTop: 4,
+            alignSelf: 'flex-end',
+            marginRight: 4
+          }}
+        >
+          <Container
+            component="div"
+            sx={{
+              padding: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%'
+            }}
+          >
+            <TotalWrapper>
+              <Typography component="h6">SubTotal </Typography>
+              <Typography component="h6">₹{subTotal}</Typography>
+            </TotalWrapper>
+            <TotalWrapper>
+              <Typography component="h6">Tax </Typography>
+              <Typography component="h6">₹{tax}</Typography>
+            </TotalWrapper>
+            <TotalWrapper>
+              <Typography component="h6">GrandTotal </Typography>
+              <Typography component="h6">₹{grandTotal}</Typography>
+            </TotalWrapper>
+          </Container>
+        </Box>
       </Box>
+      <Button variant="outlined" color="primary">
+        Place Order ₹ {grandTotal}
+      </Button>
     </Container>
   );
 };
