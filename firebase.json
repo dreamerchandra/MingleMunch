@@ -11,7 +11,7 @@
   },
   "hosting": {
     "site": "minglemunch",
-    "public": "build",
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",

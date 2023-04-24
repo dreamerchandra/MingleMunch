@@ -3,7 +3,7 @@ import {
   Button,
   ButtonGroup,
   Container,
-  Paper,
+  Divider,
   Typography
 } from '@mui/material';
 import { useCart } from './cart-activity';
@@ -28,6 +28,7 @@ const TotalWrapper = styled('div')(({ theme }) => ({
   marginTop: theme.spacing(2)
 }));
 
+const TAX = 0.18;
 export const Checkout: FC<{ revealCheckout: () => void }> = ({
   revealCheckout
 }) => {
@@ -45,7 +46,7 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
     (old, item) => old + item.product.itemPrice * item.quantity,
     0
   );
-  const tax = Number((subTotal * 0.18).toFixed(2));
+  const tax = Number((subTotal * TAX).toFixed(2));
   const grandTotal = (subTotal + tax).toFixed(2);
   return (
     <Container
@@ -96,9 +97,9 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
             </div>
           </StyledProduct>
         ))}
+        <Divider style={{ width: '40vw', margin: '20px auto' }} />
         <Box
           sx={{
-            marginTop: 4,
             alignSelf: 'flex-end',
             marginRight: 4
           }}
@@ -127,7 +128,11 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
           </Container>
         </Box>
       </Box>
-      <Button variant="outlined" color="primary">
+      <Button
+        variant="outlined"
+        color="primary"
+        href="upi://pay?pa=chandru.ck58@okicici&amp;pn=Chandra Kumar&amp;cu=INR&amp;&am=1000"
+      >
         Place Order ₹ {grandTotal}
       </Button>
     </Container>
