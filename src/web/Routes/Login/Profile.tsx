@@ -8,7 +8,10 @@ import { useNavigate } from 'react-router-dom';
 
 export const Profile = () => {
   const navigation = useNavigate();
-  const { updateUserDetails, user } = useUser();
+  const {
+    updateUserDetails,
+    userDetails: { user }
+  } = useUser();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

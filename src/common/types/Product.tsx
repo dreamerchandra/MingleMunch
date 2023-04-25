@@ -4,7 +4,6 @@ export interface Product {
   itemDescription: string;
   itemPrice: number;
   itemImage: string;
-  itemCategoryId: string;
   keywords: string[];
   shopId: string;
   shopDetails: {

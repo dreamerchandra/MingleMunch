@@ -5,36 +5,49 @@ import {
   CardContent,
   CardMedia,
   CircularProgress,
-  Typography
+  Typography,
+  styled
 } from '@mui/material';
 import { useProductQuery } from '../../query/products';
 import { Product } from '../../../common/types/Product';
 import { FC } from 'react';
-import { useCart } from './cart-activity';
+import { useCart } from '../Shoping/cart-activity';
 import Grid from '@mui/material/Grid';
 
+const CardActionsWrapper = styled(CardActions)`
+  display: flex;
+  justify-content: space-between;
+  margin: 0 16px;
+`;
 const ProductItem: FC<{ product: Product }> = ({ product }) => {
-  const { itemDescription, itemImage, itemName } = product;
+  const { itemDescription, itemImage, itemName, itemPrice } = product;
   const { addToCart, removeFromCart, cartDetails } = useCart();
   const inCart = cartDetails.cart.filter(
     (item) => item.itemId === product.itemId
   );
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <Card sx={{ width: 345, height: 350 }}>
       <CardMedia
         component="img"
         alt={itemDescription}
         height="140"
         image={itemImage}
+        style={{ objectFit: 'cover' }}
       />
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+        <Typography gutterBottom variant="h4" component="h2">
           {itemName}
         </Typography>
+        <Typography gutterBottom variant="body1" component="h3">
+          {itemDescription}
+        </Typography>
       </CardContent>
-      <CardActions style={{ justifyContent: 'flex-end' }}>
+      <CardActionsWrapper>
+        <Typography gutterBottom component="h3">
+          ₹{itemPrice}
+        </Typography>
         {inCart.length ? (
-          <>
+          <div>
             <Button size="small" onClick={() => removeFromCart(product)}>
               -
             </Button>
@@ -42,13 +55,13 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
             <Button size="small" onClick={() => addToCart(product)}>
               +
             </Button>
-          </>
+          </div>
         ) : (
           <Button size="small" onClick={() => addToCart(product)}>
             Add To Cart
           </Button>
         )}
-      </CardActions>
+      </CardActionsWrapper>
     </Card>
   );
 };
@@ -64,6 +77,7 @@ export const Products = () => {
       rowGap={3}
       columnGap={{ xs: 2, sm: 3, md: 3 }}
       columns={{ xs: 12, sm: 6, md: 4 }}
+      sx={{ marginTop: 4 }}
     >
       {data?.map((product) => (
         <ProductItem product={product} key={product.itemId} />

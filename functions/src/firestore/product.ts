@@ -1,11 +1,6 @@
 import { Product } from '../types/Product.js';
 import { firebaseDb } from '../firebase.js';
-import {
-  CollectionReference,
-  DocumentData,
-  Query,
-  QueryDocumentSnapshot
-} from 'firebase-admin/firestore';
+import { DocumentData, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 export const productConverter = {
   toFirestore(product: Product): DocumentData {

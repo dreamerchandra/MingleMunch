@@ -14,7 +14,9 @@ import { Profile } from './Profile';
 export function LoginPage() {
   const { isOtpRequested, triggerOtp, isPhoneNumberInvalid, loginWithOtp } =
     useToSignIn();
-  const { user } = useUser();
+  const {
+    userDetails: { user }
+  } = useUser();
   const form = useRef({
     phoneNumber: createRef<HTMLInputElement>()
   });

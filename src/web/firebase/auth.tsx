@@ -1,13 +1,14 @@
 import {
   ConfirmationResult,
   RecaptchaVerifier,
-  User,
+  getIdTokenResult,
   signInWithPhoneNumber,
   updateProfile
 } from 'firebase/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from './firebase';
+import { Role } from '../../common/types/roles';
 
 export const removeCountryCode = (phoneNumber: string) => {
   // remove first zero
@@ -31,10 +32,7 @@ export const useToSignIn = () => {
     appVerifier.current = new RecaptchaVerifier(
       'recaptcha-container',
       {
-        size: 'invisible',
-        callback: (res: any) => {
-          console.log(res);
-        }
+        size: 'invisible'
       },
       firebaseAuth
     );
@@ -79,30 +77,50 @@ export const useToSignIn = () => {
 };
 
 export const useUser = () => {
-  const [user, setUser] = useState<User | null>(firebaseAuth.currentUser);
+  const [userDetails, setUser] = useState({
+    user: firebaseAuth.currentUser,
+    loading: true,
+    role: '' as Role
+  });
   useEffect(() => {
-    firebaseAuth.onAuthStateChanged((user) => {
-      setUser(user);
+    firebaseAuth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const tokenResult = await getIdTokenResult(user, true);
+        setUser({
+          user: user,
+          loading: false,
+          role: tokenResult.claims.role || 'user'
+        });
+        return;
+      }
+      setUser({
+        user: user,
+        loading: false,
+        role: 'user'
+      });
     });
   }, []);
 
   const updateUserDetails = (name: string) => {
-    if (!user) return;
+    if (!userDetails.user) return;
 
-    return updateProfile(user, {
+    return updateProfile(userDetails.user, {
       displayName: name
     });
   };
-  return { user, updateUserDetails };
+  return { userDetails, updateUserDetails };
 };
 
 export const useProtectedRoute = () => {
-  const { user } = useUser();
+  const { userDetails } = useUser();
   const navigation = useNavigate();
-  console.log(user);
   useEffect(() => {
-    if (!user) {
-      navigation('/login');
+    const { loading, user } = userDetails;
+    if (loading) {
+      return;
     }
-  }, [navigation, user]);
+    if (user == null) {
+      return navigation('/login');
+    }
+  }, [navigation, userDetails]);
 };
