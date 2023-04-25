@@ -8,7 +8,7 @@ import {
   where
 } from 'firebase/firestore';
 import { firebaseDb } from './firebase';
-import { Product } from '../types/Product';
+import { Product } from '../../common/types/Product';
 
 export const productConverter = {
   toFirestore(product: Product): DocumentData {

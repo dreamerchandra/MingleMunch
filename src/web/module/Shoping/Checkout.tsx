@@ -7,7 +7,7 @@ import {
   Typography
 } from '@mui/material';
 import { useCart } from './cart-activity';
-import { Product } from '../../types/Product';
+import { Product } from '../../../common/types/Product';
 import { styled } from '@mui/system';
 import { FC } from 'react';
 

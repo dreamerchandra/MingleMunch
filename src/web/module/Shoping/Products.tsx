@@ -8,7 +8,7 @@ import {
   Typography
 } from '@mui/material';
 import { useProductQuery } from '../../query/products';
-import { Product } from '../../types/Product';
+import { Product } from '../../../common/types/Product';
 import { FC } from 'react';
 import { useCart } from './cart-activity';
 import Grid from '@mui/material/Grid';

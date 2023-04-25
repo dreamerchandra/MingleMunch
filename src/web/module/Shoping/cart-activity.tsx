@@ -1,5 +1,5 @@
 import { useContext, useReducer } from 'react';
-import { Product } from '../../types/Product';
+import { Product } from '../../../common/types/Product';
 import { useMemo } from 'react';
 import { useCallback } from 'react';
 import { createContext } from 'react';
