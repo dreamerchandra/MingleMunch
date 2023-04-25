@@ -19,6 +19,34 @@ const CardActionsWrapper = styled(CardActions)`
   justify-content: space-between;
   margin: 0 16px;
 `;
+
+const CardWrapper = styled(Card)`
+  width: 345px;
+  min-height: 300px;
+  max-height: 370px;
+  margin: 10px;
+  position: relative;
+  img {
+    filter: brightness(50%);
+    height: 60%;
+  }
+  .heading {
+    position: absolute;
+    bottom: 140px;
+    font-weight: 700;
+    color: #bae967;
+  }
+`;
+
+const Description = styled(Typography)`
+  overflow: hidden;
+  box-orient: vertical;
+  line-clamp: 3;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+`;
+
 const ProductItem: FC<{ product: Product }> = ({ product }) => {
   const { itemDescription, itemImage, itemName, itemPrice } = product;
   const { addToCart, removeFromCart, cartDetails } = useCart();
@@ -26,21 +54,23 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
     (item) => item.itemId === product.itemId
   );
   return (
-    <Card sx={{ width: 345, height: 350 }}>
+    <CardWrapper>
       <CardMedia
         component="img"
         alt={itemDescription}
-        height="140"
         image={itemImage}
         style={{ objectFit: 'cover' }}
       />
       <CardContent>
-        <Typography gutterBottom variant="h4" component="h2">
+        <Typography
+          gutterBottom
+          variant="h4"
+          component="h2"
+          className="heading"
+        >
           {itemName}
         </Typography>
-        <Typography gutterBottom variant="body1" component="h3">
-          {itemDescription}
-        </Typography>
+        <Description variant="body1">{itemDescription}</Description>
       </CardContent>
       <CardActionsWrapper>
         <Typography gutterBottom component="h3">
@@ -62,7 +92,7 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
           </Button>
         )}
       </CardActionsWrapper>
-    </Card>
+    </CardWrapper>
   );
 };
 

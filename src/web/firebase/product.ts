@@ -93,7 +93,10 @@ export const updateProduct = async (product: ProductInput) => {
 };
 
 export const uploadImage = async (file: File) => {
-  const storageRef = ref(firebaseStorage, 'PSG');
+  const storageRef = ref(
+    firebaseStorage,
+    `images/${file.name}${Math.random()}`
+  );
   const uploadRef = await uploadBytes(storageRef, file);
   return getDownloadURL(uploadRef.ref);
 };
