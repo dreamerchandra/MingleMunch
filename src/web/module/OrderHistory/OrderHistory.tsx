@@ -1,6 +1,20 @@
 import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import { Container } from '@mui/system';
 import { useOrderHistoryQuery } from './order-query';
+import { OrderStatus } from '../../../common/types/Order';
+
+const getReadableStatus = (status: OrderStatus) => {
+  switch (status) {
+    case 'pending':
+      return 'Pending';
+    case 'ack_from_hotel':
+      return 'Acknowledged from Hotel';
+    case 'prepared':
+      return 'Prepared';
+    default:
+      return 'Unknown';
+  }
+};
 
 export const OrderHistory = () => {
   const { data, isLoading } = useOrderHistoryQuery();
@@ -80,7 +94,7 @@ export const OrderHistory = () => {
                       color: 'primary.main'
                     }}
                   >
-                    {order.status}
+                    {getReadableStatus(order.status)}
                   </Typography>
                   <Typography variant="caption">₹{order.grandTotal}</Typography>
                 </div>

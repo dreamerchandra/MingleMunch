@@ -8,7 +8,6 @@ import {
   orderBy,
   query,
   setDoc,
-  updateDoc,
   where
 } from 'firebase/firestore';
 import { Order, OrderStatus } from '../../common/types/Order';

@@ -9,6 +9,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import { FC, useState } from 'react';
 import { DrawerProps } from '../type';
+import { Container } from '@mui/system';
+import { useNavigate } from 'react-router-dom';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -54,6 +56,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export const Header: FC<{ Menu: FC<DrawerProps> }> = ({ Menu }) => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -71,14 +74,22 @@ export const Header: FC<{ Menu: FC<DrawerProps> }> = ({ Menu }) => {
             >
               <MenuIcon />
             </IconButton>
-            <Typography
-              variant="h6"
-              noWrap
+            <Container
               component="div"
-              sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                navigate('/');
+              }}
             >
-              Mingle Munch
-            </Typography>
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+              >
+                Mingle Munch
+              </Typography>
+            </Container>
             <Search>
               <SearchIconWrapper>
                 <SearchIcon />
