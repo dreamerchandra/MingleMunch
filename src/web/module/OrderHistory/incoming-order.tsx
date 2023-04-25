@@ -7,11 +7,11 @@ import {
   Typography
 } from '@mui/material';
 import { Container } from '@mui/system';
-import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
+import { useMutationOrderStatus, useQueryIncomingOrder } from './order-query';
 import { OrderStatus } from '../../../common/types/Order';
 
 export const IncomingOrder = () => {
-  const { data, isLoading } = useOrderHistoryQuery();
+  const { data, isLoading } = useQueryIncomingOrder();
   const { mutateAsync } = useMutationOrderStatus();
   if (isLoading) {
     return <CircularProgress />;

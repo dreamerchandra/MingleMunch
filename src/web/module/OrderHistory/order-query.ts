@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Order, OrderStatus } from '../../../common/types/Order';
 import { useUser } from '../../firebase/auth';
-import { getOrderHistory, updateOrderStatus } from '../../firebase/order';
+import {
+  getIncomingOrder,
+  getOrderHistory,
+  updateOrderStatus
+} from '../../firebase/order';
 
 export const useOrderHistoryQuery = () => {
   const {
@@ -14,6 +18,20 @@ export const useOrderHistoryQuery = () => {
       return getOrderHistory(user?.uid);
     },
     { enabled: user?.uid !== undefined }
+  );
+};
+
+export const useQueryIncomingOrder = () => {
+  const {
+    userDetails: { role }
+  } = useUser();
+  return useQuery<Order[]>(
+    ['orderHistory'],
+    async () => {
+      if (['admin', 'vendor'].includes(role)) return getIncomingOrder();
+      throw new Error('User not logged in');
+    },
+    { enabled: ['admin', 'vendor'].includes(role) }
   );
 };
 

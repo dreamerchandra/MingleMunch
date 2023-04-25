@@ -45,6 +45,16 @@ export const getOrderHistory = async (userId: string): Promise<Order[]> => {
   return querySnap.docs.map((doc) => doc.data());
 };
 
+export const getIncomingOrder = async (): Promise<Order[]> => {
+  const q = query(
+    collection(firebaseDb, 'orders').withConverter(orderConverters),
+    where('shopDetails.shopId', '==', 'PSG'),
+    orderBy('createdAt', 'desc')
+  );
+  const querySnap = await getDocs(q);
+  return querySnap.docs.map((doc) => doc.data());
+};
+
 export const updateOrderStatus = async ({
   orderId,
   orderStatus
