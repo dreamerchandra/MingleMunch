@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { auth } from '../firebase.js';
+import { firebaseAuth } from '../firebase.js';
 import { logger } from 'firebase-functions';
 
 export const authMiddle = async (
@@ -11,7 +11,7 @@ export const authMiddle = async (
     const token = req.headers.authorization?.split(' ')[1];
     console.log(token);
     if (!token) throw new Error('token not found');
-    const user = await auth.verifyIdToken(token);
+    const user = await firebaseAuth.verifyIdToken(token);
     if (!user) throw new Error('user not found');
     logger.info(`userId: ${user.uid} role ${user.role}`);
     req.user = user;
