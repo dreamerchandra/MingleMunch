@@ -1,7 +1,10 @@
-import { User } from 'firebase/auth';
 import { Product } from './Product';
 
-type OrderStatus = 'pending' | 'ack_from_hotel' | 'prepared' | 'completed';
+export type OrderStatus =
+  | 'pending'
+  | 'ack_from_hotel'
+  | 'prepared'
+  | 'delivered';
 
 type OrderProduct = Pick<
   Product,
@@ -17,7 +20,10 @@ type OrderProduct = Pick<
 
 export interface Order {
   userId: string;
-  userDetails: User;
+  userDetails: {
+    name: string;
+    phone: string;
+  };
   orderId: string;
   createdAt: string;
   status: OrderStatus;
@@ -36,4 +42,5 @@ export interface Order {
     shopMapLocation: string;
     shopId: string;
   };
+  orderRefId: string;
 }

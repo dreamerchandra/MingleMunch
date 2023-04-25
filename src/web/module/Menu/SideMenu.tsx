@@ -39,11 +39,6 @@ export const SideMenu: FC<DrawerProps> = ({ open: isOpen, setOpen }) => {
                 label: 'Order History',
                 icon: <History />,
                 path: '/order-history'
-              },
-              {
-                label: 'Incoming Order',
-                icon: <InboxIcon />,
-                path: '/incoming-order'
               }
             ].map((item) => (
               <ListItem key={item.label} disablePadding>

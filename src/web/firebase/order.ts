@@ -3,12 +3,15 @@ import {
   QueryDocumentSnapshot,
   SnapshotOptions,
   collection,
+  doc,
   getDocs,
   orderBy,
   query,
+  setDoc,
+  updateDoc,
   where
 } from 'firebase/firestore';
-import { Order } from '../../common/types/Order';
+import { Order, OrderStatus } from '../../common/types/Order';
 import { post } from './fetch';
 import { firebaseDb } from './firebase';
 
@@ -41,4 +44,15 @@ export const getOrderHistory = async (userId: string): Promise<Order[]> => {
   );
   const querySnap = await getDocs(q);
   return querySnap.docs.map((doc) => doc.data());
+};
+
+export const updateOrderStatus = async ({
+  orderId,
+  orderStatus
+}: {
+  orderId: string;
+  orderStatus: OrderStatus;
+}): Promise<void> => {
+  const docRef = doc(firebaseDb, 'orders', orderId);
+  return setDoc(docRef, { status: orderStatus }, { merge: true });
 };
