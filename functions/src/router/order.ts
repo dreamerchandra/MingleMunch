@@ -7,7 +7,6 @@ export const createOrder = async (req: Request, res: Response) => {
     details: [{ itemId: string; quantity: number }];
   };
   const products = await getProducts(details.map((d) => d.itemId));
-  console.log(products, details);
   const { uid } = req.user;
   const detailsToQuantity = details.reduce((acc, d) => {
     acc[d.itemId] = Number(d.quantity);
@@ -16,14 +15,6 @@ export const createOrder = async (req: Request, res: Response) => {
   const subTotal = products
     .map((p) => p.itemPrice * detailsToQuantity[p.itemId])
     .reduce((a, b) => a + b, 0);
-  console.log(
-    products.map((p) => p.itemPrice),
-    detailsToQuantity,
-    products.map((p) => {
-      console.log(typeof p.itemPrice, typeof detailsToQuantity[p.itemId]);
-      return p.itemPrice * detailsToQuantity[p.itemId];
-    })
-  );
   const tax = 0.18;
   const grandTotal = subTotal + subTotal * tax;
   if (grandTotal <= 0) {
@@ -33,6 +24,7 @@ export const createOrder = async (req: Request, res: Response) => {
   }
   const ref = firebaseDb.collection('orders');
   const id = ref.doc().id;
+  const orderRefId = Math.random() * 100;
   const orderDetails = {
     orderId: id,
     userId: uid,
@@ -42,11 +34,15 @@ export const createOrder = async (req: Request, res: Response) => {
     grandTotal,
     status: 'pending',
     createdAt: new Date(),
-    user: req.user
+    user: {
+      name: req.user.name,
+      phone: req.user.phone_number
+    },
+    orderRefId: req.user.phone_number + ':: ' + orderRefId
   };
   await firebaseDb.collection('orders').doc(id).create(orderDetails);
   return res.status(200).json({
-    paymentLink: `upi://pay?pa=nadanavigneshwarar123@oksbi&pn=Nadana Vigneshwarar&aid=uGICAgMDUjJuDNw&am=${grandTotal}&tn=order`,
+    paymentLink: `upi://pay?pa=nadanavigneshwarar123@oksbi&pn=Nadana Vigneshwarar&aid=uGICAgMDUjJuDNw&am=${grandTotal}&tn=Food ordered refNo ${orderRefId}`,
     orderDetails
   });
 };

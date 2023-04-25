@@ -20,8 +20,8 @@ const constructSearch = (params: any) => {
 };
 
 const baseUrl = isLocalhost()
-  ? 'http://localhost:5001/tieheart-f1808/us-central1/app'
-  : 'https://us-central1-tieheart-f1808.cloudfunctions.net/app';
+  ? 'http://localhost:5001/mingle-munch/us-central1/app'
+  : 'https://us-central1-mingle-munch.cloudfunctions.net/app';
 
 export const get = async (
   urlString: string,

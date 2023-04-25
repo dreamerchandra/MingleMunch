@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "tieheart-f1808"
-  }
+    "default": "mingle-munch"
+  },
+  "targets": {}
 }

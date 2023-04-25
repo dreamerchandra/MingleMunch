@@ -1,6 +1,7 @@
 import { Product } from '../types/Product.js';
 import { firebaseDb } from '../firebase.js';
 import { DocumentData, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { logger } from 'firebase-functions';
 
 const productConverter = {
   toFirestore(product: Product): DocumentData {
@@ -14,7 +15,7 @@ const productConverter = {
 };
 
 export const getProducts = async (productIds: string[]) => {
-  console.log(productIds);
+  logger.log('fetching for products: ', productIds);
   const refs = productIds.map((id) =>
     firebaseDb.doc('food/' + id).withConverter(productConverter)
   );

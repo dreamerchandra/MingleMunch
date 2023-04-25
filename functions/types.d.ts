@@ -3,7 +3,7 @@ import { Role } from './src/types/roles.ts';
 
 declare module 'express-serve-static-core' {
   interface Request {
-    user: DecodedIdToken;
+    user: DecodedIdToken & { phone_number: string };
     userRole: Role;
   }
 }

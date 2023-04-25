@@ -11,16 +11,18 @@ import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: 'AIzaSyB2pE9u5UaUXkWKHO3_05DBvVaFqu49p1U',
-  authDomain: 'tieheart-f1808.firebaseapp.com',
-  projectId: 'tieheart-f1808',
-  storageBucket: 'tieheart-f1808.appspot.com',
-  messagingSenderId: '100203556049',
-  appId: '1:100203556049:web:23f61f41d895a890dca9f0',
-  measurementId: 'G-9D9D24FD7W'
+  apiKey: 'AIzaSyCajB1KkrNGpB9eiM8ph2FFOTX35T7wB60',
+  authDomain: 'mingle-munch.firebaseapp.com',
+  projectId: 'mingle-munch',
+  storageBucket: 'mingle-munch.appspot.com',
+  messagingSenderId: '291354377634',
+  appId: '1:291354377634:web:5f1d53b7cda2b2fd50c6fb'
 };
 export const firebaseApp = initializeApp(firebaseConfig);
 export const firebaseAuth = getAuth(firebaseApp);
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+window.firebaseAuth = firebaseAuth;
 export const firebaseDb = getFirestore();
 export const firebaseStorage = getStorage();
 const functions = getFunctions(firebaseApp);

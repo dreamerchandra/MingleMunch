@@ -8,7 +8,7 @@ import {
   Snackbar,
   Typography
 } from '@mui/material';
-import { margin, styled } from '@mui/system';
+import { styled } from '@mui/system';
 import { FC, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useCart } from './cart-activity';

@@ -1,5 +1,5 @@
 import { Order } from '../../common/types/Order';
-import { get, post } from './fetch';
+import { post } from './fetch';
 
 interface OrderPayload {
   details: { itemId: string; quantity: number }[];
