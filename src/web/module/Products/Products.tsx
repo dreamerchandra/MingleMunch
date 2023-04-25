@@ -107,7 +107,7 @@ export const Products = () => {
       rowGap={3}
       columnGap={{ xs: 2, sm: 3, md: 3 }}
       columns={{ xs: 12, sm: 6, md: 4 }}
-      sx={{ marginTop: 4 }}
+      sx={{ marginTop: 4, paddingBottom: 12 }}
     >
       {data?.map((product) => (
         <ProductItem product={product} key={product.itemId} />

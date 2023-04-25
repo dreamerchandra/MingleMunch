@@ -89,7 +89,9 @@ export const Checkout: FC = () => {
                 >
                   -
                 </Button>
-                <Button variant="outlined">{item.quantity}</Button>
+                <Button variant="outlined" style={{ maxWidth: '2ch' }}>
+                  {item.quantity}
+                </Button>
                 <Button
                   variant="outlined"
                   onClick={() => addToCart(item.product)}

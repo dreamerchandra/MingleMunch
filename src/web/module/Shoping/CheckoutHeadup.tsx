@@ -33,7 +33,7 @@ const Puller = styled(Box)(({ theme }) => ({
 }));
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
-  position: 'absolute',
+  position: 'sticky',
   bottom: '16px',
   right: '16px',
   zIndex: theme?.zIndex?.drawer + 1
