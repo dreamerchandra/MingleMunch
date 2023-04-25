@@ -13,7 +13,7 @@ export const authMiddle = async (
     const user = await firebaseAuth.verifyIdToken(token);
     if (!user) throw new Error('user not found');
     logger.info(`userId: ${user.uid} role ${user.role}`);
-    req.user = user;
+    req.user = user as any;
     req.userRole = user.role || 'user';
     next();
   } catch {

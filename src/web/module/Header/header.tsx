@@ -76,7 +76,7 @@ export const Header: FC<{ Menu: FC<DrawerProps> }> = ({ Menu }) => {
             </IconButton>
             <Container
               component="div"
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', marginLeft: 0 }}
               onClick={() => {
                 navigate('/');
               }}

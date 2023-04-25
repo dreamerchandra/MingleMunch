@@ -1,4 +1,3 @@
-import InboxIcon from '@mui/icons-material/MoveToInbox';
 import { Box, SwipeableDrawer } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
