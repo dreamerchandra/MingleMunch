@@ -5,6 +5,7 @@ import {
   collection,
   doc,
   getDocs,
+  onSnapshot,
   orderBy,
   query,
   setDoc,
@@ -45,12 +46,27 @@ export const getOrderHistory = async (userId: string): Promise<Order[]> => {
   return querySnap.docs.map((doc) => doc.data());
 };
 
-export const getIncomingOrder = async (): Promise<Order[]> => {
+export const incomingOrderSocketUupdate = async (
+  onAdded: (order: Order) => void,
+  onChange: (order: Order) => void
+): Promise<Order[]> => {
   const q = query(
     collection(firebaseDb, 'orders').withConverter(orderConverters),
     where('shopDetails.shopId', '==', 'PSG'),
     orderBy('createdAt', 'desc')
   );
+  onSnapshot(q, (querySnapshot) => {
+    querySnapshot.docChanges().forEach((change) => {
+      if (change.type === 'added') {
+        onAdded(change.doc.data());
+      }
+      if (change.type === 'modified') {
+        onChange(change.doc.data());
+      }
+    });
+    return querySnapshot.docs.map((doc) => doc.data());
+  });
+
   const querySnap = await getDocs(q);
   return querySnap.docs.map((doc) => doc.data());
 };

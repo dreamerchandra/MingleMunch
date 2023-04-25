@@ -11,9 +11,9 @@ import { useMutationOrderStatus, useQueryIncomingOrder } from './order-query';
 import { OrderStatus } from '../../../common/types/Order';
 
 export const IncomingOrder = () => {
-  const { data, isLoading } = useQueryIncomingOrder();
+  const { loading, orders } = useQueryIncomingOrder();
   const { mutateAsync } = useMutationOrderStatus();
-  if (isLoading) {
+  if (loading) {
     return <CircularProgress />;
   }
   return (
@@ -25,7 +25,7 @@ export const IncomingOrder = () => {
         gap: 3
       }}
     >
-      {data?.map((order) => (
+      {orders?.map((order) => (
         <Card
           sx={{
             display: 'flex',
