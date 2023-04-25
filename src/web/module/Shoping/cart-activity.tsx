@@ -1,4 +1,4 @@
-import { useContext, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useMemo } from 'react';
 import { useCallback } from 'react';
@@ -72,6 +72,10 @@ const useCartActivity = () => {
     initialState,
     getFromLocalStorage
   );
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE, JSON.stringify(cartDetails));
+  }, [cartDetails]);
 
   const addToCart = useCallback((product: Product) => {
     dispatch({ type: 'ADD_TO_CART', payload: product });

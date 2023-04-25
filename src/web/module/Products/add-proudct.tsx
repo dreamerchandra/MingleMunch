@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { Container, styled } from '@mui/system';
 import { useRef, useState } from 'react';
-import { useUpdateProductMutation } from '../../query/products';
+import { useUpdateProductMutation } from './product-query';
 import { uploadImage } from '../../firebase/product';
 import { useUser } from '../../firebase/auth';
 

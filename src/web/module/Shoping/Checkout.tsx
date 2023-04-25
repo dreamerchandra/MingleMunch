@@ -6,10 +6,11 @@ import {
   Divider,
   Typography
 } from '@mui/material';
-import { useCart } from './cart-activity';
-import { Product } from '../../../common/types/Product';
 import { styled } from '@mui/system';
 import { FC } from 'react';
+import { Product } from '../../../common/types/Product';
+import { useCart } from './cart-activity';
+import { useMutationCreateOrder } from './checkout-query';
 
 const StyledProduct = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -46,7 +47,7 @@ export const Checkout: FC = () => {
   );
   const tax = Number((subTotal * TAX).toFixed(2));
   const grandTotal = Number((subTotal + tax).toFixed(2));
-  //upi://pay?pa=nadanavigneshwarar123@oksbi&pn=Nadana Vigneshwarar&aid=uGICAgMDUjJuDNw
+  const { mutateAsync, isLoading } = useMutationCreateOrder();
   return (
     <Container
       component="main"
@@ -59,9 +60,18 @@ export const Checkout: FC = () => {
       }}
     >
       <Button
+        disabled={isLoading}
         variant="outlined"
         color="primary"
-        href={`upi://pay?pa=nadanavigneshwarar123@oksbi&pn=Nadana Vigneshwarar&aid=uGICAgMDUjJuDNw&am=${grandTotal}&tn=order`}
+        onClick={async () => {
+          const result = await mutateAsync({
+            details: items.map((item) => ({
+              itemId: item.product.itemId,
+              quantity: item.quantity
+            }))
+          });
+          window.open(result.paymentLink);
+        }}
       >
         Place order ₹ {grandTotal}
       </Button>
@@ -76,7 +86,7 @@ export const Checkout: FC = () => {
         }}
       >
         {items.map((item) => (
-          <StyledProduct>
+          <StyledProduct key={item.product.itemId}>
             <div>
               <Typography component="h6">{item.product.itemName}</Typography>
               <Typography component="h6">₹{item.product.itemPrice}</Typography>

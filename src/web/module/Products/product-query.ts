@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getProducts, updateProduct } from '../firebase/product';
+import { getProducts, updateProduct } from '../../firebase/product';
 export const useProductQuery = () =>
   useQuery({ queryKey: ['products'], queryFn: getProducts });
 

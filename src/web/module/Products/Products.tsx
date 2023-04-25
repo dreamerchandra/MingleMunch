@@ -8,7 +8,7 @@ import {
   Typography,
   styled
 } from '@mui/material';
-import { useProductQuery } from '../../query/products';
+import { useProductQuery } from './product-query';
 import { Product } from '../../../common/types/Product';
 import { FC } from 'react';
 import { useCart } from '../Shoping/cart-activity';
