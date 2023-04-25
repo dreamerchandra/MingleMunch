@@ -24,6 +24,13 @@ const router = createBrowserRouter([
       import('./Routes/Login/Login').then((m) => ({
         Component: m.LoginPage
       }))
+  },
+  {
+    path: '/vendor',
+    lazy: () =>
+      import('./Routes/Vendor/Vendor').then((m) => ({
+        Component: m.Vendor
+      }))
   }
 ]);
 

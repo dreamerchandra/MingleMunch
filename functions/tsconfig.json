@@ -1,19 +1,14 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "outDir": "lib",
-    "sourceMap": true,
+    "target": "es6",
+    "module": "ES2015",
+    "moduleResolution": "node16",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "target": "es6"
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */ ,
+    "typeRoots": ["./types"]
   },
   "compileOnSave": true,
-  "include": [
-    "./src/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
 }

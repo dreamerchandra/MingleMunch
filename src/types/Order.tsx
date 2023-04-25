@@ -11,9 +11,10 @@ export interface Order {
   orderGrandTotal: number;
   orderItems: Product[];
   orderPayment: string;
-  orderPaymentStatus: string;
   orderPaymentDate: string;
-  orderPaymentId: string;
+  orderPaymentRefId: string;
   orderPaymentMethod: string;
   orderPaymentAmount: number;
+  orderUserId: string;
+  orderUserPhoneNumber: string;
 }

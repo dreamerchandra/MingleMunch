@@ -96,7 +96,7 @@ export function CheckoutHeadsUp() {
             }}
           >
             <Puller />
-            <Checkout revealCheckout={toggleDrawer(true)} />
+            <Checkout />
           </StyledBox>
         </SwipeableDrawer>
       </Root>

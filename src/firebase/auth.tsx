@@ -88,6 +88,7 @@ export const useUser = () => {
 
   const updateUserDetails = (name: string) => {
     if (!user) return;
+
     return updateProfile(user, {
       displayName: name
     });

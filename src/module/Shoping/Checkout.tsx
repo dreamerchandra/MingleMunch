@@ -29,9 +29,7 @@ const TotalWrapper = styled('div')(({ theme }) => ({
 }));
 
 const TAX = 0.18;
-export const Checkout: FC<{ revealCheckout: () => void }> = ({
-  revealCheckout
-}) => {
+export const Checkout: FC = () => {
   const { cartDetails, addToCart, removeFromCart } = useCart();
   const items = cartDetails.cart.reduce((old, cartItem) => {
     const item = old.find((item) => item.product.itemId === cartItem.itemId);
@@ -47,7 +45,8 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
     0
   );
   const tax = Number((subTotal * TAX).toFixed(2));
-  const grandTotal = (subTotal + tax).toFixed(2);
+  const grandTotal = Number((subTotal + tax).toFixed(2));
+  //upi://pay?pa=nadanavigneshwarar123@oksbi&pn=Nadana Vigneshwarar&aid=uGICAgMDUjJuDNw
   return (
     <Container
       component="main"
@@ -59,8 +58,12 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
         marginTop: 2
       }}
     >
-      <Button variant="outlined" onClick={revealCheckout}>
-        Checkout
+      <Button
+        variant="outlined"
+        color="primary"
+        href={`upi://pay?pa=nadanavigneshwarar123@oksbi&pn=Nadana Vigneshwarar&aid=uGICAgMDUjJuDNw&am=${grandTotal}&tn=order`}
+      >
+        Place order ₹ {grandTotal}
       </Button>
       <Box
         sx={{
@@ -107,7 +110,7 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
           <Container
             component="div"
             sx={{
-              padding: 4,
+              padding: 2,
               display: 'flex',
               flexDirection: 'column',
               width: '100%'
@@ -128,13 +131,6 @@ export const Checkout: FC<{ revealCheckout: () => void }> = ({
           </Container>
         </Box>
       </Box>
-      <Button
-        variant="outlined"
-        color="primary"
-        href="upi://pay?pa=chandru.ck58@okicici&amp;pn=Chandra Kumar&amp;cu=INR&amp;&am=1000"
-      >
-        Place Order ₹ {grandTotal}
-      </Button>
     </Container>
   );
 };
