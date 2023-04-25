@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
+import { auth } from '../firebase.js';
 
-export const updateUser = (req: Request, res: Response) => {
-  console.log(req.body);
-  res.send('Express + TypeScript Server');
+export const updateUser = async (req: Request, res: Response) => {
+  const { role, userId } = req.body;
+  await auth.setCustomUserClaims(userId, { role });
+  const user = await auth.getUser(userId);
+  res.status(200).json({ user });
 };
