@@ -15,6 +15,14 @@ export const createOrder = async (req: Request, res: Response) => {
   const subTotal = products
     .map((p) => p.itemPrice * detailsToQuantity[p.itemId])
     .reduce((a, b) => a + b, 0);
+
+  const shopIds = products.map((p) => p.shopDetails.shopId);
+  const isSameShop = shopIds.every((v) => v === shopIds[0]);
+  if (!isSameShop) {
+    return res.status(400).json({
+      error: 'Invalid order'
+    });
+  }
   const tax = 0.18;
   const grandTotal = subTotal + subTotal * tax;
   if (grandTotal <= 0) {
@@ -22,13 +30,27 @@ export const createOrder = async (req: Request, res: Response) => {
       error: 'Invalid order'
     });
   }
+  const shopDetails = products[0].shopDetails;
   const ref = firebaseDb.collection('orders');
   const id = ref.doc().id;
   const orderRefId = Math.random() * 100;
   const orderDetails = {
     orderId: id,
     userId: uid,
-    items: products,
+    items: products.map((p) => ({
+      itemName: p.itemName,
+      itemPrice: p.itemPrice,
+      itemDescription: p.itemDescription,
+      itemImage: p.itemImage,
+      quantity: detailsToQuantity[p.itemId],
+      itemId: p.itemId
+    })),
+    shopDetails: {
+      shopName: shopDetails.shopName,
+      shopAddress: shopDetails.shopAddress,
+      shopMapLocation: shopDetails.shopMapLocation,
+      shopId: shopDetails.shopId
+    },
     subTotal,
     tax,
     grandTotal,

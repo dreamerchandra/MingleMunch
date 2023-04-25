@@ -3,6 +3,18 @@ import { Product } from './Product';
 
 type OrderStatus = 'pending' | 'ack_from_hotel' | 'prepared' | 'completed';
 
+type OrderProduct = Pick<
+  Product,
+  | 'itemName'
+  | 'itemId'
+  | 'itemDescription'
+  | 'itemImage'
+  | 'itemPrice'
+  | 'shopId'
+> & {
+  quantity: number;
+};
+
 export interface Order {
   userId: string;
   userDetails: User;
@@ -11,10 +23,17 @@ export interface Order {
   status: OrderStatus;
   tax: number;
   subTotal: number;
-  items: Product[];
+  grandTotal: number;
+  items: OrderProduct[];
   orderPayment: string;
   orderPaymentDate: string;
   orderPaymentRefId: string;
   orderPaymentMethod: string;
   orderPaymentAmount: number;
+  shopDetails: {
+    shopName: string;
+    shopAddress: string;
+    shopMapLocation: string;
+    shopId: string;
+  };
 }
