@@ -1,13 +1,15 @@
 import {
+  Alert,
   Box,
   Button,
   ButtonGroup,
   Container,
   Divider,
+  Snackbar,
   Typography
 } from '@mui/material';
-import { styled } from '@mui/system';
-import { FC } from 'react';
+import { margin, styled } from '@mui/system';
+import { FC, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
@@ -17,7 +19,8 @@ const StyledProduct = styled('div')(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing(2),
-  width: '100%'
+  width: '100%',
+  margin: theme.spacing(1, 0)
 }));
 
 const TotalWrapper = styled('div')(({ theme }) => ({
@@ -31,7 +34,7 @@ const TotalWrapper = styled('div')(({ theme }) => ({
 
 const TAX = 0.18;
 export const Checkout: FC = () => {
-  const { cartDetails, addToCart, removeFromCart } = useCart();
+  const { cartDetails, addToCart, removeFromCart, removeAll } = useCart();
   const items = cartDetails.cart.reduce((old, cartItem) => {
     const item = old.find((item) => item.product.itemId === cartItem.itemId);
     if (item) {
@@ -48,6 +51,7 @@ export const Checkout: FC = () => {
   const tax = Number((subTotal * TAX).toFixed(2));
   const grandTotal = Number((subTotal + tax).toFixed(2));
   const { mutateAsync, isLoading } = useMutationCreateOrder();
+  const [success, setShowSuccess] = useState(false);
   return (
     <Container
       component="main"
@@ -59,6 +63,20 @@ export const Checkout: FC = () => {
         marginTop: 2
       }}
     >
+      <Snackbar
+        open={success}
+        autoHideDuration={6000}
+        onClose={() => setShowSuccess(false)}
+        aria-label="success message"
+      >
+        <Alert
+          onClose={() => setShowSuccess(false)}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          This is a success message!
+        </Alert>
+      </Snackbar>
       <Button
         disabled={isLoading}
         variant="outlined"
@@ -70,79 +88,92 @@ export const Checkout: FC = () => {
               quantity: item.quantity
             }))
           });
-          window.open(result.paymentLink);
+          setShowSuccess(true);
+          setTimeout(() => {
+            window.open(result.paymentLink);
+            setShowSuccess(true);
+            removeAll();
+          }, 1000);
         }}
       >
         Place order ₹ {grandTotal}
       </Button>
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-          height: 'calc(40vh - 50px)',
-          overflow: 'auto'
-        }}
-      >
-        {items.map((item) => (
-          <StyledProduct key={item.product.itemId}>
-            <div>
-              <Typography component="h6">{item.product.itemName}</Typography>
-              <Typography component="h6">₹{item.product.itemPrice}</Typography>
-            </div>
-            <div>
-              <ButtonGroup variant="outlined" aria-label="update cart">
-                <Button
-                  variant="outlined"
-                  onClick={() => removeFromCart(item.product)}
-                >
-                  -
-                </Button>
-                <Button variant="outlined" style={{ maxWidth: '2ch' }}>
-                  {item.quantity}
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={() => addToCart(item.product)}
-                >
-                  +
-                </Button>
-              </ButtonGroup>
-            </div>
-          </StyledProduct>
-        ))}
-        <Divider style={{ width: '40vw', margin: '20px auto' }} />
+      {success ? (
+        <Alert severity="success">
+          Order placed successfully. Redirecting to payment page...
+        </Alert>
+      ) : (
         <Box
           sx={{
-            alignSelf: 'flex-end',
-            marginRight: 4
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            height: 'calc(40vh - 50px)',
+            overflow: 'auto'
           }}
         >
-          <Container
-            component="div"
+          {items.map((item) => (
+            <StyledProduct key={item.product.itemId}>
+              <div>
+                <Typography component="h6">{item.product.itemName}</Typography>
+                <Typography component="h6">
+                  ₹{item.product.itemPrice}
+                </Typography>
+              </div>
+              <div>
+                <ButtonGroup variant="outlined" aria-label="update cart">
+                  <Button
+                    variant="outlined"
+                    onClick={() => removeFromCart(item.product)}
+                  >
+                    -
+                  </Button>
+                  <Button variant="outlined" style={{ maxWidth: '2ch' }}>
+                    {item.quantity}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => addToCart(item.product)}
+                  >
+                    +
+                  </Button>
+                </ButtonGroup>
+              </div>
+            </StyledProduct>
+          ))}
+          <Divider style={{ width: '40vw', margin: '20px auto' }} />
+          <Box
             sx={{
-              padding: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%'
+              alignSelf: 'flex-end',
+              marginRight: 4
             }}
           >
-            <TotalWrapper>
-              <Typography component="h6">SubTotal </Typography>
-              <Typography component="h6">₹{subTotal}</Typography>
-            </TotalWrapper>
-            <TotalWrapper>
-              <Typography component="h6">Tax </Typography>
-              <Typography component="h6">₹{tax}</Typography>
-            </TotalWrapper>
-            <TotalWrapper>
-              <Typography component="h6">GrandTotal </Typography>
-              <Typography component="h6">₹{grandTotal}</Typography>
-            </TotalWrapper>
-          </Container>
+            <Container
+              component="div"
+              sx={{
+                padding: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%'
+              }}
+            >
+              <TotalWrapper>
+                <Typography component="h6">SubTotal </Typography>
+                <Typography component="h6">₹{subTotal}</Typography>
+              </TotalWrapper>
+              <TotalWrapper>
+                <Typography component="h6">Tax </Typography>
+                <Typography component="h6">₹{tax}</Typography>
+              </TotalWrapper>
+              <TotalWrapper>
+                <Typography component="h6">GrandTotal </Typography>
+                <Typography component="h6">₹{grandTotal}</Typography>
+              </TotalWrapper>
+            </Container>
+          </Box>
         </Box>
-      </Box>
+      )}
     </Container>
   );
 };

@@ -25,7 +25,11 @@ interface RemoveFromCartAction {
   type: 'REMOVE_FROM_CART';
   payload: Product;
 }
-type Actions = AddToCartAction | RemoveFromCartAction;
+interface RemoveAllFromCartAction {
+  type: 'REMOVE_ALL';
+}
+
+type Actions = AddToCartAction | RemoveFromCartAction | RemoveAllFromCartAction;
 
 const cartActivityReducer = (state: CartState, action: Actions) => {
   switch (action.type) {
@@ -47,6 +51,9 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
         total: state.total - action.payload.itemPrice,
         totalItems: state.totalItems - 1
       };
+    }
+    case 'REMOVE_ALL': {
+      return initialState;
     }
     default:
       return state;
@@ -83,10 +90,13 @@ const useCartActivity = () => {
   const removeFromCart = useCallback((product: Product) => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: product });
   }, []);
+  const removeAll = useCallback(() => {
+    dispatch({ type: 'REMOVE_ALL' });
+  }, []);
 
   return useMemo(
-    () => ({ cartDetails, addToCart, removeFromCart }),
-    [addToCart, cartDetails, removeFromCart]
+    () => ({ cartDetails, addToCart, removeFromCart, removeAll }),
+    [addToCart, cartDetails, removeFromCart, removeAll]
   );
 };
 
