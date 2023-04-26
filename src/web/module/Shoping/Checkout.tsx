@@ -5,7 +5,6 @@ import {
   ButtonGroup,
   Container,
   Divider,
-  Snackbar,
   Typography
 } from '@mui/material';
 import { styled } from '@mui/system';
@@ -65,20 +64,6 @@ export const Checkout: FC = () => {
         marginTop: 2
       }}
     >
-      <Snackbar
-        open={success}
-        autoHideDuration={6000}
-        onClose={() => setShowSuccess(false)}
-        aria-label="success message"
-      >
-        <Alert
-          onClose={() => setShowSuccess(false)}
-          severity="success"
-          sx={{ width: '100%' }}
-        >
-          This is a success message!
-        </Alert>
-      </Snackbar>
       <Button
         disabled={isLoading}
         variant="outlined"
@@ -92,18 +77,23 @@ export const Checkout: FC = () => {
           });
           setShowSuccess(true);
           setTimeout(() => {
-            window.open(result.paymentLink);
             setShowSuccess(false);
-            navigator('/order-history');
+            navigator(`/payments`, {
+              state: {
+                amount: result.grandTotal,
+                orderRefId: result.orderRefId,
+                paymentLink: result.paymentLink
+              }
+            });
             removeAll();
-          }, 1000);
+          }, 500);
         }}
       >
         Place order ₹ {grandTotal}
       </Button>
       {success ? (
         <Alert severity="success">
-          Order placed successfully. Redirecting to payment page...
+          Order placed successfully. To Complete payment in the next page.
         </Alert>
       ) : (
         <Box

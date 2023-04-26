@@ -24,7 +24,7 @@ export const createOrder = async (req: Request, res: Response) => {
     });
   }
   const tax = 0.18;
-  const grandTotal = subTotal + subTotal * tax;
+  const grandTotal = Math.round(subTotal + subTotal * tax);
   if (grandTotal <= 0) {
     return res.status(400).json({
       error: 'Invalid order'
@@ -64,7 +64,7 @@ export const createOrder = async (req: Request, res: Response) => {
   };
   await firebaseDb.collection('orders').doc(id).create(orderDetails);
   return res.status(200).json({
-    paymentLink: `upi://pay?pa=nadanavigneshwarar123@oksbi&pn=Nadana Vigneshwarar&aid=uGICAgMDUjJuDNw&am=${grandTotal}&tn=Food ordered refNo ${orderRefId}`,
-    orderDetails
+    paymentLink: `nadanavigneshwarar123@oksbi`,
+    ...orderDetails
   });
 };

@@ -1,16 +1,40 @@
 {
-  "indexes": [
-    {
+  "indexes": [{
       "collectionGroup": "message",
       "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        {
+      "fields": [{
           "fieldPath": "participants",
           "arrayConfig": "CONTAINS"
         },
         {
           "fieldPath": "createdAt",
           "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [{
+          "fieldPath": "shopDetails.shopId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [{
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
         }
       ]
     }

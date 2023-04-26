@@ -32,7 +32,7 @@ export const orderConverters = {
     options: SnapshotOptions
   ): Order {
     const data = snapshot.data(options);
-    return data as Order;
+    return { ...data, orderId: snapshot.id } as Order;
   }
 };
 

@@ -31,6 +31,13 @@ const router = createBrowserRouter([
       import('./Routes/OrderHistory/order-history').then((m) => ({
         Component: m.OrderHistoryRoute
       }))
+  },
+  {
+    path: '/payments',
+    lazy: () =>
+      import('./Routes/Payment/Payment').then((m) => ({
+        Component: m.PaymentRoute
+      }))
   }
 ]);
 
