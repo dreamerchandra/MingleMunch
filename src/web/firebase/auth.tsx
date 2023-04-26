@@ -11,12 +11,15 @@ import { firebaseAuth } from './firebase';
 import { Role } from '../../common/types/roles';
 
 export const removeCountryCode = (phoneNumber: string) => {
+  let phNo = phoneNumber;
   // remove first zero
   if (phoneNumber.startsWith('0')) {
-    phoneNumber = phoneNumber.replace(/^0/, '');
+    phNo = phNo.replace(/^0/, '');
   }
-  const regex = /^\+?\d{1,2}[- ]?/;
-  return phoneNumber.replace(regex, '');
+  if (phoneNumber.startsWith('+91')) {
+    phNo = phNo.replace(/^\+91/, '');
+  }
+  return phNo;
 };
 
 export const isPhoneNumberValid = (phoneNumber: string) => {
@@ -46,7 +49,6 @@ export const useToSignIn = () => {
     setIsOtpRequested(false);
     setPhoneNumberInvalid(false);
     const number = removeCountryCode(phoneNumber);
-    console.log(number);
     if (!isPhoneNumberValid(number)) {
       return setPhoneNumberInvalid(true);
     }

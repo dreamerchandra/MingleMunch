@@ -85,11 +85,17 @@ export const OrderHistory = () => {
                     }}
                     src="https://images.unsplash.com/photo-1614873636018-548106274e2a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2970&q=80"
                   />
-                  <Typography variant="h6">
+                  <Typography variant="body1">
                     {order?.shopDetails?.shopName}
                   </Typography>
                 </div>
-                <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1
+                  }}
+                >
                   <Typography
                     variant="h6"
                     sx={{
@@ -99,6 +105,9 @@ export const OrderHistory = () => {
                     {getReadableStatus(order.status)}
                   </Typography>
                   <Typography variant="caption">₹{order.grandTotal}</Typography>
+                  <Typography variant="caption">
+                    Ref No {order?.orderRefId?.split('::')[1]}
+                  </Typography>
                 </div>
               </Container>
             </Container>

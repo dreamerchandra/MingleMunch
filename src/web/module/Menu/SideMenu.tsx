@@ -7,7 +7,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { FC, Fragment } from 'react';
 import type { DrawerProps } from '../type';
-import { History } from '@mui/icons-material';
+import { History, Home } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 export const SideMenu: FC<DrawerProps> = ({ open: isOpen, setOpen }) => {
@@ -34,6 +34,11 @@ export const SideMenu: FC<DrawerProps> = ({ open: isOpen, setOpen }) => {
         >
           <List>
             {[
+              {
+                label: 'Order Now',
+                icon: <Home />,
+                path: '/'
+              },
               {
                 label: 'Order History',
                 icon: <History />,

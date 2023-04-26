@@ -33,7 +33,7 @@ export const createOrder = async (req: Request, res: Response) => {
   const shopDetails = products[0].shopDetails;
   const ref = firebaseDb.collection('orders');
   const id = ref.doc().id;
-  const orderRefId = Math.random() * 100;
+  const orderRefId = Math.floor(Math.random() * 1000);
   const orderDetails = {
     orderId: id,
     userId: uid,
