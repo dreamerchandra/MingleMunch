@@ -23,8 +23,8 @@ export const firebaseAuth = getAuth(firebaseApp);
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 window.firebaseAuth = firebaseAuth;
-export const firebaseDb = getFirestore();
-export const firebaseStorage = getStorage();
+export const firebaseDb = getFirestore(firebaseApp);
+export const firebaseStorage = getStorage(firebaseApp);
 const functions = getFunctions(firebaseApp);
 if (location.hostname === 'localhost') {
   connectAuthEmulator(firebaseAuth, 'http://localhost:9099');
