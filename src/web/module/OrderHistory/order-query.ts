@@ -42,7 +42,8 @@ export const useQueryIncomingOrder = () => {
         const orderIndex = prev.orders.findIndex(
           (o) => o.orderId === order.orderId
         );
-        const isNewlyAdded = orderIndex !== -1;
+        console.log(orderIndex);
+        const isNewlyAdded = orderIndex === -1;
         if (isNewlyAdded) {
           return prev;
         }

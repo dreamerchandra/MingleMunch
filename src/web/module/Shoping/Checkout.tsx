@@ -13,6 +13,7 @@ import { FC, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
+import { useNavigate } from 'react-router-dom';
 
 const StyledProduct = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -52,6 +53,7 @@ export const Checkout: FC = () => {
   const grandTotal = Number((subTotal + tax).toFixed(2));
   const { mutateAsync, isLoading } = useMutationCreateOrder();
   const [success, setShowSuccess] = useState(false);
+  const navigator = useNavigate();
   return (
     <Container
       component="main"
@@ -91,7 +93,8 @@ export const Checkout: FC = () => {
           setShowSuccess(true);
           setTimeout(() => {
             window.open(result.paymentLink);
-            setShowSuccess(true);
+            setShowSuccess(false);
+            navigator('/order-history');
             removeAll();
           }, 1000);
         }}

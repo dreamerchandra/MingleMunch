@@ -11,6 +11,8 @@ const getReadableStatus = (status: OrderStatus) => {
       return 'Acknowledged from Hotel';
     case 'prepared':
       return 'Prepared';
+    case 'delivered':
+      return 'Delivered';
     default:
       return 'Unknown';
   }
