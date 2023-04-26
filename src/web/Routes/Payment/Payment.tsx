@@ -8,7 +8,7 @@ export const PaymentRoute = () => {
     <div>
       <Header Menu={SideMenu} />
       <Container component="main">
-        <Box marginTop={2}>
+        <Box marginTop={2} style={{ height: '90vh' }}>
           <PaymentCopy />
         </Box>
       </Container>

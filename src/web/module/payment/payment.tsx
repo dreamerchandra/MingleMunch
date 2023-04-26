@@ -8,8 +8,8 @@ import {
   Typography
 } from '@mui/material';
 import { styled } from '@mui/system';
-import { FC, ReactNode, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { FC, ReactNode, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PaymentWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -72,25 +72,44 @@ const CopyInput: FC<{
 
 export const PaymentCopy = () => {
   const { state } = useLocation();
-  const { amount, orderRefId, paymentLink } = state;
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!state) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate, state]);
+  const { amount, orderRefId, paymentLink } = state || {};
   return (
-    <PaymentWrapper>
-      <PaymentDetails>
-        Order placed successfully. To Complete make payment using these details.
+    <PaymentWrapper
+      style={{
+        justifyContent: 'space-between',
+        height: '80%'
+      }}
+    >
+      <PaymentWrapper>
+        <PaymentDetails>
+          Order placed successfully. To Complete make payment using these
+          details.
+        </PaymentDetails>
+        <CopyWithLabelWrapper>
+          <CopyInput label="Payment UPI Id" value={paymentLink} />
+          <PaymentDetails variant="caption">Pay to this upi id</PaymentDetails>
+        </CopyWithLabelWrapper>
+        <CopyInput
+          label="Amount"
+          value={amount}
+          startAdornment={<InputAdornment position="start">₹</InputAdornment>}
+        />
+        <CopyWithLabelWrapper>
+          <CopyInput label="Order Id" value={orderRefId?.split('::')[1]} />
+          <PaymentDetails variant="caption">
+            Copy to payment notes
+          </PaymentDetails>
+        </CopyWithLabelWrapper>
+      </PaymentWrapper>
+      <PaymentDetails variant="caption" style={{ color: 'red' }}>
+        Note: Order will be cancelled if payment is not made within 10 minutes.
       </PaymentDetails>
-      <CopyInput
-        label="Amount"
-        value={amount}
-        startAdornment={<InputAdornment position="start">₹</InputAdornment>}
-      />
-      <CopyWithLabelWrapper>
-        <CopyInput label="Order Id" value={orderRefId.split('::')[1]} />
-        <PaymentDetails variant="caption">Copy to payment notes</PaymentDetails>
-      </CopyWithLabelWrapper>
-      <CopyWithLabelWrapper>
-        <CopyInput label="Payment UPI Id" value={paymentLink} />
-        <PaymentDetails variant="caption">Pay to this upi id</PaymentDetails>
-      </CopyWithLabelWrapper>
     </PaymentWrapper>
   );
 };
