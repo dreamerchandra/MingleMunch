@@ -13,6 +13,7 @@ import { Product } from '../../../common/types/Product';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
 import { useNavigate } from 'react-router-dom';
+import { TAX } from '../../../common/types/constant';
 
 const StyledProduct = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -32,7 +33,6 @@ const TotalWrapper = styled('div')(({ theme }) => ({
   marginTop: theme.spacing(2)
 }));
 
-const TAX = 0.18;
 export const Checkout: FC = () => {
   const { cartDetails, addToCart, removeFromCart, removeAll } = useCart();
   const items = cartDetails.cart.reduce((old, cartItem) => {

@@ -6,7 +6,9 @@ import {
   CardContent,
   CardMedia,
   FormControl,
+  FormControlLabel,
   Input,
+  Switch,
   TextareaAutosize
 } from '@mui/material';
 import { Container, styled } from '@mui/system';
@@ -14,6 +16,7 @@ import { useRef, useState } from 'react';
 import { useUpdateProductMutation } from './product-query';
 import { uploadImage } from '../../firebase/product';
 import { useUser } from '../../firebase/auth';
+import { TAX } from '../../../common/types/constant';
 
 const StyleImg = styled('img')`
   width: 100%;
@@ -88,7 +91,7 @@ const PriceWrapper = styled('div')`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
-  width: 7ch;
+  width: 20ch;
 `;
 const AddFilePicker = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -140,6 +143,7 @@ export const AddProducts = () => {
         const name = data.get('title');
         const description = data.get('description');
         const price = Number(data.get('price'));
+        const isTaxIncluded = data.get('isTaxIncluded');
         const image = data.get('image');
         if (!name || !price || !image) {
           return;
@@ -148,7 +152,7 @@ export const AddProducts = () => {
         const product = {
           itemName: name as string,
           itemDescription: description as string,
-          itemPrice: price,
+          itemPrice: isTaxIncluded ? Math.round(price - price * TAX) : price,
           itemImage: itemImage
         };
         mutateAsync(product);
@@ -184,11 +188,21 @@ export const AddProducts = () => {
             <FormControl required>
               <PriceInput
                 placeholder="Price"
-                sx={{ width: '100%' }}
+                sx={{ width: '7ch' }}
                 name="price"
                 type="number"
               />
             </FormControl>
+            <FormControlLabel
+              control={
+                <Switch
+                  placeholder="With Tax"
+                  aria-label="With Tax"
+                  name="isTaxIncluded"
+                />
+              }
+              label="With tax"
+            />
           </PriceWrapper>
           <Button size="small" type="submit">
             Save
