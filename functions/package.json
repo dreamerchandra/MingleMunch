@@ -9,9 +9,10 @@
     "serve": "node dist/index.js",
     "watch": "npx tsc --watch",
     "export": "export GOOGLE_APPLICATION_CREDENTIALS=\"./service-account.json \"",
-    "shell": "firebase emulators:start --only functions && firebase functions: shell",
+    "shell": "firebase emulators:start --only functions && firebase functions:shell",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
-    "start": "npm run export && npm run dev && npm run shell"
+    "start": "concurrently \"npm run dev\" \"npm run shell\"",
+    "mock:prod": "npm run export && npm run dev && npm run shell"
   },
   "engines": {
     "node": "16"
