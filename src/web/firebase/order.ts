@@ -2,6 +2,7 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   SnapshotOptions,
+  Unsubscribe,
   collection,
   doc,
   getDocs,
@@ -36,26 +37,19 @@ export const orderConverters = {
   }
 };
 
-export const getOrderHistory = async (userId: string): Promise<Order[]> => {
+export const getOrderHistoryWithRealTimeUpdate = async (
+  userId: string,
+  {
+    onAdded,
+    onChange
+  }: { onAdded: (order: Order) => void; onChange: (order: Order) => void }
+): Promise<{ orders: Order[]; unsubscribe: Unsubscribe }> => {
   const q = query(
     collection(firebaseDb, 'orders').withConverter(orderConverters),
     where('userId', '==', userId),
     orderBy('createdAt', 'desc')
   );
-  const querySnap = await getDocs(q);
-  return querySnap.docs.map((doc) => doc.data());
-};
-
-export const incomingOrderSocketUupdate = async (
-  onAdded: (order: Order) => void,
-  onChange: (order: Order) => void
-): Promise<Order[]> => {
-  const q = query(
-    collection(firebaseDb, 'orders').withConverter(orderConverters),
-    where('shopDetails.shopId', '==', 'PSG'),
-    orderBy('createdAt', 'desc')
-  );
-  onSnapshot(q, (querySnapshot) => {
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
     querySnapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
         onAdded(change.doc.data());
@@ -68,7 +62,34 @@ export const incomingOrderSocketUupdate = async (
   });
 
   const querySnap = await getDocs(q);
-  return querySnap.docs.map((doc) => doc.data());
+  const orders = querySnap.docs.map((doc) => doc.data());
+  return { orders, unsubscribe };
+};
+
+export const incomingOrderSocketUupdate = async (
+  onAdded: (order: Order) => void,
+  onChange: (order: Order) => void
+): Promise<{ orders: Order[]; unsubscribe: Unsubscribe }> => {
+  const q = query(
+    collection(firebaseDb, 'orders').withConverter(orderConverters),
+    where('shopDetails.shopId', '==', 'PSG'),
+    orderBy('createdAt', 'desc')
+  );
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    querySnapshot.docChanges().forEach((change) => {
+      if (change.type === 'added') {
+        onAdded(change.doc.data());
+      }
+      if (change.type === 'modified') {
+        onChange(change.doc.data());
+      }
+    });
+    return querySnapshot.docs.map((doc) => doc.data());
+  });
+
+  const querySnap = await getDocs(q);
+  const orders = querySnap.docs.map((doc) => doc.data());
+  return { orders, unsubscribe };
 };
 
 export const updateOrderStatus = async ({

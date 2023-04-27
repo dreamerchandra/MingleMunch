@@ -19,8 +19,8 @@ const getReadableStatus = (status: OrderStatus) => {
 };
 
 export const OrderHistory = () => {
-  const { data, isLoading } = useOrderHistoryQuery();
-  if (isLoading) {
+  const { orders, loading } = useOrderHistoryQuery();
+  if (loading) {
     return <CircularProgress />;
   }
   return (
@@ -32,7 +32,7 @@ export const OrderHistory = () => {
         gap: 3
       }}
     >
-      {data?.map((order) => (
+      {orders?.map((order) => (
         <Card
           sx={{
             display: 'flex',

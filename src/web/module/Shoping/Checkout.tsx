@@ -78,6 +78,7 @@ export const Checkout: FC = () => {
           setShowSuccess(true);
           setTimeout(() => {
             setShowSuccess(false);
+            removeAll();
             navigator(`/payments`, {
               state: {
                 amount: result.grandTotal,
@@ -85,7 +86,6 @@ export const Checkout: FC = () => {
                 paymentLink: result.paymentLink
               }
             });
-            removeAll();
           }, 500);
         }}
       >

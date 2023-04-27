@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev:emulator": "firebase emulators:start",
+    "dev:emulator": "firebase emulators:start --import=./stubs --export-on-exit=./stubs",
     "dev:functions": "cd ./functions && npm run watch",
     "dev:web": "vite",
     "dev": "concurrently \"npm run dev:emulator\" \"npm run dev:functions \" \"npm run dev:web\"",
