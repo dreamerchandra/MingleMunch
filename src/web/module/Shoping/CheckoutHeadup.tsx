@@ -96,7 +96,7 @@ export function CheckoutHeadsUp() {
             }}
           >
             <Puller />
-            <Checkout />
+            <Checkout open={open} />
           </StyledBox>
         </SwipeableDrawer>
       </Root>

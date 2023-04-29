@@ -33,7 +33,7 @@ const TotalWrapper = styled('div')(({ theme }) => ({
   marginTop: theme.spacing(2)
 }));
 
-export const Checkout: FC = () => {
+export const Checkout: FC<{ open: boolean }> = ({ open }) => {
   const { cartDetails, addToCart, removeFromCart, removeAll } = useCart();
   const items = cartDetails.cart.reduce((old, cartItem) => {
     const item = old.find((item) => item.product.itemId === cartItem.itemId);
@@ -64,33 +64,35 @@ export const Checkout: FC = () => {
         marginTop: 2
       }}
     >
-      <Button
-        disabled={isLoading}
-        variant="outlined"
-        color="primary"
-        onClick={async () => {
-          const result = await mutateAsync({
-            details: items.map((item) => ({
-              itemId: item.product.itemId,
-              quantity: item.quantity
-            }))
-          });
-          setShowSuccess(true);
-          setTimeout(() => {
-            setShowSuccess(false);
-            removeAll();
-            navigator(`/payments`, {
-              state: {
-                amount: result.grandTotal,
-                orderRefId: result.orderRefId,
-                paymentLink: result.paymentLink
-              }
+      {open && (
+        <Button
+          disabled={isLoading}
+          variant="outlined"
+          color="primary"
+          onClick={async () => {
+            const result = await mutateAsync({
+              details: items.map((item) => ({
+                itemId: item.product.itemId,
+                quantity: item.quantity
+              }))
             });
-          }, 500);
-        }}
-      >
-        Place order ₹ {grandTotal}
-      </Button>
+            setShowSuccess(true);
+            setTimeout(() => {
+              setShowSuccess(false);
+              removeAll();
+              navigator(`/payments`, {
+                state: {
+                  amount: result.grandTotal,
+                  orderRefId: result.orderRefId,
+                  paymentLink: result.paymentLink
+                }
+              });
+            }, 500);
+          }}
+        >
+          Place order ₹ {grandTotal}
+        </Button>
+      )}
       {success ? (
         <Alert severity="success">
           Order placed successfully. To Complete payment in the next page.

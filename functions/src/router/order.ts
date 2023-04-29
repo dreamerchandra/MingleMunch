@@ -64,7 +64,7 @@ export const createOrder = async (req: Request, res: Response) => {
   };
   await firebaseDb.collection('orders').doc(id).create(orderDetails);
   return res.status(200).json({
-    paymentLink: `nadanavigneshwarar123@oksbi`,
+    paymentLink: `mohammedashiqcool-3@okicici`,
     ...orderDetails
   });
 };
