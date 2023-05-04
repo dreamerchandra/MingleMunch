@@ -1,11 +1,12 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export interface Product {
   itemId: string;
-  itemName: string;
   isAvailable: boolean;
+  itemName: string;
   itemDescription: string;
   itemPrice: number;
   itemImage: string;
-  itemCategoryId: string;
   keywords: string[];
   shopId: string;
   shopDetails: {
@@ -14,4 +15,7 @@ export interface Product {
     shopMapLocation: string;
     shopId: string;
   };
+  updatedAt: Timestamp;
+  createdAt: Timestamp;
+  updateBy: string;
 }

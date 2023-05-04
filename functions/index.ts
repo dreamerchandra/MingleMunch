@@ -13,6 +13,10 @@ expressApp.get('/health', (req: Request, res: Response) => {
   res.send('Ok 👍');
 });
 
+expressApp.get('/migrate', (req: Request, res: Response) => {
+  res.send('Ok 👍');
+});
+
 expressApp.put('/v1/update-user', authMiddle, authorizedAsAdmin, updateUser);
 expressApp.post('/v1/order', authMiddle, createOrder);
 
