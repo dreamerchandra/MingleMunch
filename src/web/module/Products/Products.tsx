@@ -96,8 +96,8 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
   );
 };
 
-export const Products = () => {
-  const { data, isLoading } = useProductQuery();
+export const Products: FC<{ search: string }> = ({ search }) => {
+  const { data, isLoading } = useProductQuery({ search });
   if (isLoading) {
     return <CircularProgress />;
   }

@@ -76,10 +76,14 @@ export const productConverter = {
   }
 };
 
-export const getProducts = async () => {
+export const getProducts = async ({ search }: { search: string }) => {
+  const queryFns = [where('shopId', '==', 'PSG')];
+  if (search) {
+    queryFns.push(where('keywords', 'array-contains', search.toLowerCase()));
+  }
   const q = query(
     collection(firebaseDb, 'food').withConverter(productConverter),
-    where('shopId', '==', 'PSG')
+    ...queryFns
   );
   const querySnap = await getDocs(q);
   return querySnap.docs.map((doc) => doc.data());
