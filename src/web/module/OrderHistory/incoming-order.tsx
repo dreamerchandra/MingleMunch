@@ -1,12 +1,10 @@
-import {
-  Card,
-  CardContent,
-  CircularProgress,
-  MenuItem,
-  Select,
-  Typography
-} from '@mui/material';
-import { Container } from '@mui/system';
+import CardContent from '@mui/material/CardContent';
+import Card from '@mui/material/Card';
+import CircularProgress from '@mui/material/CircularProgress';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
 import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
 import { OrderStatus } from '../../../common/types/Order';
 

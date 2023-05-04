@@ -6,11 +6,12 @@ import Typography from '@mui/material/Typography';
 import MenuIcon from '@mui/icons-material/Menu';
 import { FC, useState } from 'react';
 import { DrawerProps } from '../type';
-import { Container } from '@mui/system';
+import Container from '@mui/material/Container';
 import { useNavigate } from 'react-router-dom';
-import { InputBase } from '@mui/material';
+import InputBase from '@mui/material/InputBase';
 import { styled, alpha } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
+
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,

@@ -15,7 +15,7 @@ import { FC } from 'react';
 import { useCart } from '../Shoping/cart-activity';
 import Grid from '@mui/material/Grid';
 import { useUser } from '../../firebase/auth';
-import { Container } from '@mui/system';
+import Container from '@mui/material/Container';
 import LoadingButton from '@mui/lab/LoadingButton';
 import AddToCart from '@mui/icons-material/AddShoppingCart';
 

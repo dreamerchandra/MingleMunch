@@ -6,7 +6,7 @@ import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import { useState } from 'react';
 import { Checkout } from './Checkout';
 import { useCart } from './cart-activity';
-import { ShoppingCart } from '@mui/icons-material';
+import ShoppingCart from '@mui/icons-material/ShoppingCart';
 
 const drawerBleeding = 56;
 

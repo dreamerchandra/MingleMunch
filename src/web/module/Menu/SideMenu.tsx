@@ -1,4 +1,5 @@
-import { Box, SwipeableDrawer } from '@mui/material';
+import SwipeableDrawer from '@mui/material/SwipeableDrawer';
+import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -7,7 +8,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { FC, Fragment } from 'react';
 import type { DrawerProps } from '../type';
-import { History, Home } from '@mui/icons-material';
+import Home from '@mui/icons-material/Home';
+import History from '@mui/icons-material/History';
 import { useNavigate } from 'react-router-dom';
 
 export const SideMenu: FC<DrawerProps> = ({ open: isOpen, setOpen }) => {

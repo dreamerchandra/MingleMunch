@@ -7,7 +7,7 @@ import {
   Divider,
   Typography
 } from '@mui/material';
-import { styled } from '@mui/system';
+import { styled } from '@mui/material/styles';
 import { FC, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useCart } from './cart-activity';

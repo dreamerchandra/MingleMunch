@@ -1,5 +1,8 @@
-import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
-import { Container } from '@mui/system';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
 import { useOrderHistoryQuery } from './order-query';
 import { OrderStatus } from '../../../common/types/Order';
 

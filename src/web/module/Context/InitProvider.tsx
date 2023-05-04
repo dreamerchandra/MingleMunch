@@ -6,10 +6,11 @@ import {
   useEffect,
   useState
 } from 'react';
-import { firebaseAuth } from '../../firebase/firebase';
-import { getIdTokenResult } from 'firebase/auth';
+import { getAuth, getIdTokenResult } from 'firebase/auth';
 import { Role } from '../../../common/types/roles';
+import { firebaseApp } from '../../firebase/firebsae-app';
 
+const firebaseAuth = getAuth(firebaseApp);
 const InitContext = createContext({
   user: firebaseAuth.currentUser,
   loading: true,
@@ -23,7 +24,7 @@ export const InitProvider: FC<{ children: ReactNode }> = ({ children }) => {
     role: '' as Role
   });
   useEffect(() => {
-    const unsub = firebaseAuth.onAuthStateChanged(async (user) => {
+    const unsubs = firebaseAuth.onAuthStateChanged(async (user) => {
       if (user) {
         const tokenResult = await getIdTokenResult(user, true);
         setUser({
@@ -39,7 +40,7 @@ export const InitProvider: FC<{ children: ReactNode }> = ({ children }) => {
         role: 'user'
       });
     });
-    return unsub;
+    return unsubs;
   }, []);
   return (
     <InitContext.Provider value={userDetails}>{children}</InitContext.Provider>

@@ -1,4 +1,4 @@
-import { ChangeCircle } from '@mui/icons-material';
+import ChangeCircle from '@mui/icons-material/ChangeCircle';
 import {
   Button,
   Card,
@@ -11,7 +11,8 @@ import {
   Switch,
   TextareaAutosize
 } from '@mui/material';
-import { Container, styled } from '@mui/system';
+import { styled } from '@mui/material/styles';
+import Container from '@mui/material/Container';
 import { FC, useRef, useState } from 'react';
 import { useUpdateProductMutation } from './product-query';
 import { uploadImage } from '../../firebase/product';
