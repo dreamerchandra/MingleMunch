@@ -94,7 +94,7 @@ export interface ProductQuery {
 }
 
 export const getProducts = async ({ search, isAvailable }: ProductQuery) => {
-  const queryFns = [where('shopId', '==', 'PSG'), orderBy('updatedAt', 'desc')];
+  const queryFns = [where('shopId', '==', 'PSG'), orderBy('createdAt', 'desc')];
   if (isAvailable) {
     queryFns.push(where('isAvailable', '==', isAvailable));
   }
