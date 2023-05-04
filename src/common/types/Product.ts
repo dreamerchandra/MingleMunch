@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export interface Product {
   itemId: string;
   isAvailable: boolean;
@@ -13,4 +15,6 @@ export interface Product {
     shopMapLocation: string;
     shopId: string;
   };
+  updatedAt: Timestamp;
+  createdAt: Timestamp;
 }

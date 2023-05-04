@@ -12,11 +12,13 @@ import {
   TextareaAutosize
 } from '@mui/material';
 import { Container, styled } from '@mui/system';
-import { useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { useUpdateProductMutation } from './product-query';
 import { uploadImage } from '../../firebase/product';
 import { useUser } from '../../firebase/auth';
 import { TAX } from '../../../common/types/constant';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { toast } from 'react-toastify';
 
 const StyleImg = styled('img')`
   width: 100%;
@@ -93,8 +95,10 @@ const PriceWrapper = styled('div')`
   margin-bottom: 10px;
   width: 20ch;
 `;
-const AddFilePicker = () => {
-  const [file, setFile] = useState<File | null>(null);
+const AddFilePicker: FC<{
+  file: File | null;
+  setFile: (file: File | null) => void;
+}> = ({ file, setFile }) => {
   const ref = useRef<HTMLInputElement | null>(null);
   const openFileHandle = () => {
     ref.current?.click();
@@ -124,13 +128,21 @@ const AddFilePicker = () => {
     </ChangeButton>
   );
 };
+const initialFormData = {
+  file: null as File | null,
+  name: '',
+  description: '',
+  price: '',
+  isTaxIncluded: false
+};
 
 export const AddProducts = () => {
-  const { mutateAsync } = useUpdateProductMutation();
+  const [isUpdating, setUpdating] = useState(false);
+  const { mutate } = useUpdateProductMutation();
   const {
     userDetails: { role, loading }
   } = useUser();
-  console.log(role);
+  const [formData, setFormData] = useState(initialFormData);
   if (loading || role !== 'vendor') {
     return null;
   }
@@ -148,6 +160,7 @@ export const AddProducts = () => {
         if (!name || !price || !image) {
           return;
         }
+        setUpdating(true);
         const itemImage = await uploadImage(image as File);
         const product = {
           itemName: name as string,
@@ -155,11 +168,28 @@ export const AddProducts = () => {
           itemPrice: isTaxIncluded ? Math.round(price - price * TAX) : price,
           itemImage: itemImage
         };
-        mutateAsync(product);
+        mutate(
+          { ...product, isAvailable: true },
+          {
+            onSuccess: () => {
+              setFormData(initialFormData);
+              toast.success('Product updated successfully');
+            },
+            onSettled: () => {
+              setUpdating(false);
+            }
+          }
+        );
       }}
     >
       <Card sx={{ maxWidth: 345 }}>
-        <CardMedia component={AddFilePicker} />
+        <CardMedia
+          component={AddFilePicker}
+          file={formData.file}
+          setFile={(file) => {
+            setFormData({ ...formData, file });
+          }}
+        />
         <CardContent
           sx={{
             display: 'flex',
@@ -173,6 +203,10 @@ export const AddProducts = () => {
               sx={{ width: '100%' }}
               name="title"
               style={{ fontSize: '1.5rem' }}
+              value={formData.name}
+              onChange={(e) => {
+                setFormData({ ...formData, name: e.target.value });
+              }}
             />
           </FormControl>
           <FormControl>
@@ -180,6 +214,10 @@ export const AddProducts = () => {
               placeholder="Mushroom, Cheese, Tomato, Basil, Olive Oil"
               name="description"
               maxRows={3}
+              value={formData.description}
+              onChange={(e) => {
+                setFormData({ ...formData, description: e.target.value });
+              }}
             />
           </FormControl>
         </CardContent>
@@ -191,6 +229,10 @@ export const AddProducts = () => {
                 sx={{ width: '7ch' }}
                 name="price"
                 type="number"
+                value={formData.price}
+                onChange={(e) => {
+                  setFormData({ ...formData, price: e.target.value });
+                }}
               />
             </FormControl>
             <FormControlLabel
@@ -204,9 +246,14 @@ export const AddProducts = () => {
               label="With tax"
             />
           </PriceWrapper>
-          <Button size="small" type="submit">
+          <LoadingButton
+            size="small"
+            type="submit"
+            disabled={isUpdating}
+            loading={isUpdating}
+          >
             Save
-          </Button>
+          </LoadingButton>
         </CardActionsWrapper>
       </Card>
     </Container>

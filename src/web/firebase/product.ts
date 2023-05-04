@@ -2,9 +2,11 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   SnapshotOptions,
+  Timestamp,
   collection,
   doc,
   getDocs,
+  orderBy,
   query,
   setDoc,
   updateDoc,
@@ -53,7 +55,9 @@ const constructProduct = (
     keywords,
     shopId: 'PSG',
     shopDetails,
-    isAvailable: true
+    isAvailable: true,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
   };
 };
 export const productConverter = {
@@ -85,7 +89,7 @@ export interface ProductQuery {
 }
 
 export const getProducts = async ({ search, isAvailable }: ProductQuery) => {
-  const queryFns = [where('shopId', '==', 'PSG')];
+  const queryFns = [where('shopId', '==', 'PSG'), orderBy('updatedAt', 'desc')];
   if (isAvailable) {
     queryFns.push(where('isAvailable', '==', isAvailable));
   }
@@ -114,7 +118,7 @@ export const updateProduct = async (
     collection(firebaseDb, 'food').withConverter(productConverter),
     product.productId
   );
-  return updateDoc(docRef, product);
+  return updateDoc(docRef, { ...product, updatedAt: Timestamp.now() });
 };
 
 export const uploadImage = async (file: File) => {
