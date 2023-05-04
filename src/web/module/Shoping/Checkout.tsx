@@ -86,8 +86,11 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
         },
         onError: (err) => {
           setError({
-            message: err.cause.message,
-            products: err.cause.products.map((product) => product.itemId)
+            message:
+              err.cause?.message ??
+              'Something went wrong. Please try again later.',
+            products:
+              err.cause?.products?.map((product) => product.itemId) ?? []
           });
         }
       }

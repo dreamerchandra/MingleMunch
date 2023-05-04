@@ -9,8 +9,8 @@ import { Product } from '../../../common/types/Product';
 
 interface OrderError {
   error: string;
-  message: string;
-  products: Product[];
+  message?: string;
+  products?: Product[];
 }
 
 export const useMutationCreateOrder = (): UseMutationResult<
