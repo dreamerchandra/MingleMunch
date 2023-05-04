@@ -14,6 +14,8 @@ import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
 import { useNavigate } from 'react-router-dom';
 import { TAX } from '../../../common/types/constant';
+import LoadingButton from '@mui/lab/LoadingButton';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 
 const StyledProduct = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -65,9 +67,12 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
       }}
     >
       {open && (
-        <Button
-          disabled={isLoading}
+        <LoadingButton
+          loading={isLoading}
+          loadingPosition="start"
+          startIcon={<ShoppingCartCheckoutIcon />}
           variant="outlined"
+          disabled={isLoading}
           color="primary"
           onClick={async () => {
             const result = await mutateAsync({
@@ -91,7 +96,7 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
           }}
         >
           Place order ₹ {grandTotal}
-        </Button>
+        </LoadingButton>
       )}
       {success ? (
         <Alert severity="success">
