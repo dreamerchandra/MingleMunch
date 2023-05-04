@@ -12,7 +12,7 @@ import {
   updateDoc,
   where
 } from 'firebase/firestore';
-import { firebaseDb, firebaseStorage } from './firebase';
+import { firebaseAuth, firebaseDb, firebaseStorage } from './firebase';
 import { Product } from '../../common/types/Product';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
@@ -33,6 +33,11 @@ export interface ProductInput {
 }
 
 const trim = (str: string) => str.replace(/\s+/, '').toLocaleLowerCase();
+
+const constructMandatoryMetaFields = () => ({
+  updatedAt: Timestamp.now(),
+  updateBy: firebaseAuth.currentUser?.uid || ''
+});
 
 const constructProduct = (
   productInput: ProductInput
@@ -57,7 +62,7 @@ const constructProduct = (
     shopDetails,
     isAvailable: true,
     createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
+    ...constructMandatoryMetaFields()
   };
 };
 export const productConverter = {
@@ -118,7 +123,7 @@ export const updateProduct = async (
     collection(firebaseDb, 'food').withConverter(productConverter),
     product.productId
   );
-  return updateDoc(docRef, { ...product, updatedAt: Timestamp.now() });
+  return updateDoc(docRef, { ...product, ...constructMandatoryMetaFields() });
 };
 
 export const uploadImage = async (file: File) => {
