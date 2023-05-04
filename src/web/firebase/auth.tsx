@@ -1,14 +1,13 @@
 import {
   ConfirmationResult,
   RecaptchaVerifier,
-  getIdTokenResult,
   signInWithPhoneNumber,
   updateProfile
 } from 'firebase/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from './firebase';
-import { Role } from '../../common/types/roles';
+import { useInit } from '../module/Context/InitProvider';
 
 export const removeCountryCode = (phoneNumber: string) => {
   let phNo = phoneNumber;
@@ -79,30 +78,7 @@ export const useToSignIn = () => {
 };
 
 export const useUser = () => {
-  const [userDetails, setUser] = useState({
-    user: firebaseAuth.currentUser,
-    loading: true,
-    role: '' as Role
-  });
-  useEffect(() => {
-    firebaseAuth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const tokenResult = await getIdTokenResult(user, true);
-        setUser({
-          user: user,
-          loading: false,
-          role: tokenResult.claims.role || 'user'
-        });
-        return;
-      }
-      setUser({
-        user: user,
-        loading: false,
-        role: 'user'
-      });
-    });
-  }, []);
-
+  const userDetails = useInit();
   const updateUserDetails = (name: string) => {
     if (!userDetails.user) return;
 

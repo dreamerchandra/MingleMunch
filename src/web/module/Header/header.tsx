@@ -55,7 +55,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export const Header: FC<{
   Menu: FC<DrawerProps>;
-  onSearch: (search: string) => void;
+  onSearch?: (search: string) => void;
 }> = ({ Menu, onSearch }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -92,18 +92,20 @@ export const Header: FC<{
                 B-SCHOOL BISTRO
               </Typography>
             </Container>
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ 'aria-label': 'search' }}
-                onChange={(e) => {
-                  onSearch(e.target.value);
-                }}
-              />
-            </Search>
+            {onSearch && (
+              <Search>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  placeholder="Search…"
+                  inputProps={{ 'aria-label': 'search' }}
+                  onChange={(e) => {
+                    onSearch(e.target.value);
+                  }}
+                />
+              </Search>
+            )}
           </Toolbar>
         </AppBar>
       </Box>
