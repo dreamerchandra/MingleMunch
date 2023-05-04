@@ -5,6 +5,7 @@ import {
   CardContent,
   CardMedia,
   CircularProgress,
+  IconButton,
   Typography,
   styled
 } from '@mui/material';
@@ -16,10 +17,12 @@ import Grid from '@mui/material/Grid';
 import { useUser } from '../../firebase/auth';
 import { Container } from '@mui/system';
 import LoadingButton from '@mui/lab/LoadingButton';
+import AddToCart from '@mui/icons-material/AddShoppingCart';
 
 const CardActionsWrapper = styled(CardActions)`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin: 0 16px;
 `;
 
@@ -63,7 +66,14 @@ const FooterActions: FC<{ product: Product }> = ({ product }) => {
   return (
     <>
       {inCart.length ? (
-        <div>
+        <Container
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'end'
+          }}
+        >
           <Button size="small" onClick={() => removeFromCart(product)}>
             -
           </Button>
@@ -71,34 +81,47 @@ const FooterActions: FC<{ product: Product }> = ({ product }) => {
           <Button size="small" onClick={() => addToCart(product)}>
             +
           </Button>
-        </div>
+        </Container>
       ) : (
         <Container
           style={{
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'end'
           }}
         >
-          {role === 'vendor' && (
-            <LoadingButton
-              size="small"
-              onClick={() =>
-                mutateAsync({
-                  productId: product.itemId,
-                  isAvailable: !product.isAvailable
-                })
-              }
-              disabled={isLoading}
-              loading={isLoading}
-              variant="outlined"
-              color="secondary"
-            >
-              {product.isAvailable ? 'Mark unavailable' : 'Mark available'}
-            </LoadingButton>
+          {role === 'vendor' ? (
+            <>
+              <LoadingButton
+                size="small"
+                onClick={() =>
+                  mutateAsync({
+                    productId: product.itemId,
+                    isAvailable: !product.isAvailable
+                  })
+                }
+                variant="outlined"
+                disabled={isLoading}
+                loading={isLoading}
+              >
+                {product.isAvailable ? 'Can Order' : 'Out of stock'}
+              </LoadingButton>
+
+              <IconButton
+                aria-label="add to cart"
+                color="primary"
+                onClick={() => addToCart(product)}
+                disabled={!product.isAvailable}
+              >
+                <AddToCart />
+              </IconButton>
+            </>
+          ) : (
+            <Button size="small" onClick={() => addToCart(product)}>
+              Add to cart
+            </Button>
           )}
-          <Button size="small" onClick={() => addToCart(product)}>
-            Add to cart
-          </Button>
         </Container>
       )}
     </>
