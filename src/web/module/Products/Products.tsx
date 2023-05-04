@@ -8,11 +8,14 @@ import {
   Typography,
   styled
 } from '@mui/material';
-import { useProductQuery } from './product-query';
+import { useMutationProductEdit, useProductQuery } from './product-query';
 import { Product } from '../../../common/types/Product';
 import { FC } from 'react';
 import { useCart } from '../Shoping/cart-activity';
 import Grid from '@mui/material/Grid';
+import { useUser } from '../../firebase/auth';
+import { Container } from '@mui/system';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const CardActionsWrapper = styled(CardActions)`
   display: flex;
@@ -47,12 +50,64 @@ const Description = styled(Typography)`
   -webkit-box-orient: vertical;
 `;
 
-const ProductItem: FC<{ product: Product }> = ({ product }) => {
-  const { itemDescription, itemImage, itemName, itemPrice } = product;
+const FooterActions: FC<{ product: Product }> = ({ product }) => {
   const { addToCart, removeFromCart, cartDetails } = useCart();
+  const {
+    userDetails: { role }
+  } = useUser();
   const inCart = cartDetails.cart.filter(
     (item) => item.itemId === product.itemId
   );
+  const { mutateAsync, isLoading } = useMutationProductEdit();
+
+  return (
+    <>
+      {inCart.length ? (
+        <div>
+          <Button size="small" onClick={() => removeFromCart(product)}>
+            -
+          </Button>
+          <>{inCart.length}</>
+          <Button size="small" onClick={() => addToCart(product)}>
+            +
+          </Button>
+        </div>
+      ) : (
+        <Container
+          style={{
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {role === 'vendor' && (
+            <LoadingButton
+              size="small"
+              onClick={() =>
+                mutateAsync({
+                  productId: product.itemId,
+                  isAvailable: !product.isAvailable
+                })
+              }
+              disabled={isLoading}
+              loading={isLoading}
+              variant="outlined"
+              color="secondary"
+            >
+              {product.isAvailable ? 'Mark unavailable' : 'Mark available'}
+            </LoadingButton>
+          )}
+          <Button size="small" onClick={() => addToCart(product)}>
+            Add to cart
+          </Button>
+        </Container>
+      )}
+    </>
+  );
+};
+
+const ProductItem: FC<{ product: Product }> = ({ product }) => {
+  const { itemDescription, itemImage, itemName, itemPrice } = product;
+
   return (
     <CardWrapper>
       <CardMedia
@@ -76,28 +131,21 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
         <Typography gutterBottom component="h3">
           ₹{itemPrice}
         </Typography>
-        {inCart.length ? (
-          <div>
-            <Button size="small" onClick={() => removeFromCart(product)}>
-              -
-            </Button>
-            <>{inCart.length}</>
-            <Button size="small" onClick={() => addToCart(product)}>
-              +
-            </Button>
-          </div>
-        ) : (
-          <Button size="small" onClick={() => addToCart(product)}>
-            Add To Cart
-          </Button>
-        )}
+        <FooterActions product={product} />
       </CardActionsWrapper>
     </CardWrapper>
   );
 };
 
 export const Products: FC<{ search: string }> = ({ search }) => {
-  const { data, isLoading } = useProductQuery({ search });
+  const {
+    userDetails: { role, loading }
+  } = useUser();
+  const { data, isLoading } = useProductQuery({
+    search,
+    isAvailable: role === 'user' ? true : undefined,
+    isEnabled: !loading
+  });
   if (isLoading) {
     return <CircularProgress />;
   }

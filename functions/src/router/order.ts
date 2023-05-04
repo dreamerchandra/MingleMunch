@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { firebaseDb } from '../firebase.js';
 import { getProducts } from '../firestore/product.js';
+import { logger } from 'firebase-functions';
 
 export const createOrder = async (req: Request, res: Response) => {
   const { details } = req.body as {
@@ -15,6 +16,19 @@ export const createOrder = async (req: Request, res: Response) => {
   const subTotal = products
     .map((p) => p.itemPrice * detailsToQuantity[p.itemId])
     .reduce((a, b) => a + b, 0);
+  const isAllAvailable = products.every((p) => p.isAvailable);
+  if (!isAllAvailable) {
+    const nonAvailableItems = products.filter((p) => !p.isAvailable);
+    logger.log(
+      'some items are not available',
+      nonAvailableItems.map((p) => p.itemId)
+    );
+    return res.status(400).json({
+      error: 'Invalid order',
+      message: 'Some items are not available',
+      products: nonAvailableItems
+    });
+  }
 
   const shopIds = products.map((p) => p.shopDetails.shopId);
   const isSameShop = shopIds.every((v) => v === shopIds[0]);

@@ -1,6 +1,7 @@
 export interface Product {
   itemId: string;
   itemName: string;
+  isAvailable: boolean;
   itemDescription: string;
   itemPrice: number;
   itemImage: string;

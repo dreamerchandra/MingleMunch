@@ -1,5 +1,6 @@
 export interface Product {
   itemId: string;
+  isAvailable: boolean;
   itemName: string;
   itemDescription: string;
   itemPrice: number;

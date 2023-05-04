@@ -17,13 +17,16 @@ import { TAX } from '../../../common/types/constant';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 
-const StyledProduct = styled('div')(({ theme }) => ({
+const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing(2),
   width: '100%',
-  margin: theme.spacing(1, 0)
+  margin: theme.spacing(1, 0),
+  '> *': {
+    color: error ? theme.palette.error.main : ''
+  }
 }));
 
 const TotalWrapper = styled('div')(({ theme }) => ({
@@ -46,15 +49,53 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
     }
     return old;
   }, [] as { product: Product; quantity: number }[]);
+
   const subTotal = items.reduce(
     (old, item) => old + item.product.itemPrice * item.quantity,
     0
   );
   const tax = Number((subTotal * TAX).toFixed(2));
   const grandTotal = Number((subTotal + tax).toFixed(2));
-  const { mutateAsync, isLoading } = useMutationCreateOrder();
+  const { mutate, isLoading } = useMutationCreateOrder();
   const [success, setShowSuccess] = useState(false);
+  const initialErrorState = { message: '', products: [] as string[] };
+  const [error, setError] = useState(initialErrorState);
   const navigator = useNavigate();
+  const onPlaceOrder = () => {
+    mutate(
+      {
+        details: items.map((item) => ({
+          itemId: item.product.itemId,
+          quantity: item.quantity
+        }))
+      },
+      {
+        onSuccess: (result) => {
+          setShowSuccess(true);
+          setTimeout(() => {
+            setShowSuccess(false);
+            removeAll();
+            navigator(`/payments`, {
+              state: {
+                amount: result.grandTotal,
+                orderRefId: result.orderRefId,
+                paymentLink: result.paymentLink
+              }
+            });
+          }, 500);
+        },
+        onError: (err) => {
+          setError({
+            message: err.cause.message,
+            products: err.cause.products.map((product) => product.itemId)
+          });
+        }
+      }
+    );
+  };
+  if (!open) {
+    return null;
+  }
   return (
     <Container
       component="main"
@@ -66,7 +107,17 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
         marginTop: 2
       }}
     >
-      {open && (
+      {error.message ? (
+        <Alert
+          severity="error"
+          onClose={() => {
+            removeAll();
+            setError(initialErrorState);
+          }}
+        >
+          {error.message}
+        </Alert>
+      ) : (
         <LoadingButton
           loading={isLoading}
           loadingPosition="start"
@@ -74,26 +125,7 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
           variant="outlined"
           disabled={isLoading}
           color="primary"
-          onClick={async () => {
-            const result = await mutateAsync({
-              details: items.map((item) => ({
-                itemId: item.product.itemId,
-                quantity: item.quantity
-              }))
-            });
-            setShowSuccess(true);
-            setTimeout(() => {
-              setShowSuccess(false);
-              removeAll();
-              navigator(`/payments`, {
-                state: {
-                  amount: result.grandTotal,
-                  orderRefId: result.orderRefId,
-                  paymentLink: result.paymentLink
-                }
-              });
-            }, 500);
-          }}
+          onClick={onPlaceOrder}
         >
           Place order ₹ {grandTotal}
         </LoadingButton>
@@ -114,7 +146,10 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
           }}
         >
           {items.map((item) => (
-            <StyledProduct key={item.product.itemId}>
+            <StyledProduct
+              key={item.product.itemId}
+              error={error.products.includes(item.product.itemId)}
+            >
               <div>
                 <Typography component="h6">{item.product.itemName}</Typography>
                 <Typography component="h6">

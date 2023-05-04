@@ -7,6 +7,7 @@ import {
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where
 } from 'firebase/firestore';
 import { firebaseDb, firebaseStorage } from './firebase';
@@ -26,6 +27,7 @@ export interface ProductInput {
   itemDescription: string;
   itemPrice: number;
   itemImage: string;
+  isAvailable: boolean;
 }
 
 const trim = (str: string) => str.replace(/\s+/, '').toLocaleLowerCase();
@@ -50,7 +52,8 @@ const constructProduct = (
     itemImage,
     keywords,
     shopId: 'PSG',
-    shopDetails
+    shopDetails,
+    isAvailable: true
   };
 };
 export const productConverter = {
@@ -76,8 +79,16 @@ export const productConverter = {
   }
 };
 
-export const getProducts = async ({ search }: { search: string }) => {
+export interface ProductQuery {
+  search: string;
+  isAvailable?: boolean;
+}
+
+export const getProducts = async ({ search, isAvailable }: ProductQuery) => {
   const queryFns = [where('shopId', '==', 'PSG')];
+  if (isAvailable) {
+    queryFns.push(where('isAvailable', '==', isAvailable));
+  }
   if (search) {
     queryFns.push(where('keywords', 'array-contains', search.toLowerCase()));
   }
@@ -89,11 +100,21 @@ export const getProducts = async ({ search }: { search: string }) => {
   return querySnap.docs.map((doc) => doc.data());
 };
 
-export const updateProduct = async (product: ProductInput) => {
+export const insertProduct = async (product: ProductInput) => {
   const docRef = doc(
     collection(firebaseDb, 'food').withConverter(productConverter)
   );
   return setDoc(docRef, constructProduct(product));
+};
+
+export const updateProduct = async (
+  product: Partial<ProductInput> & { productId: string }
+) => {
+  const docRef = doc(
+    collection(firebaseDb, 'food').withConverter(productConverter),
+    product.productId
+  );
+  return updateDoc(docRef, product);
 };
 
 export const uploadImage = async (file: File) => {

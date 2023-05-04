@@ -1,11 +1,19 @@
 import { isLocalhost } from '../utils';
 import { firebaseAuth } from './firebase';
 
-const handleError = (res: Response) => {
+const getJsonError = (res: string) => {
+  try {
+    return JSON.parse(res);
+  } catch (e) {
+    return {};
+  }
+};
+
+const handleError = async (res: Response) => {
   if (res.ok) {
     return res;
   }
-  throw Error(res.statusText);
+  throw Error(res.statusText, { cause: getJsonError(await res.text()) });
 };
 
 const constructSearch = (params: any) => {
@@ -58,7 +66,7 @@ export const post = async (
       body: JSON.stringify(params),
       signal
     });
-    handleError(res);
+    await handleError(res);
     const data = await res.json();
     return data;
   } catch (e) {
