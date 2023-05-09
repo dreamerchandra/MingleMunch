@@ -6,7 +6,7 @@ import {
 } from 'firebase/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { firebaseAuth } from './firebase';
+import { firebaseAuth } from './firebase/auth';
 import { useInit } from '../module/Context/InitProvider';
 
 export const removeCountryCode = (phoneNumber: string) => {

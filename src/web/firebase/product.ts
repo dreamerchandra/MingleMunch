@@ -12,7 +12,9 @@ import {
   updateDoc,
   where
 } from 'firebase/firestore';
-import { firebaseAuth, firebaseDb, firebaseStorage } from './firebase';
+import { firebaseDb } from './firebase/db';
+import { firebaseStorage } from './firebase/storage';
+import { firebaseAuth } from './firebase/auth';
 import { Product } from '../../common/types/Product';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 

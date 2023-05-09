@@ -6,20 +6,19 @@ import {
   useEffect,
   useState
 } from 'react';
-import { getAuth, getIdTokenResult } from 'firebase/auth';
+import { User, getIdTokenResult } from 'firebase/auth';
 import { Role } from '../../../common/types/roles';
-import { firebaseApp } from '../../firebase/firebsae-app';
+import { firebaseAuth } from '../../firebase/firebase/auth';
 
-const firebaseAuth = getAuth(firebaseApp);
 const InitContext = createContext({
-  user: firebaseAuth.currentUser,
+  user: null as User | null,
   loading: true,
   role: '' as Role
 });
 
 export const InitProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [userDetails, setUser] = useState({
-    user: firebaseAuth.currentUser,
+    user: null as User | null,
     loading: true,
     role: '' as Role
   });

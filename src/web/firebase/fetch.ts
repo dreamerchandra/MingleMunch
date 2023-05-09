@@ -1,5 +1,5 @@
 import { isLocalhost } from '../utils';
-import { firebaseAuth } from './firebase';
+import { firebaseAuth } from './firebase/auth';
 
 const getJsonError = (res: string) => {
   try {

@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { Order, OrderStatus } from '../../common/types/Order';
 import { post } from './fetch';
-import { firebaseDb } from './firebase';
+import { firebaseDb } from './firebase/db';
 
 export interface OrderPayload {
   details: { itemId: string; quantity: number }[];
