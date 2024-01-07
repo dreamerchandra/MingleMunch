@@ -107,10 +107,10 @@ export const Header: FC<{
                 <StyledInputBase
                   placeholder="Search…"
                   inputProps={{ 'aria-label': 'search' }}
-                  onFocus={(e) => {
+                  onFocus={() => {
                     setSearchFocus(true);
                   }}
-                  onBlur={(e) => {
+                  onBlur={() => {
                     setSearchFocus(false);
                   }}
                   onChange={(e) => {

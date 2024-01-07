@@ -1,4 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
+import { Shop } from './shop';
 
 export interface Product {
   itemId: string;
@@ -9,12 +10,7 @@ export interface Product {
   itemImage: string;
   keywords: string[];
   shopId: string;
-  shopDetails: {
-    shopName: string;
-    shopAddress: string;
-    shopMapLocation: string;
-    shopId: string;
-  };
+  shopDetails: Omit<Shop, 'shopImage'>;
   updatedAt: Timestamp;
   createdAt: Timestamp;
   updateBy: string;

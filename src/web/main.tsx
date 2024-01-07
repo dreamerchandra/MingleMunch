@@ -9,20 +9,28 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { InitProvider } from './module/Context/InitProvider';
 import { theme as GlobalTheme } from './theme';
+import { CartProvider } from './module/Shoping/cart-activity';
 
 const router = createBrowserRouter([
-  {
-    path: '/',
-    lazy: () =>
-      import('./Routes/Home/Home').then((m) => ({
-        element: <m.HomePage />
-      }))
-  },
   {
     path: '/login',
     lazy: () =>
       import('./Routes/Login/Login').then((m) => ({
         element: <m.LoginPage />
+      }))
+  },
+  {
+    path: '/',
+    lazy: () =>
+      import('./Routes/Shop/shop').then((m) => ({
+        element: <m.ShopPage />
+      }))
+  },
+  {
+    path: '/shop/:shopId',
+    lazy: () =>
+      import('./Routes/Menu/Menu').then((m) => ({
+        element: <m.MenuPage />
       }))
   },
   {
@@ -58,7 +66,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <QueryClientProvider client={queryClient}>
           <CssBaseline />
           <ToastContainer />
-          <RouterProvider router={router}></RouterProvider>
+          <CartProvider>
+            <RouterProvider router={router}></RouterProvider>
+          </CartProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </InitProvider>

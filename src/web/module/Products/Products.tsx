@@ -12,13 +12,14 @@ import {
 } from '@mui/material';
 import { useMutationProductEdit, useProductQuery } from './product-query';
 import { Product } from '../../../common/types/Product';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { useCart } from '../Shoping/cart-activity';
 import Grid from '@mui/material/Grid';
 import { useUser } from '../../firebase/auth';
 import Container from '@mui/material/Container';
 import LoadingButton from '@mui/lab/LoadingButton';
 import AddToCart from '@mui/icons-material/AddShoppingCart';
+import Fuse from 'fuse.js';
 
 const CardActionsWrapper = styled(CardActions)`
   display: flex;
@@ -133,10 +134,12 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
   const { itemDescription, itemImage, itemName, itemPrice } = product;
 
   return (
-    <div style={{
-      width: '80vw',
-      margin: 'auto'
-    }}>
+    <div
+      style={{
+        width: '80vw',
+        margin: 'auto'
+      }}
+    >
       <div
         style={{
           display: 'flex',
@@ -172,18 +175,34 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
   );
 };
 
-export const Products: FC<{ search: string }> = ({ search }) => {
+const fuseOptions = {
+  shouldSort: true,
+  keys: ['itemName', 'itemDescription']
+};
+export const Products: FC<{ search: string; shopId: string }> = ({
+  search,
+  shopId
+}) => {
   const {
     userDetails: { role, loading }
   } = useUser();
   const { data, isLoading } = useProductQuery({
-    search,
+    search: '',
     isAvailable: role === 'user' ? true : undefined,
-    isEnabled: !loading
+    isEnabled: !loading,
+    shopId
   });
+  const filteredList = useMemo(() => {
+    if (data == null) return [];
+    if(search == '') return data;
+    const fuse = new Fuse(data, fuseOptions);
+    return fuse.search(search).map((item) => item.item);
+  }, [data, search]);
+
   if (isLoading) {
     return <CircularProgress />;
   }
+
   return (
     <Grid
       container
@@ -192,7 +211,7 @@ export const Products: FC<{ search: string }> = ({ search }) => {
       columns={{ xs: 12, sm: 6, md: 4 }}
       sx={{ marginTop: 4, paddingBottom: 12 }}
     >
-      {data?.map((product) => (
+      {filteredList?.map((product) => (
         <ProductItem product={product} key={product.itemId} />
       ))}
     </Grid>

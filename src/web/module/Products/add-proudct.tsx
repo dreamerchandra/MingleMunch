@@ -137,7 +137,7 @@ const initialFormData = {
   isTaxIncluded: false
 };
 
-export const AddProducts = () => {
+export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
   const [isUpdating, setUpdating] = useState(false);
   const { mutate } = useUpdateProductMutation();
   const {
@@ -170,7 +170,7 @@ export const AddProducts = () => {
           itemImage: itemImage
         };
         mutate(
-          { ...product, isAvailable: true },
+          { ...product, isAvailable: true, shopId },
           {
             onSuccess: () => {
               setFormData(initialFormData);

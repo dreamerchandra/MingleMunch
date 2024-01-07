@@ -17,8 +17,9 @@ import { firebaseStorage } from './firebase/storage';
 import { firebaseAuth } from './firebase/auth';
 import { Product } from '../../common/types/Product';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { Shop } from '../../common/types/shop';
 
-const createKeywords = (name: string) => {
+export const createKeywords = (name: string) => {
   const keywords = [];
   for (let i = 0; i < name.length; i++) {
     keywords.push(name.substring(0, i + 1).toLowerCase());
@@ -32,6 +33,7 @@ export interface ProductInput {
   itemPrice: number;
   itemImage: string;
   isAvailable: boolean;
+  shopId: string;
 }
 
 const trim = (str: string) => str.replace(/\s+/, '').toLocaleLowerCase();
@@ -42,17 +44,18 @@ const constructMandatoryMetaFields = () => ({
 });
 
 const constructProduct = (
-  productInput: ProductInput
+  productInput: ProductInput,
+  shop: Shop
 ): Omit<Product, 'itemId'> => {
   const { itemName, itemDescription, itemPrice, itemImage } = productInput;
   const keywords = createKeywords(
     [trim(itemName), trim(itemDescription)].join(' ')
   );
   const shopDetails = {
-    shopName: 'PSG',
-    shopAddress: 'PSG',
-    shopMapLocation: 'PSG',
-    shopId: 'PSG'
+    shopName: shop.shopName,
+    shopAddress: shop.shopAddress,
+    shopMapLocation: shop.shopMapLocation,
+    shopId: shop.shopId
   };
   return {
     itemName,
@@ -60,7 +63,7 @@ const constructProduct = (
     itemPrice,
     itemImage,
     keywords,
-    shopId: 'PSG',
+    shopId: shop.shopId,
     shopDetails,
     isAvailable: true,
     createdAt: Timestamp.now(),
@@ -72,13 +75,7 @@ export const productConverter = {
     const keywords = createKeywords(
       [product.itemName, product.itemDescription].join(' ')
     );
-    const shopDetails = {
-      shopName: 'PSG',
-      shopAddress: 'PSG',
-      shopMapLocation: 'PSG',
-      shopId: 'PSG'
-    };
-    return { ...product, keywords, shopDetails, shopId: 'PSG' };
+    return { ...product, keywords, shopId: product.shopId };
   },
 
   fromFirestore(
@@ -93,10 +90,11 @@ export const productConverter = {
 export interface ProductQuery {
   search: string;
   isAvailable?: boolean;
+  shopId: string
 }
 
-export const getProducts = async ({ search, isAvailable }: ProductQuery) => {
-  const queryFns = [where('shopId', '==', 'PSG'), orderBy('createdAt', 'desc')];
+export const getProducts = async ({ search, isAvailable, shopId }: ProductQuery) => {
+  const queryFns = [where('shopId', '==', shopId), orderBy('createdAt', 'desc')];
   if (isAvailable) {
     queryFns.push(where('isAvailable', '==', isAvailable));
   }
@@ -111,11 +109,12 @@ export const getProducts = async ({ search, isAvailable }: ProductQuery) => {
   return querySnap.docs.map((doc) => doc.data());
 };
 
-export const insertProduct = async (product: ProductInput) => {
+export const insertProduct = async (product: ProductInput, shop: Shop) => {
   const docRef = doc(
     collection(firebaseDb, 'food').withConverter(productConverter)
   );
-  return setDoc(docRef, constructProduct(product));
+  console.log(constructProduct(product, shop))
+  return setDoc(docRef, constructProduct(product, shop));
 };
 
 export const updateProduct = async (
