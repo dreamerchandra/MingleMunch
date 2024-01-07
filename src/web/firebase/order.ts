@@ -72,7 +72,6 @@ export const incomingOrderSocketUupdate = async (
 ): Promise<{ orders: Order[]; unsubscribe: Unsubscribe }> => {
   const q = query(
     collection(firebaseDb, 'orders').withConverter(orderConverters),
-    where('shopDetails.shopId', '==', 'PSG'),
     orderBy('createdAt', 'desc')
   );
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
