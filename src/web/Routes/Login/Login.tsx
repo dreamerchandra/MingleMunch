@@ -86,7 +86,6 @@ export function LoginPage() {
                     fullWidth
                     name="otp"
                     label="Otp"
-                    type="password"
                     id="otp"
                     autoComplete="otp"
                   />

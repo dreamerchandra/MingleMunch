@@ -144,7 +144,7 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
     userDetails: { role, loading }
   } = useUser();
   const [formData, setFormData] = useState(initialFormData);
-  if (loading || role !== 'vendor') {
+  if (loading || role === 'user') {
     return null;
   }
   return (

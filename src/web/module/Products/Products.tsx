@@ -1,58 +1,21 @@
+import AddToCart from '@mui/icons-material/AddShoppingCart';
+import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Button,
-  Card,
-  CardActions,
   CardMedia,
   CircularProgress,
   Divider,
   IconButton,
-  Typography,
-  styled
+  Typography
 } from '@mui/material';
-import { useMutationProductEdit, useProductQuery } from './product-query';
-import { Product } from '../../../common/types/Product';
-import { FC, useMemo } from 'react';
-import { useCart } from '../Shoping/cart-activity';
-import Grid from '@mui/material/Grid';
-import { useUser } from '../../firebase/auth';
 import Container from '@mui/material/Container';
-import LoadingButton from '@mui/lab/LoadingButton';
-import AddToCart from '@mui/icons-material/AddShoppingCart';
+import Grid from '@mui/material/Grid';
 import Fuse from 'fuse.js';
-
-const CardActionsWrapper = styled(CardActions)`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0 16px;
-`;
-
-const CardWrapper = styled(Card)`
-  width: 345px;
-  min-height: 300px;
-  max-height: 370px;
-  margin: 10px;
-  position: relative;
-  img {
-    filter: brightness(50%);
-    height: 60%;
-  }
-  .heading {
-    position: absolute;
-    bottom: 140px;
-    font-weight: 700;
-    color: #bae967;
-  }
-`;
-
-const Description = styled(Typography)`
-  overflow: hidden;
-  box-orient: vertical;
-  line-clamp: 3;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-`;
+import { FC, useMemo } from 'react';
+import { Product } from '../../../common/types/Product';
+import { useUser } from '../../firebase/auth';
+import { useCart } from '../Shoping/cart-activity';
+import { useMutationProductEdit, useProductQuery } from './product-query';
 
 const FooterActions: FC<{ product: Product }> = ({ product }) => {
   const { addToCart, removeFromCart, cartDetails } = useCart();
@@ -119,7 +82,11 @@ const FooterActions: FC<{ product: Product }> = ({ product }) => {
               </IconButton>
             </>
           ) : (
-            <Button size="small" onClick={() => addToCart(product)}>
+            <Button
+              size="small"
+              onClick={() => addToCart(product)}
+              variant="outlined"
+            >
               Add to cart
             </Button>
           )}
@@ -148,7 +115,7 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
           marginBottom: '16px'
         }}
       >
-        <div>
+        <div style={{ padding: '8px' }}>
           <Typography variant="h3" component="h2">
             {itemName}
           </Typography>
@@ -159,12 +126,23 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
             ₹{itemPrice}
           </Typography>
         </div>
-        <div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}
+        >
           <CardMedia
             component="img"
             alt={itemDescription}
             image={itemImage}
-            style={{ objectFit: 'cover', height: '100px', width: '200px' }}
+            style={{
+              objectFit: 'cover',
+              height: '95px',
+              width: '95px',
+              borderRadius: '50%'
+            }}
           />
           <FooterActions product={product} />
         </div>
@@ -193,7 +171,7 @@ export const Products: FC<{ search: string; shopId: string }> = ({
   });
   const filteredList = useMemo(() => {
     if (data == null) return [];
-    if(search == '') return data;
+    if (search == '') return data;
     const fuse = new Fuse(data, fuseOptions);
     return fuse.search(search).map((item) => item.item);
   }, [data, search]);

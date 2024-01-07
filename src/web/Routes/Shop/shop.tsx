@@ -1,5 +1,4 @@
 import { Box, Container } from '@mui/material';
-import { useState } from 'react';
 import { useProtectedRoute } from '../../firebase/auth';
 import { Header } from '../../module/Header/header';
 import { SideMenu } from '../../module/Menu/SideMenu';
