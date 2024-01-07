@@ -1,1 +1,1 @@
-export const TAX = 0.18;
+export const TAX = 0;

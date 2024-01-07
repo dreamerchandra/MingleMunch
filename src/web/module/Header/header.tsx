@@ -21,6 +21,7 @@ const Search = styled('div')(({ theme }) => ({
   },
   marginLeft: 0,
   width: '100%',
+  transition: 'width 0.5s',
   [theme.breakpoints.up('sm')]: {
     marginLeft: theme.spacing(1),
     width: 'auto'
@@ -60,11 +61,14 @@ export const Header: FC<{
 }> = ({ Menu, onSearch }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [searchFocus, setSearchFocus] = useState(false);
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
-          <Toolbar>
+          <Toolbar style={{
+            width: '100%',
+          }}>
             <IconButton
               size="large"
               edge="start"
@@ -79,7 +83,7 @@ export const Header: FC<{
             </IconButton>
             <Container
               component="div"
-              style={{ cursor: 'pointer', marginLeft: 0 }}
+              style={{ cursor: 'pointer', marginLeft: 0, display: searchFocus ? 'none' : 'block' }}
               onClick={() => {
                 navigate('/');
               }}
@@ -90,17 +94,25 @@ export const Header: FC<{
                 component="div"
                 sx={{ flexGrow: 1 }}
               >
-                B-SCHOOL BISTRO
+                BURN
               </Typography>
             </Container>
             {onSearch && (
-              <Search>
+              <Search style={{
+                width: searchFocus ? '80vw' : 'auto'
+              }}>
                 <SearchIconWrapper>
                   <SearchIcon />
                 </SearchIconWrapper>
                 <StyledInputBase
                   placeholder="Search…"
                   inputProps={{ 'aria-label': 'search' }}
+                  onFocus={(e) => {
+                    setSearchFocus(true);
+                  }}
+                  onBlur={(e) => {
+                    setSearchFocus(false);
+                  }}
                   onChange={(e) => {
                     onSearch(e.target.value);
                   }}

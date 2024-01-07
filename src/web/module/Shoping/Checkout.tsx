@@ -197,14 +197,6 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
               }}
             >
               <TotalWrapper>
-                <Typography component="h6">SubTotal </Typography>
-                <Typography component="h6">₹{subTotal}</Typography>
-              </TotalWrapper>
-              <TotalWrapper>
-                <Typography component="h6">Tax </Typography>
-                <Typography component="h6">₹{tax}</Typography>
-              </TotalWrapper>
-              <TotalWrapper>
                 <Typography component="h6">GrandTotal </Typography>
                 <Typography component="h6">₹{grandTotal}</Typography>
               </TotalWrapper>

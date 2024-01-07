@@ -5,6 +5,7 @@ import {
   CardContent,
   CardMedia,
   CircularProgress,
+  Divider,
   IconButton,
   Typography,
   styled
@@ -132,31 +133,42 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
   const { itemDescription, itemImage, itemName, itemPrice } = product;
 
   return (
-    <CardWrapper>
-      <CardMedia
-        component="img"
-        alt={itemDescription}
-        image={itemImage}
-        style={{ objectFit: 'cover' }}
-      />
-      <CardContent>
-        <Typography
-          gutterBottom
-          variant="h4"
-          component="h2"
-          className="heading"
-        >
-          {itemName}
-        </Typography>
-        <Description variant="body1">{itemDescription}</Description>
-      </CardContent>
-      <CardActionsWrapper>
-        <Typography gutterBottom component="h3">
-          ₹{itemPrice}
-        </Typography>
-        <FooterActions product={product} />
-      </CardActionsWrapper>
-    </CardWrapper>
+    <div style={{
+      width: '80vw',
+      margin: 'auto'
+    }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '16px'
+        }}
+      >
+        <div>
+          <Typography variant="h3" component="h2">
+            {itemName}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {itemDescription}
+          </Typography>
+          <Typography variant="h3" color="text.secondary">
+            ₹{itemPrice}
+          </Typography>
+        </div>
+        <div>
+          <CardMedia
+            component="img"
+            alt={itemDescription}
+            image={itemImage}
+            style={{ objectFit: 'cover', height: '100px', width: '200px' }}
+          />
+          <FooterActions product={product} />
+        </div>
+      </div>
+      <Divider />
+    </div>
   );
 };
 
