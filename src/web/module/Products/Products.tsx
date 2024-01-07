@@ -2,7 +2,6 @@ import {
   Button,
   Card,
   CardActions,
-  CardContent,
   CardMedia,
   CircularProgress,
   Divider,
