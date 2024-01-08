@@ -12,10 +12,11 @@ import { FC, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
-import { useNavigate } from 'react-router-dom';
 import { TAX } from '../../../common/types/constant';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import { Check } from '@mui/icons-material';
+import { green } from '@mui/material/colors';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -60,7 +61,6 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
   const [success, setShowSuccess] = useState(false);
   const initialErrorState = { message: '', products: [] as string[] };
   const [error, setError] = useState(initialErrorState);
-  const navigator = useNavigate();
   const onPlaceOrder = () => {
     mutate(
       {
@@ -70,19 +70,12 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
         }))
       },
       {
-        onSuccess: (result) => {
+        onSuccess: () => {
           setShowSuccess(true);
           setTimeout(() => {
             setShowSuccess(false);
             removeAll();
-            navigator(`/payments`, {
-              state: {
-                amount: result.grandTotal,
-                orderRefId: result.orderRefId,
-                paymentLink: result.paymentLink
-              }
-            });
-          }, 500);
+          }, 10_000);
         },
         onError: (err) => {
           setError({
@@ -110,99 +103,154 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
         marginTop: 2
       }}
     >
-      {error.message ? (
-        <Alert
-          severity="error"
-          onClose={() => {
-            removeAll();
-            setError(initialErrorState);
-          }}
-        >
-          {error.message}
-        </Alert>
-      ) : (
-        <LoadingButton
-          loading={isLoading}
-          loadingPosition="start"
-          startIcon={<ShoppingCartCheckoutIcon />}
-          variant="outlined"
-          disabled={isLoading}
-          color="primary"
-          onClick={onPlaceOrder}
-        >
-          Place order ₹ {grandTotal}
-        </LoadingButton>
-      )}
       {success ? (
-        <Alert severity="success">
-          Order placed successfully. To Complete payment in the next page.
-        </Alert>
-      ) : (
-        <Box
-          sx={{
-            marginTop: 8,
+        <div
+          style={{
             display: 'flex',
             flexDirection: 'column',
-            width: '100%',
-            height: 'calc(40vh - 50px)',
-            overflow: 'auto'
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 2,
+            gap: '20px'
           }}
         >
-          {items.map((item) => (
-            <StyledProduct
-              key={item.product.itemId}
-              error={error.products.includes(item.product.itemId)}
-            >
-              <div>
-                <Typography component="h6">{item.product.itemName}</Typography>
-                <Typography component="h6">
-                  ₹{item.product.itemPrice}
-                </Typography>
-              </div>
-              <div>
-                <ButtonGroup variant="outlined" aria-label="update cart">
-                  <Button
-                    variant="outlined"
-                    onClick={() => removeFromCart(item.product)}
-                  >
-                    -
-                  </Button>
-                  <Button variant="outlined" style={{ maxWidth: '2ch' }}>
-                    {item.quantity}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => addToCart(item.product)}
-                  >
-                    +
-                  </Button>
-                </ButtonGroup>
-              </div>
-            </StyledProduct>
-          ))}
-          <Divider style={{ width: '40vw', margin: '20px auto' }} />
-          <Box
-            sx={{
-              alignSelf: 'flex-end',
-              marginRight: 4
+          <div
+            style={{
+              backgroundColor: '#cddfda',
+              color: 'white',
+              height: '0px',
+              width: '0px',
+              borderRadius: '50%',
+              padding: '125px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: 'auto'
             }}
           >
-            <Container
-              component="div"
+            <Check
+              style={{
+                width: 60,
+                height: 60,
+                color: green[900]
+              }}
+            />
+          </div>
+          <Alert
+            severity="success"
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}
+          >
+            <div>Order placed successfully.</div>
+            <div>We will call you shortly to confirm the order.</div>
+          </Alert>
+        </div>
+      ) : (
+        <>
+          <Box
+            sx={{
+              marginTop: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%',
+              height: 'calc(40vh - 50px)',
+              overflow: 'auto'
+            }}
+          >
+            {items.map((item) => (
+              <StyledProduct
+                key={item.product.itemId}
+                error={error.products.includes(item.product.itemId)}
+              >
+                <div>
+                  <Typography component="h6">
+                    {item.product.itemName}
+                  </Typography>
+                  <Typography component="h6">
+                    ₹{item.product.itemPrice}
+                  </Typography>
+                </div>
+                <div>
+                  <ButtonGroup variant="outlined" aria-label="update cart">
+                    <Button
+                      variant="outlined"
+                      onClick={() => removeFromCart(item.product)}
+                    >
+                      -
+                    </Button>
+                    <Button variant="outlined" style={{ maxWidth: '2ch' }}>
+                      {item.quantity}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => addToCart(item.product)}
+                    >
+                      +
+                    </Button>
+                  </ButtonGroup>
+                </div>
+              </StyledProduct>
+            ))}
+            <Divider style={{ width: '40vw', margin: '20px auto' }} />
+            <Box
               sx={{
-                padding: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%'
+                alignSelf: 'flex-end',
+                marginRight: 4
               }}
             >
-              <TotalWrapper>
-                <Typography component="h6">GrandTotal </Typography>
-                <Typography component="h6">₹{grandTotal}</Typography>
-              </TotalWrapper>
-            </Container>
+              <Container
+                component="div"
+                sx={{
+                  padding: 2,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  width: '100%'
+                }}
+              >
+                <TotalWrapper>
+                  <Typography component="h6">Sub Total </Typography>
+                  <Typography component="h6">₹{grandTotal}</Typography>
+                </TotalWrapper>
+                <TotalWrapper>
+                  <Typography component="h6">Delivery </Typography>
+                  <Typography component="h6">₹30</Typography>
+                </TotalWrapper>
+                <TotalWrapper>
+                  <Typography component="h6">GrandTotal </Typography>
+                  <Typography component="h6">
+                    ₹{Math.round(grandTotal + 20)}
+                  </Typography>
+                </TotalWrapper>
+              </Container>
+            </Box>
           </Box>
-        </Box>
+          {error.message ? (
+            <Alert
+              severity="error"
+              onClose={() => {
+                removeAll();
+                setError(initialErrorState);
+              }}
+            >
+              {error.message}
+            </Alert>
+          ) : (
+            <LoadingButton
+              loading={isLoading}
+              loadingPosition="start"
+              startIcon={<ShoppingCartCheckoutIcon />}
+              variant="outlined"
+              disabled={isLoading}
+              color="primary"
+              onClick={onPlaceOrder}
+            >
+              Place order ₹ {grandTotal}
+            </LoadingButton>
+          )}
+        </>
       )}
     </Container>
   );

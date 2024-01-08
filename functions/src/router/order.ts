@@ -38,7 +38,8 @@ export const createOrder = async (req: Request, res: Response) => {
     });
   }
   const tax = 0;
-  const grandTotal = Math.round(subTotal + subTotal * tax);
+  const deliveryFee = 20;
+  const grandTotal = Math.round(subTotal + subTotal * tax + deliveryFee);
   if (grandTotal <= 0) {
     return res.status(400).json({
       error: 'Invalid order'

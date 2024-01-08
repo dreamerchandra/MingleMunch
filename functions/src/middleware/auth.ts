@@ -16,7 +16,8 @@ export const authMiddle = async (
     req.user = user as any;
     req.userRole = user.role || 'user';
     next();
-  } catch {
+  } catch(err) {
+    console.log(err)
     res.status(401).json({
       error: 'Unauthorized'
     });
