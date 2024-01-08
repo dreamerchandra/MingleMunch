@@ -2,7 +2,6 @@ import AddToCart from '@mui/icons-material/AddShoppingCart';
 import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Button,
-  CardMedia,
   CircularProgress,
   Divider,
   IconButton,
@@ -97,7 +96,7 @@ const FooterActions: FC<{ product: Product }> = ({ product }) => {
 };
 
 const ProductItem: FC<{ product: Product }> = ({ product }) => {
-  const { itemDescription, itemImage, itemName, itemPrice } = product;
+  const { itemDescription, itemName, itemPrice } = product;
 
   return (
     <div
@@ -133,17 +132,7 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
             alignItems: 'center'
           }}
         >
-          <CardMedia
-            component="img"
-            alt={itemDescription}
-            image={itemImage}
-            style={{
-              objectFit: 'cover',
-              height: '95px',
-              width: '95px',
-              borderRadius: '50%'
-            }}
-          />
+          <div style={{ height: '25px' }}></div>
           <FooterActions product={product} />
         </div>
       </div>
