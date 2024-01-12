@@ -25,7 +25,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
             {shop.shopName}
           </Typography>
           <Typography component="div" variant="caption">
-            Delivery Fee: Rs.30
+            Delivery Fee: Rs.25
           </Typography>
         </CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>

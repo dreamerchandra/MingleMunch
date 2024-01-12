@@ -1,3 +1,6 @@
+import { Check } from '@mui/icons-material';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Alert,
   Box,
@@ -7,16 +10,13 @@ import {
   Divider,
   Typography
 } from '@mui/material';
+import { green } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
 import { FC, useState } from 'react';
 import { Product } from '../../../common/types/Product';
+import { TAX } from '../../../common/types/constant';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
-import { TAX } from '../../../common/types/constant';
-import LoadingButton from '@mui/lab/LoadingButton';
-import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
-import { Check } from '@mui/icons-material';
-import { green } from '@mui/material/colors';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -56,7 +56,8 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
     0
   );
   const tax = Number((subTotal * TAX).toFixed(2));
-  const grandTotal = Number((subTotal + tax).toFixed(2));
+  const deliveryFee = 25;
+  const grandTotal = Number((subTotal + tax + deliveryFee).toFixed(2));
   const { mutate, isLoading } = useMutationCreateOrder();
   const [success, setShowSuccess] = useState(false);
   const initialErrorState = { message: '', products: [] as string[] };
@@ -110,7 +111,6 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: 2,
             gap: '20px'
           }}
         >
@@ -152,7 +152,6 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
         <>
           <Box
             sx={{
-              marginTop: 8,
               display: 'flex',
               flexDirection: 'column',
               width: '100%',
@@ -160,6 +159,56 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
               overflow: 'auto'
             }}
           >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                margin: 'auto',
+                gap: '10px'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  margin: 'auto',
+                  gap: '5px'
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#c6f6e8',
+                    color: 'white',
+                    height: '7px',
+                    width: '7px',
+                    borderRadius: '50%',
+                  }}
+                ></div>
+                <Typography component="h6">Budget Delivery</Typography>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  margin: 'auto',
+                  gap: '5px'
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#c6f6e8',
+                    color: 'white',
+                    height: '7px',
+                    width: '7px',
+                    borderRadius: '50%',
+                  }}
+                ></div>
+                <Typography component="h6">By BURN</Typography>
+              </div>
+            </div>
             {items.map((item) => (
               <StyledProduct
                 key={item.product.itemId}
@@ -212,16 +261,16 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
               >
                 <TotalWrapper>
                   <Typography component="h6">Sub Total </Typography>
-                  <Typography component="h6">₹{grandTotal}</Typography>
+                  <Typography component="h6">₹{subTotal}</Typography>
                 </TotalWrapper>
                 <TotalWrapper>
                   <Typography component="h6">Delivery </Typography>
-                  <Typography component="h6">₹30</Typography>
+                  <Typography component="h6">₹ {deliveryFee}</Typography>
                 </TotalWrapper>
                 <TotalWrapper>
                   <Typography component="h6">GrandTotal </Typography>
                   <Typography component="h6">
-                    ₹{Math.round(grandTotal + 20)}
+                    ₹{Math.round(grandTotal)}
                   </Typography>
                 </TotalWrapper>
               </Container>
@@ -238,6 +287,10 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
               {error.message}
             </Alert>
           ) : (
+            <>
+            <div style={{
+              height: '20px'
+            }}></div>
             <LoadingButton
               loading={isLoading}
               loadingPosition="start"
@@ -249,6 +302,7 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
             >
               Place order ₹ {grandTotal}
             </LoadingButton>
+            </>
           )}
         </>
       )}

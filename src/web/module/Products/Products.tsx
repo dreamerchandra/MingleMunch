@@ -54,7 +54,7 @@ const FooterActions: FC<{ product: Product }> = ({ product }) => {
             justifyContent: 'end'
           }}
         >
-          {role === 'vendor' ? (
+          {['admin', 'vendor'].includes(role) ? (
             <>
               <LoadingButton
                 size="small"

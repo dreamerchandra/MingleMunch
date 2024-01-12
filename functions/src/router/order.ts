@@ -38,7 +38,7 @@ export const createOrder = async (req: Request, res: Response) => {
     });
   }
   const tax = 0;
-  const deliveryFee = 20;
+  const deliveryFee = 25;
   const grandTotal = Math.round(subTotal + subTotal * tax + deliveryFee);
   if (grandTotal <= 0) {
     return res.status(400).json({
