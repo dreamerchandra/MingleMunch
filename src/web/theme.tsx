@@ -16,13 +16,20 @@ const LinkBehavior = forwardRef<
 
 export const theme: ThemeOptions = {
   components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#cfff0424',
+        }
+      }
+    },
     MuiButton: {
       defaultProps: {
-        color: 'secondary',
+        color: 'primary',
         disableRipple: false,
         disableTouchRipple: false,
         disableFocusRipple: false
-      }
+      },
     },
     MuiButtonBase: {
       defaultProps: {
@@ -41,10 +48,15 @@ export const theme: ThemeOptions = {
       light: 'rgba(0, 0, 0, 0.87)',
       contrastText: '#9A9A9D'
     },
+    secondary: {
+      main: '#d1ff04',
+      light: '#d1ff04',
+      contrastText: '#000'
+    },
     divider: 'rgba(0, 0, 0, 0.3)',
     background: {
-      default: '#F9F9F9',
-      paper: '#fff'
+      default: '#fff',
+      paper: '#fff',
     },
     common: {
       black: '#1D1D1D',
@@ -55,11 +67,7 @@ export const theme: ThemeOptions = {
       secondary: 'rgba(0, 0, 0, 0.6)',
       disabled: 'rgba(0, 0, 0, 0.3)'
     },
-    secondary: {
-      main: 'hsl(16deg, 96%, 50.98%)',
-      light: 'hsl(16deg, 96%, 50.98%)',
-      contrastText: '#fff'
-    },
+    
     info: {
       main: '#29b6f6',
       light: '#4fc3f7',

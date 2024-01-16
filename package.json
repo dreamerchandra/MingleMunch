@@ -8,7 +8,7 @@
     "dev:functions": "cd ./functions && npm run watch",
     "dev:web": "vite",
     "dev": "concurrently \"npm run dev:emulator\" \"npm run dev:functions \" \"npm run dev:web\"",
-    "build": "tsc && vite build && yarn version minor",
+    "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "migration:env": "export FIRESTORE_EMULATOR_HOST=\"localhost:8080\"",

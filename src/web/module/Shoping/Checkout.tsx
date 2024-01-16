@@ -357,11 +357,10 @@ export const Checkout: FC = () => {
                   startIcon={<ShoppingCartCheckoutIcon />}
                   variant="contained"
                   disabled={isLoading}
-                  color="primary"
                   onClick={onPlaceOrder}
+                  color='secondary'
                   style={{
                     borderRadius: '10px',
-                    color: '#fff',
                     marginBottom: '20px'
                   }}
                 >

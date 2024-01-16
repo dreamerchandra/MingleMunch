@@ -1,10 +1,12 @@
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { useOrderHistoryQuery } from './order-query';
+import Typography from '@mui/material/Typography';
 import { OrderStatus } from '../../../common/types/Order';
+import { useOrderHistoryQuery } from './order-query';
 
 const getReadableStatus = (status: OrderStatus) => {
   switch (status) {
@@ -35,6 +37,28 @@ export const OrderHistory = () => {
         gap: 3
       }}
     >
+      {orders?.length === 0 ? (
+        <Box
+          sx={{
+            height: '70vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2
+          }}
+        >
+          <Typography variant="h6" color="GrayText">
+            You haven't order anything
+          </Typography>
+          <Typography variant="h6" color="ActiveCaption">
+            We will be happy to serve you
+          </Typography>
+          <Button variant="contained" color="secondary" href="/">
+            Order Now
+          </Button>
+        </Box>
+      ) : null}
       {orders?.map((order) => (
         <Card
           sx={{
