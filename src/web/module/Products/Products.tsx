@@ -13,6 +13,7 @@ import Fuse from 'fuse.js';
 import { FC, useMemo } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useUser } from '../../firebase/auth';
+import { useShopQuery } from '../Shop/shop-query';
 import { useCart } from '../Shoping/cart-activity';
 import { useMutationProductEdit, useProductQuery } from './product-query';
 
@@ -152,6 +153,8 @@ export const Products: FC<{ search: string; shopId: string }> = ({
   const {
     userDetails: { role, loading }
   } = useUser();
+  const {data: shops} = useShopQuery()
+  
   const { data, isLoading } = useProductQuery({
     search: '',
     isAvailable: role === 'user' ? true : undefined,
@@ -168,6 +171,7 @@ export const Products: FC<{ search: string; shopId: string }> = ({
   if (isLoading) {
     return <CircularProgress />;
   }
+  const shopName =shops?.find((shop) => shop.shopId === shopId)?.shopName ?? 'Loading...';
 
   return (
     <Grid
@@ -177,6 +181,7 @@ export const Products: FC<{ search: string; shopId: string }> = ({
       columns={{ xs: 12, sm: 6, md: 4 }}
       sx={{ marginTop: 4, paddingBottom: 12 }}
     >
+      <Typography variant='h2' component='h2' sx={{margin: 'auto'}}>{shopName}</Typography>
       {filteredList?.map((product) => (
         <ProductItem product={product} key={product.itemId} />
       ))}

@@ -3,6 +3,7 @@ import { Product } from '../../../common/types/Product';
 import { useMemo } from 'react';
 import { useCallback } from 'react';
 import { createContext } from 'react';
+import LogRocket from 'logrocket';
 
 interface CartState {
   cart: Product[];
@@ -86,12 +87,24 @@ const useCartActivity = () => {
 
   const addToCart = useCallback((product: Product) => {
     dispatch({ type: 'ADD_TO_CART', payload: product });
+    LogRocket.track('cart-added', {
+      productCategory: 'Food',
+      productSku: product.itemId,
+   });
   }, []);
   const removeFromCart = useCallback((product: Product) => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: product });
+    LogRocket.track('cart-removed', {
+      productCategory: 'Food',
+      productSku: product.itemId,
+   });
   }, []);
   const removeAll = useCallback(() => {
     dispatch({ type: 'REMOVE_ALL' });
+    LogRocket.track('cart-removed', {
+      productCategory: 'Food',
+      productSku: 'all',
+   });
   }, []);
 
   return useMemo(

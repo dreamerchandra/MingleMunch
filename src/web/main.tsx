@@ -10,7 +10,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import { InitProvider } from './module/Context/InitProvider';
 import { theme as GlobalTheme } from './theme';
 import { CartProvider } from './module/Shoping/cart-activity';
+import LogRocket from 'logrocket';
+import packageJson from '../../package.json';
 
+if (process.env.NODE_ENV === 'production') {
+  console.log(`init logrocket with ${packageJson.version}`);
+  LogRocket.init('oedyyk/chandra', {
+    release: process.env.REACT_APP_VERSION
+  });
+}
 const router = createBrowserRouter([
   {
     path: '/login',
@@ -38,6 +46,13 @@ const router = createBrowserRouter([
     lazy: () =>
       import('./Routes/Splash/Splash').then((m) => ({
         element: <m.SplashPage />
+      }))
+  },
+  {
+    path: '/cart',
+    lazy: () =>
+      import('./Routes/Cart/cart').then((m) => ({
+        element: <m.CartPage />
       }))
   },
   {

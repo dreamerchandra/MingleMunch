@@ -1,22 +1,24 @@
 import { Check } from '@mui/icons-material';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import LoadingButton from '@mui/lab/LoadingButton';
-import {
-  Alert,
-  Box,
-  Button,
-  ButtonGroup,
-  Container,
-  Divider,
-  Typography
-} from '@mui/material';
 import { green } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { TAX } from '../../../common/types/constant';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
+import { useNavigate } from 'react-router-dom';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import Card from '@mui/material/Card';
+import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import CheckIcon from '@mui/icons-material/Check';
+import LogRocket from 'logrocket';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -39,7 +41,15 @@ const TotalWrapper = styled('div')(({ theme }) => ({
   marginTop: theme.spacing(2)
 }));
 
-export const Checkout: FC<{ open: boolean }> = ({ open }) => {
+const SubSection = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  width: '100%',
+  marginTop: theme.spacing(4)
+}));
+
+export const Checkout: FC = () => {
   const { cartDetails, addToCart, removeFromCart, removeAll } = useCart();
   const items = cartDetails.cart.reduce((old, cartItem) => {
     const item = old.find((item) => item.product.itemId === cartItem.itemId);
@@ -72,6 +82,11 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
       },
       {
         onSuccess: () => {
+          LogRocket.track('order-placed', {
+            productCategory: 'Food',
+            productSku: items.map((item) => item.product.itemId),
+            revenue: grandTotal
+          });
           setShowSuccess(true);
           setTimeout(() => {
             setShowSuccess(false);
@@ -90,6 +105,12 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
       }
     );
   };
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate(-1);
+    }
+  }, [items.length, navigate]);
   if (!open) {
     return null;
   }
@@ -149,162 +170,207 @@ export const Checkout: FC<{ open: boolean }> = ({ open }) => {
           </Alert>
         </div>
       ) : (
-        <>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            justifyContent: 'space-between',
+            height: '90vh'
+          }}
+        >
           <Box
             sx={{
               display: 'flex',
               flexDirection: 'column',
               width: '100%',
-              height: 'calc(40vh - 50px)',
-              overflow: 'auto'
+              justifyContent: 'space-between'
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                margin: 'auto',
-                gap: '10px'
-              }}
-            >
-              <div
+            <div>
+              <SubSection
                 style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  margin: 'auto',
-                  gap: '5px'
+                  marginTop: 0
                 }}
               >
-                <div
-                  style={{
-                    backgroundColor: '#c6f6e8',
-                    color: 'white',
-                    height: '7px',
-                    width: '7px',
-                    borderRadius: '50%',
+                <Alert
+                  icon={<CheckIcon fontSize="inherit" />}
+                  severity="success"
+                  sx={{
+                    bgcolor: '#41b594',
+                    color: '#fff',
+                    borderRadius: '5px'
                   }}
-                ></div>
-                <Typography component="h6">Budget Delivery</Typography>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  margin: 'auto',
-                  gap: '5px'
-                }}
-              >
-                <div
+                >
+                  You have saved Rs.{Math.round(grandTotal * 0.3)} on this
+                  order.
+                </Alert>
+                <Card
+                  sx={{ padding: 2, mt: 2, mb: 2 }}
+                  elevation={2}
                   style={{
-                    backgroundColor: '#c6f6e8',
-                    color: 'white',
-                    height: '7px',
-                    width: '7px',
-                    borderRadius: '50%',
+                    borderRadius: '10px'
                   }}
-                ></div>
-                <Typography component="h6">By BURN</Typography>
-              </div>
+                >
+                  {items
+                    .sort((a, b) =>
+                      a.product.itemName.localeCompare(b.product.itemName)
+                    )
+                    .map((item, idx) => (
+                      <div key={item.product.itemId}>
+                        <StyledProduct
+                          key={item.product.itemId}
+                          error={error.products.includes(item.product.itemId)}
+                        >
+                          <div>
+                            <Typography component="h6">
+                              {item.product.itemName}
+                            </Typography>
+                            <Typography component="h6">
+                              ₹{item.product.itemPrice}
+                            </Typography>
+                          </div>
+                          <div>
+                            <ButtonGroup
+                              variant="outlined"
+                              aria-label="update cart"
+                            >
+                              <Button
+                                variant="outlined"
+                                onClick={() => removeFromCart(item.product)}
+                              >
+                                -
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                style={{ maxWidth: '2ch' }}
+                              >
+                                {item.quantity}
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                onClick={() => addToCart(item.product)}
+                              >
+                                +
+                              </Button>
+                            </ButtonGroup>
+                          </div>
+                        </StyledProduct>
+                        {idx != items.length - 1 && (
+                          <Divider
+                            style={{
+                              backgroundColor: '#f3faf8',
+                              margin: 'auto',
+                              width: '40vw'
+                            }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                </Card>
+              </SubSection>
+              <SubSection>
+                <Button
+                  onClick={() => {
+                    navigate(-1);
+                  }}
+                  sx={{
+                    margin: 'auto'
+                  }}
+                  variant="outlined"
+                >
+                  <Typography variant="body2">Add more items</Typography>
+                </Button>
+                <Button
+                  onClick={() => {
+                    removeAll();
+                    navigate('/');
+                  }}
+                  sx={{
+                    margin: 'auto'
+                  }}
+                  variant="text"
+                  color="info"
+                >
+                  <Typography variant="caption">Clear all</Typography>
+                </Button>
+              </SubSection>
+              <Divider
+                style={{ width: '40vw', margin: '20px auto' }}
+                sx={{ bgcolor: 'primary.main' }}
+              />
             </div>
-            {items.map((item) => (
-              <StyledProduct
-                key={item.product.itemId}
-                error={error.products.includes(item.product.itemId)}
-              >
-                <div>
-                  <Typography component="h6">
-                    {item.product.itemName}
-                  </Typography>
-                  <Typography component="h6">
-                    ₹{item.product.itemPrice}
-                  </Typography>
-                </div>
-                <div>
-                  <ButtonGroup variant="outlined" aria-label="update cart">
-                    <Button
-                      variant="outlined"
-                      onClick={() => removeFromCart(item.product)}
-                    >
-                      -
-                    </Button>
-                    <Button variant="outlined" style={{ maxWidth: '2ch' }}>
-                      {item.quantity}
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={() => addToCart(item.product)}
-                    >
-                      +
-                    </Button>
-                  </ButtonGroup>
-                </div>
-              </StyledProduct>
-            ))}
-            <Divider style={{ width: '40vw', margin: '20px auto' }} />
-            <Box
-              sx={{
-                alignSelf: 'flex-end',
-                marginRight: 4
+          </Box>
+          <div>
+            <Card
+              elevation={1}
+              style={{
+                borderRadius: '5px'
               }}
             >
-              <Container
-                component="div"
+              <Box
                 sx={{
-                  padding: 2,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  width: '100%'
+                  alignSelf: 'flex-end'
                 }}
               >
-                <TotalWrapper>
-                  <Typography component="h6">Sub Total </Typography>
-                  <Typography component="h6">₹{subTotal}</Typography>
-                </TotalWrapper>
-                <TotalWrapper>
-                  <Typography component="h6">Delivery </Typography>
-                  <Typography component="h6">₹ {deliveryFee}</Typography>
-                </TotalWrapper>
-                <TotalWrapper>
-                  <Typography component="h6">GrandTotal </Typography>
-                  <Typography component="h6">
-                    ₹{Math.round(grandTotal)}
-                  </Typography>
-                </TotalWrapper>
-              </Container>
-            </Box>
-          </Box>
-          {error.message ? (
-            <Alert
-              severity="error"
-              onClose={() => {
-                removeAll();
-                setError(initialErrorState);
-              }}
-            >
-              {error.message}
-            </Alert>
-          ) : (
-            <>
-            <div style={{
-              height: '20px'
-            }}></div>
-            <LoadingButton
-              loading={isLoading}
-              loadingPosition="start"
-              startIcon={<ShoppingCartCheckoutIcon />}
-              variant="outlined"
-              disabled={isLoading}
-              color="primary"
-              onClick={onPlaceOrder}
-            >
-              Place order ₹ {grandTotal}
-            </LoadingButton>
-            </>
-          )}
-        </>
+                <Container
+                  component="div"
+                  sx={{
+                    padding: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: '100%'
+                  }}
+                >
+                  <TotalWrapper>
+                    <Typography component="h6">Item Total </Typography>
+                    <Typography component="h6">₹{subTotal}</Typography>
+                  </TotalWrapper>
+                  <TotalWrapper>
+                    <Typography component="h6">Delivery </Typography>
+                    <Typography component="h6">₹ {deliveryFee}</Typography>
+                  </TotalWrapper>
+                  <TotalWrapper>
+                    <Typography component="h6">GrandTotal </Typography>
+                    <Typography component="h6">
+                      ₹{Math.round(grandTotal)}
+                    </Typography>
+                  </TotalWrapper>
+                </Container>
+              </Box>
+            </Card>
+            {error.message ? (
+              <Alert
+                severity="error"
+                onClose={() => {
+                  removeAll();
+                  setError(initialErrorState);
+                }}
+              >
+                {error.message}
+              </Alert>
+            ) : (
+              <SubSection>
+                <LoadingButton
+                  loading={isLoading}
+                  loadingPosition="start"
+                  startIcon={<ShoppingCartCheckoutIcon />}
+                  variant="contained"
+                  disabled={isLoading}
+                  color="primary"
+                  onClick={onPlaceOrder}
+                  style={{
+                    borderRadius: '10px',
+                    color: '#fff',
+                    marginBottom: '20px'
+                  }}
+                >
+                  Place order ₹ {grandTotal}
+                </LoadingButton>
+              </SubSection>
+            )}
+          </div>
+        </Box>
       )}
     </Container>
   );

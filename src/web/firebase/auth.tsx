@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from './firebase/auth';
 import { useInit } from '../module/Context/InitProvider';
+import LogRocket from 'logrocket';
 
 export const removeCountryCode = (phoneNumber: string) => {
   let phNo = phoneNumber;
@@ -99,6 +100,12 @@ export const useProtectedRoute = () => {
     }
     if (user == null) {
       return navigation('/login');
+    } else {
+      LogRocket.identify(user.uid, {
+        name: user.displayName!,
+        phone: user.phoneNumber!,
+        uid: user.uid!
+      });
     }
   }, [navigation, userDetails]);
 };
