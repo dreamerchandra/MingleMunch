@@ -2,6 +2,31 @@ import { Request, Response } from 'express';
 import { firebaseDb } from '../firebase.js';
 import { getProducts } from '../firestore/product.js';
 import { logger } from 'firebase-functions';
+import client from 'twilio';
+
+const accountSid = 'AC8d9667b8ce34ed5473965c348b3d0d19';
+const authToken = '05233ec0283191e5482a020480b11e57';
+
+const twilio = client(accountSid, authToken);
+
+export const updateWhatsapp = async ({
+  name,
+  phoneNumber
+}: {
+  name: string;
+  phoneNumber: string;
+}) => {
+  if (process.env.FIRESTORE_EMULATOR_HOST) {
+    return;
+  }
+  return twilio.messages
+    .create({
+      body: `New order from ${name} and phone number is ${phoneNumber}`,
+      from: 'whatsapp:+14155238886',
+      to: 'whatsapp:+916374140416'
+    })
+    .then((message) => console.log(message.sid));
+};
 
 export const createOrder = async (req: Request, res: Response) => {
   const { details } = req.body as {
@@ -78,6 +103,10 @@ export const createOrder = async (req: Request, res: Response) => {
     orderRefId: req.user.phone_number + ':: ' + orderRefId
   };
   await firebaseDb.collection('orders').doc(id).create(orderDetails);
+  await updateWhatsapp({
+    name: req.user.name,
+    phoneNumber: req.user.phone_number
+  });
   return res.status(200).json({
     paymentLink: `mohammedashiqcool-3@okicici`,
     ...orderDetails
