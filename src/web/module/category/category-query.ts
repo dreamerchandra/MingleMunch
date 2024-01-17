@@ -72,7 +72,7 @@ export const useCategoryMutation = ({
       return insertCategory(categoryInput);
     },
     {
-      onSuccess: (data, categoryInput) => {
+      onSuccess: (_, categoryInput) => {
         queryClient.invalidateQueries(['categories', categoryInput.shopId]);
         onSuccess()
       }
