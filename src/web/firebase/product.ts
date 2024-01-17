@@ -34,6 +34,10 @@ export interface ProductInput {
   itemImage: string;
   isAvailable: boolean;
   shopId: string;
+  category: {
+    id: string;
+    name: string;
+  };
 }
 
 const trim = (str: string) => str.replace(/\s+/, '').toLocaleLowerCase();
@@ -67,6 +71,10 @@ const constructProduct = (
     shopDetails,
     isAvailable: true,
     createdAt: Timestamp.now(),
+    category: {
+      id: productInput.category.id,
+      name: productInput.category.name
+    },
     ...constructMandatoryMetaFields()
   };
 };
@@ -90,11 +98,18 @@ export const productConverter = {
 export interface ProductQuery {
   search: string;
   isAvailable?: boolean;
-  shopId: string
+  shopId: string;
 }
 
-export const getProducts = async ({ search, isAvailable, shopId }: ProductQuery) => {
-  const queryFns = [where('shopId', '==', shopId), orderBy('createdAt', 'desc')];
+export const getProducts = async ({
+  search,
+  isAvailable,
+  shopId
+}: ProductQuery) => {
+  const queryFns = [
+    where('shopId', '==', shopId),
+    orderBy('createdAt', 'desc')
+  ];
   if (isAvailable) {
     queryFns.push(where('isAvailable', '==', isAvailable));
   }
@@ -113,7 +128,7 @@ export const insertProduct = async (product: ProductInput, shop: Shop) => {
   const docRef = doc(
     collection(firebaseDb, 'food').withConverter(productConverter)
   );
-  console.log(constructProduct(product, shop))
+  console.log(constructProduct(product, shop));
   return setDoc(docRef, constructProduct(product, shop));
 };
 

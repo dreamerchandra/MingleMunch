@@ -58,7 +58,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export const Header: FC<{
   Menu: FC<DrawerProps>;
   onSearch?: (search: string) => void;
-}> = ({ Menu, onSearch }) => {
+  search?: string;
+}> = ({ Menu, onSearch, search }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const [searchFocus, setSearchFocus] = useState(false);
@@ -66,9 +67,11 @@ export const Header: FC<{
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
-          <Toolbar style={{
-            width: '100%',
-          }}>
+          <Toolbar
+            style={{
+              width: '100%'
+            }}
+          >
             <IconButton
               size="large"
               edge="start"
@@ -83,7 +86,11 @@ export const Header: FC<{
             </IconButton>
             <Container
               component="div"
-              style={{ cursor: 'pointer', marginLeft: 0, display: searchFocus ? 'none' : 'block' }}
+              style={{
+                cursor: 'pointer',
+                marginLeft: 0,
+                display: searchFocus ? 'none' : 'block'
+              }}
               onClick={() => {
                 navigate('/');
               }}
@@ -98,15 +105,18 @@ export const Header: FC<{
               </Typography>
             </Container>
             {onSearch && (
-              <Search style={{
-                width: searchFocus ? '80vw' : 'auto'
-              }}>
+              <Search
+                style={{
+                  width: searchFocus ? '80vw' : 'auto'
+                }}
+              >
                 <SearchIconWrapper>
                   <SearchIcon />
                 </SearchIconWrapper>
                 <StyledInputBase
                   placeholder="Search…"
                   inputProps={{ 'aria-label': 'search' }}
+                  value={search ?? ''}
                   onFocus={() => {
                     setSearchFocus(true);
                   }}

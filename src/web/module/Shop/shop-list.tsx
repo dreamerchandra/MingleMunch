@@ -50,7 +50,6 @@ export const Shops = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  console.log(data);
   return (
     <div
       style={{

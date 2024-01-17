@@ -1,5 +1,7 @@
 import ChangeCircle from '@mui/icons-material/ChangeCircle';
+import LoadingButton from '@mui/lab/LoadingButton';
 import {
+  Box,
   Button,
   Card,
   CardActions,
@@ -8,18 +10,21 @@ import {
   FormControl,
   FormControlLabel,
   Input,
+  InputLabel,
+  MenuItem,
+  Select,
   Switch,
   TextareaAutosize
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
+import { styled } from '@mui/material/styles';
 import { FC, useRef, useState } from 'react';
-import { useUpdateProductMutation } from './product-query';
-import { uploadImage } from '../../firebase/product';
-import { useUser } from '../../firebase/auth';
-import { TAX } from '../../../common/types/constant';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { toast } from 'react-toastify';
+import { TAX } from '../../../common/types/constant';
+import { useUser } from '../../firebase/auth';
+import { uploadImage } from '../../firebase/product';
+import { useUpdateProductMutation } from './product-query';
+import { useCategoryQuery } from '../category/category-query';
 
 const StyleImg = styled('img')`
   width: 100%;
@@ -85,10 +90,6 @@ const CardActionsWrapper = styled(CardActions)`
   margin: 0 16px;
 `;
 
-const PriceInput = styled(Input)`
-  font-size: 0.75rem;
-`;
-
 const PriceWrapper = styled('div')`
   display: flex;
   align-items: center;
@@ -134,12 +135,14 @@ const initialFormData = {
   name: '',
   description: '',
   price: '',
-  isTaxIncluded: false
+  isTaxIncluded: false,
+  categoryId: ''
 };
 
 export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
   const [isUpdating, setUpdating] = useState(false);
   const { mutate } = useUpdateProductMutation();
+  const { data: categories } = useCategoryQuery(shopId);
   const {
     userDetails: { role, loading }
   } = useUser();
@@ -158,7 +161,8 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
         const price = Number(data.get('price'));
         const isTaxIncluded = data.get('isTaxIncluded');
         const image = data.get('image');
-        if (!name || !price || !image) {
+        const category = data.get('category');
+        if (!name || !price || !image || !category || !categories) {
           return;
         }
         setUpdating(true);
@@ -167,7 +171,11 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
           itemName: name as string,
           itemDescription: description as string,
           itemPrice: isTaxIncluded ? Math.round(price - price * TAX) : price,
-          itemImage: itemImage
+          itemImage: itemImage,
+          category: {
+            name: categories.find((i) => i.categoryId == category)!.categoryName as string,
+            id: category as string
+          }
         };
         mutate(
           { ...product, isAvailable: true, shopId },
@@ -221,13 +229,37 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
               }}
             />
           </FormControl>
-        </CardContent>
-        <CardActionsWrapper>
-          <PriceWrapper>
-            <FormControl required>
-              <PriceInput
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 2,
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <FormControl fullWidth>
+              <InputLabel id="category">Category</InputLabel>
+              <Select
+                labelId="category"
+                name="category"
+                value={formData.categoryId}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    categoryId: e.target.value as string
+                  });
+                }}
+              >
+                {categories?.map((category) => (
+                  <MenuItem value={category.categoryId}>
+                    {category.categoryName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl required fullWidth>
+              <Input
                 placeholder="Price"
-                sx={{ width: '7ch' }}
                 name="price"
                 type="number"
                 value={formData.price}
@@ -236,6 +268,10 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 }}
               />
             </FormControl>
+          </Box>
+        </CardContent>
+        <CardActionsWrapper>
+          <PriceWrapper>
             <FormControlLabel
               control={
                 <Switch

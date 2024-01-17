@@ -14,4 +14,8 @@ export interface Product {
   updatedAt: Timestamp;
   createdAt: Timestamp;
   updateBy: string;
+  category: {
+    id: string;
+    name: string;
+  };
 }

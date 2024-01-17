@@ -1,6 +1,7 @@
 import AddToCart from '@mui/icons-material/AddShoppingCart';
 import LoadingButton from '@mui/lab/LoadingButton';
 import {
+  Box,
   Button,
   CircularProgress,
   Divider,
@@ -8,13 +9,13 @@ import {
   Typography
 } from '@mui/material';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
 import Fuse from 'fuse.js';
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useUser } from '../../firebase/auth';
 import { useShopQuery } from '../Shop/shop-query';
 import { useCart } from '../Shoping/cart-activity';
+import { CategoryList } from '../category/category-list';
 import { useMutationProductEdit, useProductQuery } from './product-query';
 
 const FooterActions: FC<{ product: Product }> = ({ product }) => {
@@ -102,7 +103,7 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
   return (
     <div
       style={{
-        width: '80vw',
+        width: 'min(90vw, 800px)',
         margin: 'auto'
       }}
     >
@@ -146,15 +147,17 @@ const fuseOptions = {
   shouldSort: true,
   keys: ['itemName', 'itemDescription']
 };
-export const Products: FC<{ search: string; shopId: string }> = ({
-  search,
-  shopId
-}) => {
+export const Products: FC<{
+  search: string;
+  shopId: string;
+  onSearch: (str: string) => void;
+}> = ({ search, shopId, onSearch }) => {
   const {
     userDetails: { role, loading }
   } = useUser();
-  const {data: shops} = useShopQuery()
-  
+  const { data: shops } = useShopQuery();
+  const [selectedCategoryIds, setCategory] = useState<string[]>([]);
+
   const { data, isLoading } = useProductQuery({
     search: '',
     isAvailable: role === 'user' ? true : undefined,
@@ -162,29 +165,78 @@ export const Products: FC<{ search: string; shopId: string }> = ({
     shopId
   });
   const filteredList = useMemo(() => {
+    const filterByCategory = (item: Product) => {
+      if (selectedCategoryIds.length === 0) return true;
+      return selectedCategoryIds.includes(item.category.id);
+    };
     if (data == null) return [];
-    if (search == '') return data;
+    if (search == '') return data.filter(filterByCategory);
     const fuse = new Fuse(data, fuseOptions);
-    return fuse.search(search).map((item) => item.item);
-  }, [data, search]);
+    return fuse
+      .search(search)
+      .map((item) => item.item)
+      .filter(filterByCategory);
+  }, [data, search, selectedCategoryIds]);
 
   if (isLoading) {
     return <CircularProgress />;
   }
-  const shopName =shops?.find((shop) => shop.shopId === shopId)?.shopName ?? 'Loading...';
+  const shopName =
+    shops?.find((shop) => shop.shopId === shopId)?.shopName ?? 'Loading...';
 
   return (
-    <Grid
-      container
-      rowGap={3}
-      columnGap={{ xs: 2, sm: 3, md: 3 }}
-      columns={{ xs: 12, sm: 6, md: 4 }}
-      sx={{ marginTop: 4, paddingBottom: 12 }}
-    >
-      <Typography variant='h2' component='h2' sx={{margin: 'auto'}}>{shopName}</Typography>
-      {filteredList?.map((product) => (
-        <ProductItem product={product} key={product.itemId} />
-      ))}
-    </Grid>
+    <>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Typography variant="h2" component="h1" sx={{ margin: 'auto' }}>
+          {shopName}
+        </Typography>
+        <CategoryList
+          shopId={shopId}
+          selected={selectedCategoryIds}
+          onChange={(e) => setCategory(e)}
+        />
+        {filteredList.length === 0 && (
+          <Container
+            sx={{
+              height: '200px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Typography variant="h3" component="h2">
+              Too many filters.
+            </Typography>
+            <Typography variant="h6" component="h2">
+              Try clearing some.
+            </Typography>
+            <Button
+              onClick={() => {
+                setCategory([]);
+                onSearch('');
+              }}
+              sx={{
+                mt: 4
+              }}
+              variant="outlined"
+              color="warning"
+            >
+              Clear All
+            </Button>
+          </Container>
+        )}
+        {filteredList?.map((product) => (
+          <ProductItem product={product} key={product.itemId} />
+        ))}
+      </Box>
+    </>
   );
 };

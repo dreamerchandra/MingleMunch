@@ -86,7 +86,7 @@ export const theme: ThemeOptions = {
     h2: {
       fontFamily: "'Nunito', sans-serif ",
       fontSize: '28px',
-      fontWeight: 700,
+      fontWeight: 900,
       lineHeight: 1.2222222222222223,
       color: '#000000'
     },
