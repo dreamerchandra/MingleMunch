@@ -5,18 +5,39 @@ import Stories from 'react-insta-stories';
 import { useStoriesQuery, useWatchedStories } from './stories-query';
 
 export const OurStories = () => {
-  const [openMeta, setOpenMeta] = useState({ open: false, id: '' });
+  const [openMeta, _setOpenMeta] = useState({ open: false, id: '' });
+  const setOpenMeta = (meta: { open: boolean; id: string }) => {
+    if (meta.open) {
+      document.body.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+    _setOpenMeta(meta);
+  };
   const { data: stories } = useStoriesQuery();
-  const { watched, setWatch } = useWatchedStories();
+  const { watched, setWatch: setWatched } = useWatchedStories();
   const storyNotWatchedIds =
     stories?.map((s) => s.storyId).filter((s) => !watched.includes(s)) ?? [];
-  const storyOrderIds = [...storyNotWatchedIds, ...watched];
+  const storyWatchedIds =
+    stories?.map((s) => s.storyId).filter((s) => watched.includes(s)) ?? [];
+  const storyOrderIds = [...storyNotWatchedIds, ...storyWatchedIds];
+
   const getStory = (id: string) => {
-    return stories?.find((s) => s.storyId === id);
+    const story = stories!.find((s) => s.storyId === id)!;
+    if (story.type === 'image' && story?.imageUrl) {
+      return { ...story, url: story.imageUrl, profileUrl: story.imageUrl };
+    } else {
+      return {
+        ...story,
+        url: story.imageUrl,
+        type: 'video',
+        profileUrl: 'https://mingle-munch.web.app/logo.png'
+      };
+    }
   };
 
   const onNext = () => {
-    setWatch(getStory(openMeta.id!)!.storyId);
+    setWatched(getStory(openMeta.id).storyId);
     const nextStoryIndex =
       (storyOrderIds.indexOf(openMeta.id) + 1) % storyOrderIds.length;
     if (nextStoryIndex === 0) {
@@ -64,7 +85,7 @@ export const OurStories = () => {
           >
             <Avatar
               alt={getStory(id)?.title}
-              src={getStory(id)?.imageUrl}
+              src={getStory(id)?.profileUrl}
               sx={{ width: 64, height: 64 }}
             />
           </div>
@@ -93,29 +114,32 @@ export const OurStories = () => {
               padding: 2
             }}
           >
-            <Close color="secondary" />
+            <Close color="warning" />
           </IconButton>
-          <Stories
-            stories={[
-              {
-                url: getStory(openMeta.id)!.imageUrl,
-                type: getStory(openMeta.id)!.type,
-                header: {
-                  heading: getStory(openMeta.id)!.title,
-                  subheading: '',
-                  profileImage: getStory(openMeta.id)!.imageUrl
+          {getStory(openMeta.id) ? (
+            <Stories
+              stories={[
+                {
+                  url: getStory(openMeta.id).url,
+                  type: getStory(openMeta.id).type,
+                  header: {
+                    heading: getStory(openMeta.id).title,
+                    subheading: '',
+                    profileImage: getStory(openMeta.id).profileUrl
+                  }
                 }
-              }
-            ]}
-            onStoryEnd={onNext}
-            onNext={onNext}
-            width="100vw"
-            height="100vh"
-            storyStyles={{
-              background: '#fff',
-              height: '100vh'
-            }}
-          />
+              ]}
+              onStoryEnd={onNext}
+              onNext={onNext}
+              width="100vw"
+              height="100vh"
+              storyStyles={{
+                background: '#fff',
+                height: '100vh',
+                objectFit: 'cover'
+              }}
+            />
+          ) : null}
         </div>
       ) : null}
     </Container>

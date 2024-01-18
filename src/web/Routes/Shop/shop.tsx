@@ -12,7 +12,14 @@ export const ShopPage = () => {
     <>
       <Header Menu={SideMenu} />
       <Container component="main">
-        <OurStories  />
+        <OurStories />
+        <img
+          style={{
+            width: '90vw'
+          }}
+          alt='banner'
+          src="https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/banner.png?alt=media&token=c52454d1-4154-417f-9f68-b876782895dc"
+        />
         <Box marginTop={2}>
           <Shops />
           <CheckoutHeadsUp />

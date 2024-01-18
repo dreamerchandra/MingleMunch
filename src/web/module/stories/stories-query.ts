@@ -19,6 +19,7 @@ interface Story {
   storyId: string;
   imageUrl: string;
   type: string;
+  createdAt?: Date;
 }
 
 const storyConverter = {
