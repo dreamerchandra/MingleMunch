@@ -20,6 +20,7 @@ import Typography from '@mui/material/Typography';
 import CheckIcon from '@mui/icons-material/Check';
 import LogRocket from 'logrocket';
 import InfoIcon from '@mui/icons-material/Info';
+import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import CardContent from '@mui/material/CardContent';
@@ -135,51 +136,63 @@ export const Checkout: FC = () => {
       {success ? (
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '20px',
-            height: '75vh'
+            height: '92vh',
+            width: '100vw',
+            backgroundImage: 'url(/abstract_emoji.png)',
+            filter: 'brightness(70%)',
+            backgroundSize: 'contain',
+            overflow: 'hidden'
           }}
         >
           <div
             style={{
-              backgroundColor: '#cddfda',
-              color: 'white',
-              height: '0px',
-              width: '0px',
-              borderRadius: '50%',
-              padding: '125px',
               display: 'flex',
-              justifyContent: 'center',
+              flexDirection: 'column',
               alignItems: 'center',
-              margin: 'auto'
+              justifyContent: 'space-between',
+              gap: '20px',
+              height: '75vh'
             }}
           >
-            <Check
+            <div
               style={{
-                width: 60,
-                height: 60,
-                color: green[900]
+                backgroundColor: '#d1ff04',
+                color: 'white',
+                height: '0px',
+                width: '0px',
+                borderRadius: '50%',
+                padding: '125px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: 'auto'
               }}
-            />
+            >
+              <Check
+                style={{
+                  width: 60,
+                  height: 60,
+                  color: green[900]
+                }}
+              />
+            </div>
+            <Alert
+              severity="success"
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: '#d1ff04'
+              }}
+              icon={null}
+            >
+              <div>Order placed successfully.</div>
+              <div>We will call you shortly to confirm the order.</div>
+            </Alert>
+            <Button href="/" color="info">
+              Back to home
+            </Button>
           </div>
-          <Alert
-            severity="success"
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center'
-            }}
-            icon={null}
-          >
-            <div>Order placed successfully.</div>
-            <div>We will call you shortly to confirm the order.</div>
-          </Alert>
-          <Button href="/" color="info">
-            Take me back to home
-          </Button>
         </div>
       ) : (
         <Box
@@ -288,8 +301,11 @@ export const Checkout: FC = () => {
                     margin: 'auto'
                   }}
                   variant="outlined"
+                  color="success"
                 >
-                  <Typography variant="body2">Add more items</Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 800 }}>
+                    Add more items
+                  </Typography>
                 </Button>
                 <Button
                   onClick={() => {
@@ -300,8 +316,9 @@ export const Checkout: FC = () => {
                     margin: 'auto'
                   }}
                   variant="text"
-                  color="info"
+                  color="warning"
                 >
+                  <DeleteIcon sx={{ height: 16 }} />
                   <Typography variant="caption">Clear all</Typography>
                 </Button>
               </SubSection>
@@ -326,11 +343,13 @@ export const Checkout: FC = () => {
           >
             <CardContent>
               <Typography variant="h3" sx={{ fontWeight: 900 }}>
-                Shielded you from paying <br /> Rs. {Math.round(subTotal * 0.18)} extra.
+                Shielded you from paying <br /> Rs.{' '}
+                {Math.round(subTotal * 0.18)} extra.
               </Typography>
               <div
                 style={{
-                  border: '1px dashed #c0f09e'
+                  border: '1px dashed #c0f09e',
+                  marginBottom: '6px'
                 }}
               />
               <Typography variant="h6">Order Big for more benefits</Typography>

@@ -33,7 +33,14 @@ export const Profile = () => {
         component="form"
         onSubmit={handleSubmit}
         noValidate
-        sx={{ mt: 1, marginTop: 8 }}
+        sx={{
+          mt: 1,
+          marginTop: 8,
+          height: '75vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}
       >
         <TextField
           margin="normal"
@@ -48,6 +55,7 @@ export const Profile = () => {
           type="submit"
           fullWidth
           variant="contained"
+          color="secondary"
           sx={{ mt: 3, mb: 2 }}
         >
           Take me In
