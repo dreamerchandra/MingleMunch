@@ -1,44 +1,53 @@
-import PlayArrowIcon from '@mui/icons-material/KeyboardArrowRight';
+import { Divider } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { useShopQuery } from './shop-query';
 import { FC } from 'react';
-import { Shop as IShop } from '../../../common/types/shop';
 import { useNavigate } from 'react-router-dom';
+import { Shop as IShop } from '../../../common/types/shop';
+import { useShopQuery } from './shop-query';
 
 export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
   const navigation = useNavigate();
   return (
     <Card
-      sx={{ display: 'flex', justifyContent: 'space-between' }}
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        minHeight: 100,
+        maxHeight: 200,
+        height: 'fit-content',
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        minWidth: '85vw',
+      }}
+      elevation={0}
       onClick={() => {
         navigation(`/shop/${shop.shopId}`);
       }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        <CardContent sx={{ flex: '1 0 auto', m: 2 }}>
-          <Typography component="div" variant="h3">
+      <Box sx={{ display: 'flex', flexDirection: 'column', pl: 2 }}>
+        <CardContent
+          sx={{ flex: '1 0 auto', justifyContent: 'space-between', p: 0 }}
+        >
+          <Typography component="h3" variant="h3">
             {shop.shopName}
           </Typography>
-          <Typography component="div" variant="caption">
-            Delivery Fee: Rs.25
+          <Typography component="h6" variant="h6">
+            {shop.isOpen ? shop.description : 'Currently Closed'}
           </Typography>
         </CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
-          <IconButton aria-label="play/pause">
-            <PlayArrowIcon sx={{ height: 38, width: 38 }} />
-          </IconButton>
-        </Box>
       </Box>
       <CardMedia
         component="img"
-        sx={{ width: 151 }}
+        sx={{ width: 75, height: 75, borderRadius: '50%', mr: 3 }}
         image={shop.shopImage}
         alt={shop.shopName}
+        style={{
+          filter: shop.isOpen ? 'none' : 'grayscale(1)'
+        }}
       />
     </Card>
   );
@@ -51,17 +60,24 @@ export const Shops = () => {
     return <div>Loading...</div>;
   }
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
-        gap: '1rem'
+        pt: 4,
+        alignItems: 'center',
+        gap: 1,
       }}
     >
+      <Typography variant="h6" sx={{ letterSpacing: 4, mb: 2 }}>
+        ALL RESTAURANTS
+      </Typography>
       {data?.map((shop) => (
-        <Shop key={shop.shopId} shop={shop} />
+        <div>
+          <Shop key={shop.shopId} shop={shop} />
+          <Divider sx={{ width: '75vw', margin: 'auto' }} />
+        </div>
       ))}
-    </div>
+    </Box>
   );
 };

@@ -4,4 +4,6 @@ export interface Shop {
   shopMapLocation: string;
   shopId: string;
   shopImage: string;
+  description: string;
+  isOpen: boolean;
 }

@@ -4,6 +4,7 @@ import { getProducts } from '../firestore/product.js';
 import { logger } from 'firebase-functions';
 import client from 'twilio';
 import dotenv from 'dotenv';
+import { getShops } from '../firestore/shop.js';
 
 dotenv.config();
 const accountSid = 'AC8d9667b8ce34ed5473965c348b3d0d19';
@@ -35,6 +36,13 @@ export const createOrder = async (req: Request, res: Response) => {
     details: [{ itemId: string; quantity: number }];
   };
   const products = await getProducts(details.map((d) => d.itemId));
+  const shops = await getShops(products.map((p) => p.shopDetails.shopId));
+  if(!shops.every(s => s.isOpen)) {
+    return res.status(400).json({
+      error: 'Invalid order',
+      message: 'Some shops are closed'
+    });
+  }
   const { uid } = req.user;
   const detailsToQuantity = details.reduce((acc, d) => {
     acc[d.itemId] = Number(d.quantity);
@@ -65,7 +73,7 @@ export const createOrder = async (req: Request, res: Response) => {
     });
   }
   const tax = 0;
-  const deliveryFee = 25;
+  const deliveryFee = 28;
   const grandTotal = Math.round(subTotal + subTotal * tax + deliveryFee);
   if (grandTotal <= 0) {
     return res.status(400).json({

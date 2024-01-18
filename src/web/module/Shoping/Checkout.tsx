@@ -202,7 +202,7 @@ export const Checkout: FC = () => {
                     borderRadius: '5px'
                   }}
                 >
-                  You have saved Rs.{Math.round(grandTotal * 0.3)} on this
+                  You have saved Rs.{Math.round(subTotal * 0.18)} on this
                   order.
                 </Alert>
                 <Card
