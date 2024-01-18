@@ -10,7 +10,7 @@ export interface Product {
   itemImage: string;
   keywords: string[];
   shopId: string;
-  shopDetails: Omit<Shop, 'shopImage'>;
+  shopDetails: Omit<Shop, 'shopImage' | 'isOpen' | 'description'>;
   updatedAt: Timestamp;
   createdAt: Timestamp;
   updateBy: string;

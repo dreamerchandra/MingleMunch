@@ -73,8 +73,8 @@ export const Shops = () => {
         ALL RESTAURANTS
       </Typography>
       {data?.map((shop) => (
-        <div>
-          <Shop key={shop.shopId} shop={shop} />
+        <div key={shop.shopId}>
+          <Shop  shop={shop} />
           <Divider sx={{ width: '75vw', margin: 'auto' }} />
         </div>
       ))}

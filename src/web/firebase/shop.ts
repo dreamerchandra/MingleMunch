@@ -1,4 +1,4 @@
-import { DocumentData, QueryDocumentSnapshot, SnapshotOptions, collection, getDocs, query, where } from "firebase/firestore";
+import { DocumentData, QueryDocumentSnapshot, SnapshotOptions, collection, getDocs, query } from "firebase/firestore";
 import { Shop } from "../../common/types/shop";
 import { firebaseDb } from "./firebase/db";
 import { createKeywords } from "./product";
