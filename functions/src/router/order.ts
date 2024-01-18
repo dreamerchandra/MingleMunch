@@ -3,9 +3,11 @@ import { firebaseDb } from '../firebase.js';
 import { getProducts } from '../firestore/product.js';
 import { logger } from 'firebase-functions';
 import client from 'twilio';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const accountSid = 'AC8d9667b8ce34ed5473965c348b3d0d19';
-const authToken = '05233ec0283191e5482a020480b11e57';
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 const twilio = client(accountSid, authToken);
 
