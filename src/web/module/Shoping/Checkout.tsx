@@ -19,6 +19,10 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import CheckIcon from '@mui/icons-material/Check';
 import LogRocket from 'logrocket';
+import InfoIcon from '@mui/icons-material/Info';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import CardContent from '@mui/material/CardContent';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -38,7 +42,7 @@ const TotalWrapper = styled('div')(({ theme }) => ({
   justifyContent: 'space-between',
   gap: theme.spacing(8),
   width: '100%',
-  marginTop: theme.spacing(2)
+  marginTop: theme.spacing(1)
 }));
 
 const SubSection = styled('div')(({ theme }) => ({
@@ -46,7 +50,7 @@ const SubSection = styled('div')(({ theme }) => ({
   flexDirection: 'column',
   justifyContent: 'space-between',
   width: '100%',
-  marginTop: theme.spacing(4)
+  marginTop: theme.spacing(2)
 }));
 
 export const Checkout: FC = () => {
@@ -67,7 +71,10 @@ export const Checkout: FC = () => {
   );
   const tax = Number((subTotal * TAX).toFixed(2));
   const deliveryFee = 25;
-  const grandTotal = Number((subTotal + tax + deliveryFee).toFixed(2));
+  const platformFee = 3;
+  const grandTotal = Number(
+    (subTotal + tax + deliveryFee + platformFee).toFixed(2)
+  );
   const { mutate, isLoading } = useMutationCreateOrder();
   const [success, setShowSuccess] = useState(false);
   const initialErrorState = { message: '', products: [] as string[] };
@@ -132,7 +139,8 @@ export const Checkout: FC = () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '20px'
+            gap: '20px',
+            height: '75vh'
           }}
         >
           <div
@@ -164,10 +172,14 @@ export const Checkout: FC = () => {
               flexDirection: 'row',
               alignItems: 'center'
             }}
+            icon={null}
           >
             <div>Order placed successfully.</div>
             <div>We will call you shortly to confirm the order.</div>
           </Alert>
+          <Button href="/" color="info">
+            Take me back to home
+          </Button>
         </div>
       ) : (
         <Box
@@ -175,8 +187,7 @@ export const Checkout: FC = () => {
             display: 'flex',
             flexDirection: 'column',
             width: '100%',
-            justifyContent: 'space-between',
-            height: '90vh'
+            justifyContent: 'space-between'
           }}
         >
           <Box
@@ -202,11 +213,10 @@ export const Checkout: FC = () => {
                     borderRadius: '5px'
                   }}
                 >
-                  You have saved Rs.{Math.round(subTotal * 0.18)} on this
-                  order.
+                  You have saved Rs.{Math.round(subTotal * 0.18)} on this order.
                 </Alert>
                 <Card
-                  sx={{ padding: 2, mt: 2, mb: 2 }}
+                  sx={{ padding: 2, mt: 2 }}
                   elevation={2}
                   style={{
                     borderRadius: '10px'
@@ -296,11 +306,36 @@ export const Checkout: FC = () => {
                 </Button>
               </SubSection>
               <Divider
-                style={{ width: '40vw', margin: '20px auto' }}
+                style={{ width: '40vw', margin: '10px auto' }}
                 sx={{ bgcolor: 'primary.main' }}
               />
             </div>
           </Box>
+          <Card
+            sx={{
+              borderRadius: 2,
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right',
+              mb: 4,
+              backgroundColor: '#c0eade',
+              backgroundImage:
+                'linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5)), url(/shield.png)'
+            }}
+            elevation={4}
+          >
+            <CardContent>
+              <Typography variant="h3" sx={{ fontWeight: 900 }}>
+                Shielded you from paying <br /> Rs. {Math.round(subTotal * 0.18)} extra.
+              </Typography>
+              <div
+                style={{
+                  border: '1px dashed #c0f09e'
+                }}
+              />
+              <Typography variant="h6">Order Big for more benefits</Typography>
+            </CardContent>
+          </Card>
           <div>
             <Card
               elevation={1}
@@ -327,12 +362,43 @@ export const Checkout: FC = () => {
                     <Typography component="h6">₹{subTotal}</Typography>
                   </TotalWrapper>
                   <TotalWrapper>
-                    <Typography component="h6">Delivery </Typography>
+                    <Typography component="h6">
+                      Delivery{' '}
+                      <Tooltip
+                        title="This helps our delivery partners to serve you better."
+                        enterTouchDelay={20}
+                        leaveTouchDelay={5_000}
+                      >
+                        <IconButton sx={{ p: 0, ml: 1 }}>
+                          <InfoIcon sx={{ width: 20 }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Typography>
                     <Typography component="h6">₹ {deliveryFee}</Typography>
                   </TotalWrapper>
                   <TotalWrapper>
-                    <Typography component="h6">GrandTotal </Typography>
                     <Typography component="h6">
+                      Platform Fee
+                      <Tooltip
+                        title="This small fee helps us to keep this platform running."
+                        enterTouchDelay={20}
+                        leaveTouchDelay={5_000}
+                      >
+                        <IconButton sx={{ p: 0, ml: 1 }}>
+                          <InfoIcon sx={{ width: 20 }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Typography>
+                    <Typography component="h6">₹ {platformFee}</Typography>
+                  </TotalWrapper>
+                  <TotalWrapper>
+                    <Typography component="h6">GrandTotal </Typography>
+                    <Typography
+                      component="h6"
+                      sx={{
+                        fontWeight: 'bold'
+                      }}
+                    >
                       ₹{Math.round(grandTotal)}
                     </Typography>
                   </TotalWrapper>
@@ -358,7 +424,7 @@ export const Checkout: FC = () => {
                   variant="contained"
                   disabled={isLoading}
                   onClick={onPlaceOrder}
-                  color='secondary'
+                  color="secondary"
                   style={{
                     borderRadius: '10px',
                     marginBottom: '20px'

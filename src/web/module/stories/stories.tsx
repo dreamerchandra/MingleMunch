@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material';
-import { Avatar, Container, IconButton } from '@mui/material';
+import { Avatar, Box, Container, IconButton, Typography } from '@mui/material';
 import { useState } from 'react';
 import Stories from 'react-insta-stories';
 import { useStoriesQuery, useWatchedStories } from './stories-query';
@@ -50,98 +50,118 @@ export const OurStories = () => {
     });
   };
   return (
-    <Container
+    <Box
       sx={{
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         gap: 2,
-        overflowX: 'auto',
-        m: 2,
         mt: 4,
+        m: 2,
         mb: 4
       }}
     >
-      {storyOrderIds?.map((id) => {
-        return (
-          <div
-            key={id}
-            style={{
-              border: `5px solid ${watched.includes(id) ? 'gray' : '#d1ff04'}`,
-              borderRadius: '50%',
-              width: '70px',
-              height: '70px',
-              flexShrink: 0,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              filter: watched.includes(id) ? 'grayscale(1)' : 'brightness(75%)'
-            }}
-            onClick={() => {
-              setOpenMeta({
-                open: true,
-                id: id
-              });
-            }}
-          >
-            <Avatar
-              alt={getStory(id)?.title}
-              src={getStory(id)?.profileUrl}
-              sx={{ width: 64, height: 64 }}
-            />
-          </div>
-        );
-      })}
-      {openMeta.open ? (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: 9999
-          }}
-        >
-          <IconButton
-            onClick={() => {
-              setOpenMeta({ open: false, id: '' });
-            }}
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              zIndex: 9999,
-              padding: 2
-            }}
-          >
-            <Close color="warning" />
-          </IconButton>
-          {getStory(openMeta.id) ? (
-            <Stories
-              stories={[
-                {
-                  url: getStory(openMeta.id).url,
-                  type: getStory(openMeta.id).type,
-                  header: {
-                    heading: getStory(openMeta.id).title,
-                    subheading: '',
-                    profileImage: getStory(openMeta.id).profileUrl
-                  }
-                }
-              ]}
-              onStoryEnd={onNext}
-              onNext={onNext}
-              width="100vw"
-              height="100vh"
-              storyStyles={{
-                background: '#fff',
-                height: '100vh',
-                objectFit: 'cover'
+      <Typography variant="h6" sx={{ letterSpacing: 4 }}>
+        OUR STORIES
+      </Typography>
+      <Container
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 2,
+          overflowX: 'auto'
+        }}
+      >
+        {storyOrderIds?.map((id) => {
+          return (
+            <div
+              key={id}
+              style={{
+                border: `2px solid ${
+                  watched.includes(id)
+                    ? 'gray'
+                    : '#Cfff04'
+                }`,
+                borderRadius: '50%',
+                width: '70px',
+                height: '70px',
+                flexShrink: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                filter: watched.includes(id)
+                  ? 'grayscale(1)'
+                  : 'brightness(75%)',
+                padding: '34px'
               }}
-            />
-          ) : null}
-        </div>
-      ) : null}
-    </Container>
+              onClick={() => {
+                setOpenMeta({
+                  open: true,
+                  id: id
+                });
+              }}
+            >
+              <Avatar
+                alt={getStory(id)?.title}
+                src={getStory(id)?.profileUrl}
+                sx={{ width: 64, height: 64 }}
+              />
+            </div>
+          );
+        })}
+        {openMeta.open ? (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 9999
+            }}
+          >
+            <IconButton
+              onClick={() => {
+                setOpenMeta({ open: false, id: '' });
+              }}
+              sx={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                zIndex: 9999,
+                padding: 2
+              }}
+            >
+              <Close color="warning" />
+            </IconButton>
+            {getStory(openMeta.id) ? (
+              <Stories
+                stories={[
+                  {
+                    url: getStory(openMeta.id).url,
+                    type: getStory(openMeta.id).type,
+                    header: {
+                      heading: getStory(openMeta.id).title,
+                      subheading: '',
+                      profileImage: getStory(openMeta.id).profileUrl
+                    }
+                  }
+                ]}
+                onStoryEnd={onNext}
+                onNext={onNext}
+                width="100vw"
+                height="100vh"
+                storyStyles={{
+                  background: '#fff',
+                  height: '100vh',
+                  objectFit: 'cover'
+                }}
+              />
+            ) : null}
+          </div>
+        ) : null}
+      </Container>
+    </Box>
   );
 };
