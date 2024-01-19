@@ -18,4 +18,5 @@ export interface Product {
   updatedAt: Timestamp;
   createdAt: Timestamp;
   updateBy: string;
+  parcelCharges: number;
 }

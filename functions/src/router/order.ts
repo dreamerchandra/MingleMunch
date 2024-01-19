@@ -6,7 +6,7 @@ import client from 'twilio';
 import dotenv from 'dotenv';
 import { getShops } from '../firestore/shop.js';
 
-console.log(process.env.TWILIO_AUTH_TOKEN)
+console.log(process.env.TWILIO_AUTH_TOKEN);
 dotenv.config();
 const accountSid = 'AC8d9667b8ce34ed5473965c348b3d0d19';
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -38,7 +38,7 @@ export const createOrder = async (req: Request, res: Response) => {
   };
   const products = await getProducts(details.map((d) => d.itemId));
   const shops = await getShops(products.map((p) => p.shopDetails.shopId));
-  if(!shops.every(s => s.isOpen)) {
+  if (!shops.every((s) => s.isOpen)) {
     return res.status(400).json({
       error: 'Invalid order',
       message: 'Some shops are closed'
@@ -49,8 +49,11 @@ export const createOrder = async (req: Request, res: Response) => {
     acc[d.itemId] = Number(d.quantity);
     return acc;
   }, {} as { [key: string]: number });
-  const subTotal = products
+  const itemsTotal = products
     .map((p) => p.itemPrice * detailsToQuantity[p.itemId])
+    .reduce((a, b) => a + b, 0);
+  const parcelChargesTotal = products
+    .map((p) => p.parcelCharges * detailsToQuantity[p.itemId])
     .reduce((a, b) => a + b, 0);
   const isAllAvailable = products.every((p) => p.isAvailable);
   if (!isAllAvailable) {
@@ -73,9 +76,11 @@ export const createOrder = async (req: Request, res: Response) => {
       error: 'Invalid order'
     });
   }
-  const tax = 0;
-  const deliveryFee = 28;
-  const grandTotal = Math.round(subTotal + subTotal * tax + deliveryFee);
+  const deliveryFee = 25;
+  const platformFee = 3;
+  const grandTotal = Number(
+    (itemsTotal + deliveryFee + platformFee + parcelChargesTotal).toFixed(2)
+  );
   if (grandTotal <= 0) {
     return res.status(400).json({
       error: 'Invalid order'
@@ -102,8 +107,7 @@ export const createOrder = async (req: Request, res: Response) => {
       shopMapLocation: shopDetails.shopMapLocation,
       shopId: shopDetails.shopId
     },
-    subTotal,
-    tax,
+    subTotal: itemsTotal,
     grandTotal,
     status: 'pending',
     createdAt: new Date(),

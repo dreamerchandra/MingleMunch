@@ -5,7 +5,6 @@ import { green } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
 import { FC, useEffect, useState } from 'react';
 import { Product } from '../../../common/types/Product';
-import { TAX } from '../../../common/types/constant';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
 import { useNavigate } from 'react-router-dom';
@@ -66,15 +65,18 @@ export const Checkout: FC = () => {
     return old;
   }, [] as { product: Product; quantity: number }[]);
 
-  const subTotal = items.reduce(
+  const itemsTotal = items.reduce(
     (old, item) => old + item.product.itemPrice * item.quantity,
     0
   );
-  const tax = Number((subTotal * TAX).toFixed(2));
+  const parcelChargesTotal = items.reduce(
+    (old, item) => old + (item.product.parcelCharges ?? 0) * item.quantity,
+    0
+  );
   const deliveryFee = 25;
   const platformFee = 3;
   const grandTotal = Number(
-    (subTotal + tax + deliveryFee + platformFee).toFixed(2)
+    (itemsTotal + deliveryFee + platformFee + parcelChargesTotal).toFixed(2)
   );
   const { mutate, isLoading } = useMutationCreateOrder();
   const [success, setShowSuccess] = useState(false);
@@ -201,7 +203,7 @@ export const Checkout: FC = () => {
             flexDirection: 'column',
             width: '100%',
             justifyContent: 'space-between',
-            minHeight: '90vh',
+            minHeight: '90vh'
           }}
         >
           <Box
@@ -227,7 +229,8 @@ export const Checkout: FC = () => {
                     borderRadius: '5px'
                   }}
                 >
-                  You have saved Rs.{Math.round(subTotal * 0.18)} on this order.
+                  You have saved Rs.{Math.round(itemsTotal * 0.18)} on this
+                  order.
                 </Alert>
                 <Card
                   sx={{ padding: 2, mt: 2 }}
@@ -345,7 +348,7 @@ export const Checkout: FC = () => {
             <CardContent>
               <Typography variant="h3" sx={{ fontWeight: 900 }}>
                 Shielded you from paying <br /> Rs.{' '}
-                {Math.round(subTotal * 0.18)} extra.
+                {Math.round(itemsTotal * 0.18)} extra.
               </Typography>
               <div
                 style={{
@@ -379,7 +382,7 @@ export const Checkout: FC = () => {
                 >
                   <TotalWrapper>
                     <Typography component="h6">Item Total </Typography>
-                    <Typography component="h6">₹{subTotal}</Typography>
+                    <Typography component="h6">₹{itemsTotal}</Typography>
                   </TotalWrapper>
                   <TotalWrapper>
                     <Typography component="h6">
@@ -411,6 +414,25 @@ export const Checkout: FC = () => {
                     </Typography>
                     <Typography component="h6">₹ {platformFee}</Typography>
                   </TotalWrapper>
+                  {parcelChargesTotal > 0 ? (
+                    <TotalWrapper>
+                      <Typography component="h6">
+                        Parcel Charges
+                        <Tooltip
+                          title="This small fee helps us to keep this platform running."
+                          enterTouchDelay={20}
+                          leaveTouchDelay={5_000}
+                        >
+                          <IconButton sx={{ p: 0, ml: 1 }}>
+                            <InfoIcon sx={{ width: 20 }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Typography>
+                      <Typography component="h6">
+                        ₹ {parcelChargesTotal}
+                      </Typography>
+                    </TotalWrapper>
+                  ) : null}
                   <TotalWrapper>
                     <Typography component="h6">GrandTotal </Typography>
                     <Typography

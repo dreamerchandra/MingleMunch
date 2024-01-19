@@ -38,6 +38,7 @@ export interface ProductInput {
     id: string;
     name: string;
   };
+  parcelCharges: number;
 }
 
 const trim = (str: string) => str.replace(/\s+/, '').toLocaleLowerCase();
@@ -71,6 +72,7 @@ const constructProduct = (
     shopDetails,
     isAvailable: true,
     createdAt: Timestamp.now(),
+    parcelCharges: productInput.parcelCharges || 0,
     category: {
       id: productInput.category.id,
       name: productInput.category.name

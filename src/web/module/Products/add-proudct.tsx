@@ -8,23 +8,20 @@ import {
   CardContent,
   CardMedia,
   FormControl,
-  FormControlLabel,
   Input,
   InputLabel,
   MenuItem,
   Select,
-  Switch,
   TextareaAutosize
 } from '@mui/material';
 import Container from '@mui/material/Container';
 import { styled } from '@mui/material/styles';
 import { FC, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
-import { TAX } from '../../../common/types/constant';
 import { useUser } from '../../firebase/auth';
 import { uploadImage } from '../../firebase/product';
-import { useUpdateProductMutation } from './product-query';
 import { useCategoryQuery } from '../category/category-query';
+import { useUpdateProductMutation } from './product-query';
 
 const StyleImg = styled('img')`
   width: 100%;
@@ -136,7 +133,8 @@ const initialFormData = {
   description: '',
   price: '',
   isTaxIncluded: false,
-  categoryId: ''
+  categoryId: '',
+  parcelCharges: ''
 };
 
 export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
@@ -159,7 +157,6 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
         const name = data.get('title');
         const description = data.get('description');
         const price = Number(data.get('price'));
-        const isTaxIncluded = data.get('isTaxIncluded');
         const image = data.get('image');
         const category = data.get('category');
         if (!name || !price || !image || !category || !categories) {
@@ -170,10 +167,12 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
         const product = {
           itemName: name as string,
           itemDescription: description as string,
-          itemPrice: isTaxIncluded ? Math.round(price - price * TAX) : price,
+          itemPrice: price,
+          parcelCharges: Number(data.get('parcelCharges')) ?? 0,
           itemImage: itemImage,
           category: {
-            name: categories.find((i) => i.categoryId == category)!.categoryName as string,
+            name: categories.find((i) => i.categoryId == category)!
+              .categoryName as string,
             id: category as string
           }
         };
@@ -272,16 +271,17 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
         </CardContent>
         <CardActionsWrapper>
           <PriceWrapper>
-            <FormControlLabel
-              control={
-                <Switch
-                  placeholder="With Tax"
-                  aria-label="With Tax"
-                  name="isTaxIncluded"
-                />
-              }
-              label="With tax"
-            />
+            <FormControl fullWidth>
+              <Input
+                placeholder="Packing Charges (Rs. 3)"
+                name="parcelCharges"
+                type="number"
+                value={formData.parcelCharges}
+                onChange={(e) => {
+                  setFormData({ ...formData, parcelCharges: e.target.value });
+                }}
+              />
+            </FormControl>
           </PriceWrapper>
           <LoadingButton
             size="small"

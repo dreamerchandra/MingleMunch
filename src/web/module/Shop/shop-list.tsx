@@ -35,7 +35,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
           <Typography component="h3" variant="h3">
             {shop.shopName}
           </Typography>
-          <Typography component="h6" variant="h6">
+          <Typography component="h6" variant="h6" color="GrayText">
             {shop.isOpen ? shop.description : 'Currently Closed'}
           </Typography>
         </CardContent>
