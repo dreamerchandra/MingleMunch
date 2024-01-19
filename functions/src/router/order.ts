@@ -6,6 +6,7 @@ import client from 'twilio';
 import dotenv from 'dotenv';
 import { getShops } from '../firestore/shop.js';
 
+console.log(process.env.TWILIO_AUTH_TOKEN)
 dotenv.config();
 const accountSid = 'AC8d9667b8ce34ed5473965c348b3d0d19';
 const authToken = process.env.TWILIO_AUTH_TOKEN;

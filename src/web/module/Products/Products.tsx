@@ -191,7 +191,8 @@ export const Products: FC<{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          mb: 20,
         }}
       >
         <Typography variant="h2" component="h1" sx={{ margin: 'auto' }}>

@@ -200,7 +200,8 @@ export const Checkout: FC = () => {
             display: 'flex',
             flexDirection: 'column',
             width: '100%',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            minHeight: '90vh',
           }}
         >
           <Box
