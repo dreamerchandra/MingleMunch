@@ -419,7 +419,7 @@ export const Checkout: FC = () => {
                       <Typography component="h6">
                         Parcel Charges
                         <Tooltip
-                          title="This small fee helps us to keep this platform running."
+                          title="Industry's lowest ever parcel charges by burn!"
                           enterTouchDelay={20}
                           leaveTouchDelay={5_000}
                         >

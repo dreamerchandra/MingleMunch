@@ -4,6 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "csv-parser": "^3.0.0",
+    "firebase-admin": "^12.0.0",
     "fireway": "^1.1.0"
   }
 }

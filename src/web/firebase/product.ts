@@ -19,13 +19,6 @@ import { Product } from '../../common/types/Product';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Shop } from '../../common/types/shop';
 
-export const createKeywords = (name: string) => {
-  const keywords = [];
-  for (let i = 0; i < name.length; i++) {
-    keywords.push(name.substring(0, i + 1).toLowerCase());
-  }
-  return keywords;
-};
 
 export interface ProductInput {
   itemName: string;
@@ -41,8 +34,6 @@ export interface ProductInput {
   parcelCharges: number;
 }
 
-const trim = (str: string) => str.replace(/\s+/, '').toLocaleLowerCase();
-
 const constructMandatoryMetaFields = () => ({
   updatedAt: Timestamp.now(),
   updateBy: firebaseAuth.currentUser?.uid || ''
@@ -53,9 +44,6 @@ const constructProduct = (
   shop: Shop
 ): Omit<Product, 'itemId'> => {
   const { itemName, itemDescription, itemPrice, itemImage } = productInput;
-  const keywords = createKeywords(
-    [trim(itemName), trim(itemDescription)].join(' ')
-  );
   const shopDetails = {
     shopName: shop.shopName,
     shopAddress: shop.shopAddress,
@@ -67,7 +55,6 @@ const constructProduct = (
     itemDescription,
     itemPrice,
     itemImage,
-    keywords,
     shopId: shop.shopId,
     shopDetails,
     isAvailable: true,
@@ -82,10 +69,7 @@ const constructProduct = (
 };
 export const productConverter = {
   toFirestore(product: Product): DocumentData {
-    const keywords = createKeywords(
-      [product.itemName, product.itemDescription].join(' ')
-    );
-    return { ...product, keywords, shopId: product.shopId };
+    return { ...product, shopId: product.shopId };
   },
 
   fromFirestore(
