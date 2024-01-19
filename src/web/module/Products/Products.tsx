@@ -200,6 +200,7 @@ export const Products: FC<{
         </Typography>
         <CategoryList
           shopId={shopId}
+          search={search}
           selected={selectedCategoryIds}
           onChange={(e) => setCategory(e)}
         />

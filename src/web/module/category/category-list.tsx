@@ -1,14 +1,31 @@
 import Tick from '@mui/icons-material/CheckCircle';
 import { Box, Chip, Typography } from '@mui/material';
-import { FC } from 'react';
-import { useCategoryQuery } from './category-query';
+import Fuse from 'fuse.js';
+import { FC, useEffect, useState } from 'react';
+import { Category, useCategoryQuery } from './category-query';
 
 export const CategoryList: FC<{
   shopId: string;
   selected: string[];
   onChange: (ids: string[]) => void;
-}> = ({ shopId, selected, onChange }) => {
+  search: string;
+}> = ({ shopId, selected, onChange, search }) => {
   const { data: categories } = useCategoryQuery(shopId);
+  const [fuse, setFuse] = useState<Fuse<Category>>();
+
+  useEffect(() => {
+    if (categories == null) return;
+    const fuseOptions = {
+      shouldSort: true,
+      keys: ['categoryName']
+    };
+    const fuse = new Fuse(categories, fuseOptions);
+    setFuse(fuse);
+  }, [categories]);
+  const res = search ? fuse
+  ?.search(search)
+  .map((i) => i.item) : categories;
+
   return (
     <Box
       sx={{
@@ -30,28 +47,31 @@ export const CategoryList: FC<{
           width: 'min(90vw, 900px)'
         }}
       >
-        {categories?.map((category) => (
-          <Chip
-            key={category.categoryId}
-            label={category.categoryName}
-            color={
-              selected.includes(category.categoryId) ? 'secondary' : 'default'
-            }
-            variant={
-              selected.includes(category.categoryId) ? 'filled' : 'outlined'
-            }
-            onClick={() => {
-              if (selected.includes(category.categoryId)) {
-                onChange(
-                  selected.filter((item) => item !== category.categoryId)
-                );
-              } else {
-                onChange([...selected, category.categoryId]);
+        {res
+          ?.map((category) => (
+            <Chip
+              key={category.categoryId}
+              label={category.categoryName}
+              color={
+                selected.includes(category.categoryId) ? 'secondary' : 'default'
               }
-            }}
-            icon={selected.includes(category.categoryId) ? <Tick /> : undefined}
-          />
-        ))}
+              variant={
+                selected.includes(category.categoryId) ? 'filled' : 'outlined'
+              }
+              onClick={() => {
+                if (selected.includes(category.categoryId)) {
+                  onChange(
+                    selected.filter((item) => item !== category.categoryId)
+                  );
+                } else {
+                  onChange([...selected, category.categoryId]);
+                }
+              }}
+              icon={
+                selected.includes(category.categoryId) ? <Tick /> : undefined
+              }
+            />
+          ))}
       </Box>
     </Box>
   );

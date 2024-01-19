@@ -66,8 +66,8 @@ const migrate = async () => {
   console.log(shop);
   if (!shop) return;
   const category = {
-    id: '9PGJOtpSbmSxtLplxguH',
-    name: 'Veg Gravy'
+    id: 'FsOeAyVcT5qZc0fW1H7G',
+    name: 'Soup'
   };
   const results = [];
 
