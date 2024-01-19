@@ -31,6 +31,7 @@ export const useToSignIn = () => {
   const [isOtpRequested, setIsOtpRequested] = useState(false);
   const [isPhoneNumberInvalid, setPhoneNumberInvalid] = useState(false);
   const loginInstance = useRef<ConfirmationResult>();
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     appVerifier.current = new RecaptchaVerifier(
       'recaptcha-container',
@@ -62,7 +63,8 @@ export const useToSignIn = () => {
       })
       .catch((err) => {
         console.log('error triggering otp', err);
-        setPhoneNumberInvalid(err.message);
+        LogRocket.captureException(err);
+        setError(err.message);
       })
       .finally(() => setIsOtpRequested(true));
   }, []);
@@ -71,11 +73,23 @@ export const useToSignIn = () => {
     if (!appVerifier.current) {
       return;
     }
-    loginInstance.current?.confirm(otp).then((result) => {
-      console.log(result);
-    });
+    loginInstance.current
+      ?.confirm(otp)
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        setError('Invalid OTP');
+        LogRocket.captureException(err);
+      });
   }, []);
-  return { isOtpRequested, triggerOtp, isPhoneNumberInvalid, loginWithOtp };
+  return {
+    isOtpRequested,
+    triggerOtp,
+    isPhoneNumberInvalid,
+    loginWithOtp,
+    error
+  };
 };
 
 export const useUser = () => {

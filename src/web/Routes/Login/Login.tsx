@@ -1,3 +1,4 @@
+import { Alert, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -7,8 +8,13 @@ import { useToSignIn, useUser } from '../../firebase/auth';
 import { Profile } from './Profile';
 
 export function LoginPage() {
-  const { isOtpRequested, triggerOtp, isPhoneNumberInvalid, loginWithOtp } =
-    useToSignIn();
+  const {
+    isOtpRequested,
+    triggerOtp,
+    isPhoneNumberInvalid,
+    loginWithOtp,
+    error
+  } = useToSignIn();
   const {
     userDetails: { user }
   } = useUser();
@@ -104,6 +110,10 @@ export function LoginPage() {
                   </>
                 )}
               </Box>
+              <Alert severity="error" sx={{ display: error ? 'flex' : 'none' }}>
+                {error}
+                <Button color='info' href="tel:+918754791569">Call Us</Button>
+              </Alert>
             </Box>
           </div>
           {isOtpRequested ? null : <div id="recaptcha-container"></div>}

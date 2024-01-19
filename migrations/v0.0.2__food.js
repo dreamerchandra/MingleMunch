@@ -42,6 +42,7 @@ const constructProduct = (productInput, shop, category, FieldValue) => {
   return {
     itemName,
     itemDescription,
+    itemImage: '',
     itemPrice,
     shopId: shop.shopId,
     shopDetails,

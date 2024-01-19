@@ -97,7 +97,7 @@ export const createOrder = async (req: Request, res: Response) => {
       itemName: p.itemName,
       itemPrice: p.itemPrice,
       itemDescription: p.itemDescription,
-      itemImage: p.itemImage,
+      itemImage: p?.itemImage,
       quantity: detailsToQuantity[p.itemId],
       itemId: p.itemId
     })),
