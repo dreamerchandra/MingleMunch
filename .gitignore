@@ -25,3 +25,4 @@ dist-ssr
 service-account.json
 prod-service-account.json
 .env
+mingle-munch.json
