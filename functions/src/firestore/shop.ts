@@ -17,7 +17,7 @@ export const shopConverter = {
   };
 
 export const getShops = async (shopIds: string[]) => {
-  logger.log('fetching for products: ', shopIds);
+  logger.log('fetching for shop: ', shopIds);
   const refs = shopIds.map((id) =>
     firebaseDb.doc('shop/' + id).withConverter(shopConverter)
   );

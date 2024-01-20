@@ -1,4 +1,5 @@
 import { Product } from './Product';
+import { Shop } from './shop';
 
 export type OrderStatus =
   | 'pending'
@@ -16,6 +17,7 @@ type OrderProduct = Pick<
   | 'shopId'
 > & {
   quantity: number;
+  shopDetails?: Shop;
 };
 
 export interface Order {

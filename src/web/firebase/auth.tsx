@@ -99,6 +99,8 @@ export const useUser = () => {
 
     return updateProfile(userDetails.user, {
       displayName: name
+    }).then(() => {
+      userDetails.user?.reload();
     });
   };
   return { userDetails, updateUserDetails };

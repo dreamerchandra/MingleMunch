@@ -103,7 +103,7 @@ export const IncomingOrder = () => {
             </Container>
             {order.items.map((item) => (
               <Typography variant="h6" key={item.itemId}>
-                {item.itemName} *{item.quantity}
+                {item.itemName} *{item.quantity}- {item.shopDetails?.shopName}
               </Typography>
             ))}
           </CardContent>

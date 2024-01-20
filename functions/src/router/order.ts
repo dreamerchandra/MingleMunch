@@ -1,9 +1,9 @@
+import dotenv from 'dotenv';
 import { Request, Response } from 'express';
-import { firebaseDb } from '../firebase.js';
-import { getProducts } from '../firestore/product.js';
 import { logger } from 'firebase-functions';
 import client from 'twilio';
-import dotenv from 'dotenv';
+import { firebaseDb } from '../firebase.js';
+import { getProducts } from '../firestore/product.js';
 import { getShops } from '../firestore/shop.js';
 
 console.log(process.env.TWILIO_AUTH_TOKEN);
@@ -36,6 +36,7 @@ export const createOrder = async (req: Request, res: Response) => {
   const { details } = req.body as {
     details: [{ itemId: string; quantity: number }];
   };
+  logger.log(`incoming request payload, ${JSON.stringify(details)}`)
   const products = await getProducts(details.map((d) => d.itemId));
   const shops = await getShops(products.map((p) => p.shopDetails.shopId));
   if (!shops.every((s) => s.isOpen)) {
@@ -53,8 +54,9 @@ export const createOrder = async (req: Request, res: Response) => {
     .map((p) => p.itemPrice * detailsToQuantity[p.itemId])
     .reduce((a, b) => a + b, 0);
   const parcelChargesTotal = products
-    .map((p) => p.parcelCharges * detailsToQuantity[p.itemId])
+    .map((p) => (p.parcelCharges * detailsToQuantity[p.itemId]) || 0)
     .reduce((a, b) => a + b, 0);
+  logger.log(`parcel charges ${JSON.stringify(products)}`)
   const isAllAvailable = products.every((p) => p.isAvailable);
   if (!isAllAvailable) {
     const nonAvailableItems = products.filter((p) => !p.isAvailable);
@@ -78,9 +80,9 @@ export const createOrder = async (req: Request, res: Response) => {
   }
   const deliveryFee = 25;
   const platformFee = 3;
-  const grandTotal = Number(
-    (itemsTotal + deliveryFee + platformFee + parcelChargesTotal).toFixed(2)
-  );
+  const grandTotal = 
+    (itemsTotal + deliveryFee + platformFee + parcelChargesTotal);
+  logger.info(`grand total is ${grandTotal} ${JSON.stringify({ grandTotal, itemsTotal, deliveryFee, platformFee, parcelChargesTotal  })}` )
   if (grandTotal <= 0) {
     return res.status(400).json({
       error: 'Invalid order'
@@ -99,7 +101,9 @@ export const createOrder = async (req: Request, res: Response) => {
       itemDescription: p.itemDescription,
       itemImage: p?.itemImage,
       quantity: detailsToQuantity[p.itemId],
-      itemId: p.itemId
+      itemId: p.itemId,
+      shopId: p.shopDetails.shopId,
+      shopDetails: p.shopDetails,
     })),
     shopDetails: {
       shopName: shopDetails.shopName,

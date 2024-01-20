@@ -73,9 +73,10 @@ export const OrderHistory = () => {
           <CardContent
             sx={{
               display: 'flex',
-              flexDirection: 'column',
+              flexDirection: 'row',
               gap: 1,
-              width: '100%'
+              flex: 1,
+              width: '100%',
             }}
           >
             <Container
@@ -85,64 +86,48 @@ export const OrderHistory = () => {
               }}
               sx={{
                 display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                width: '100%',
+                flexDirection: 'column',
                 padding: 0
               }}
             >
-              <Container
-                component="div"
-                sx={{
+              {order.items.map((item) => (
+                <Typography variant="h6" key={item.itemId}>
+                  {item.itemName} *{item.quantity} - {item.shopDetails?.shopName}
+                </Typography>
+              ))}
+            </Container>
+            <Container
+              component="div"
+              style={{
+                padding: 0
+              }}
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                padding: 0
+              }}
+            >
+              <div
+                style={{
                   display: 'flex',
-                  flexDirection: 'row',
-                  gap: 2,
-                  border: '1px solid rgb(213 230 213 / 50%)',
-                  width: '100%',
-                  justifyContent: 'space-between',
-                  padding: 1,
-                  alignItems: 'center'
+                  flexDirection: 'column',
+                  gap: 1
                 }}
               >
-                <div>
-                  <img
-                    style={{
-                      width: '100px',
-                      height: '100px'
-                    }}
-                    src="https://images.unsplash.com/photo-1614873636018-548106274e2a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2970&q=80"
-                  />
-                  <Typography variant="body1">
-                    {order?.shopDetails?.shopName}
-                  </Typography>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 1
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: 'primary.main'
                   }}
                 >
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      color: 'primary.main'
-                    }}
-                  >
-                    {getReadableStatus(order.status)}
-                  </Typography>
-                  <Typography variant="caption">₹{order.grandTotal}</Typography>
-                  <Typography variant="caption">
-                    Ref No {order?.orderRefId?.split('::')[1]}
-                  </Typography>
-                </div>
-              </Container>
+                  {getReadableStatus(order.status)}
+                </Typography>
+                <Typography variant="caption">₹{order.grandTotal}</Typography>
+                <Typography variant="caption">
+                  Ref No {order?.orderRefId?.split('::')[1]}
+                </Typography>
+              </div>
             </Container>
-            {order.items.map((item) => (
-              <Typography variant="h6" key={item.itemId}>
-                {item.itemName} *{item.quantity}
-              </Typography>
-            ))}
           </CardContent>
         </Card>
       ))}
