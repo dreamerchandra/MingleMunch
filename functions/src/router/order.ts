@@ -29,7 +29,8 @@ export const updateWhatsapp = async ({
       from: 'whatsapp:+14155238886',
       to: 'whatsapp:+916374140416'
     })
-    .then((message) => console.log(message.sid));
+    .then((message) => logger.log(`twilio whatsapp message sent ${message.sid}`))
+    .catch((err) => logger.error(`twilio whatsapp message error ${err.message}`));
 };
 
 export const createOrder = async (req: Request, res: Response) => {

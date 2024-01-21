@@ -2,7 +2,8 @@ import {
   ConfirmationResult,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  updateProfile
+  updateProfile,
+  getIdToken,
 } from 'firebase/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -100,7 +101,7 @@ export const useUser = () => {
     return updateProfile(userDetails.user, {
       displayName: name
     }).then(() => {
-      userDetails.user?.reload();
+      getIdToken(userDetails.user!, true);
     });
   };
   return { userDetails, updateUserDetails };
