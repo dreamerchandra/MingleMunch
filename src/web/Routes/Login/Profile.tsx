@@ -1,10 +1,10 @@
+import { Container } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { FormEvent, useEffect } from 'react';
-import { useUser } from '../../firebase/auth';
-import { Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../firebase/auth';
 
 export const Profile = () => {
   const navigation = useNavigate();
@@ -18,12 +18,16 @@ export const Profile = () => {
     const data = new FormData(event.currentTarget);
     const name = data.get('name');
     await updateUserDetails(name as string);
-    navigation('/');
+    const path = localStorage.getItem('redirect') || '/';
+    localStorage.removeItem('redirect');
+    navigation(path);
   };
 
   useEffect(() => {
     if (user?.displayName) {
-      navigation('/');
+      const path = localStorage.getItem('redirect') || '/';
+      console.log('redirecting to', localStorage.getItem('redirect'));
+      navigation(path);
     }
   }, [navigation, user]);
 
@@ -39,7 +43,7 @@ export const Profile = () => {
           height: '75vh',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: 'center'
         }}
       >
         <TextField

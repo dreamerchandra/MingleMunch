@@ -3,7 +3,7 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   updateProfile,
-  getIdToken,
+  getIdToken
 } from 'firebase/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -116,6 +116,8 @@ export const useProtectedRoute = () => {
       return;
     }
     if (user == null) {
+      if (window.location.pathname === '/login') return;
+      localStorage.setItem('redirect', window.location.pathname);
       return navigation('/login');
     } else {
       LogRocket.identify(user.uid, {

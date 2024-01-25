@@ -1,7 +1,6 @@
 import { Box, Container } from '@mui/material';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useProtectedRoute } from '../../firebase/auth';
 import { Header } from '../../module/Header/header';
 import { SideMenu } from '../../module/Menu/SideMenu';
 import { Products } from '../../module/Products/Products';
@@ -10,7 +9,7 @@ import { CheckoutHeadsUp } from '../../module/Shoping/CheckoutHeadup';
 import { AddCategory } from '../../module/category/add-category';
 
 export const MenuPage = () => {
-  useProtectedRoute();
+  // useProtectedRoute();
   const [search, onSearch] = useState('');
   const { shopId = '' } = useParams();
   return (
