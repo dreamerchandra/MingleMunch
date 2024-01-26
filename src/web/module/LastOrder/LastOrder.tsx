@@ -1,7 +1,7 @@
-import Box from '@mui/material/Box';
-import { useLastOrder } from './last-order';
+import { Phone } from '@mui/icons-material';
 import Button from '@mui/material/Button';
-import { useState } from 'react';
+import { FC, useEffect, useState } from 'react';
+import { useLastOrder } from './last-order';
 
 declare global {
   interface Window {
@@ -47,12 +47,35 @@ export const AddToHomeScreen = () => {
   );
 };
 
+const Text: FC<{ label: string }> = ({ label }) => {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      setIdx((i) => (i + 1) % 2);
+    }, 2000);
+    return () => clearInterval(timerId);
+  }, []);
+  if (idx == 0)
+    return (
+      <>
+        <Phone />
+        {label}
+      </>
+    );
+  return (
+    <>
+      <Phone />
+      Taking Longer : ) Call Us
+    </>
+  );
+};
+
 export const LastOrder = () => {
   const lastOrder = useLastOrder();
   if (!lastOrder) return <AddToHomeScreen />;
   if (lastOrder?.status == 'delivered') return <AddToHomeScreen />;
   return (
-    <Box
+    <Button
       sx={{
         position: 'fixed',
         bottom: 0,
@@ -63,14 +86,18 @@ export const LastOrder = () => {
         width: '100%',
         backgroundColor: '#d1ff0465',
         pt: 2,
-        pb: 2
+        pb: 2,
+        gap: 2
       }}
+      href="tel:+918220080109"
     >
-      {lastOrder?.status == 'pending' &&
-        'Waiting for hotel to accept your order'}
-      {lastOrder?.status == 'ack_from_hotel' &&
-        'Your order has been acknowledged by the hotel'}
-      {lastOrder?.status == 'prepared' && 'Your order is on the way'}
-    </Box>
+      {lastOrder?.status == 'pending' && <Text label="Pending At Hotel" />}
+      {lastOrder?.status == 'ack_from_hotel' && (
+        <Text label="Acknowledged by the hotel" />
+      )}
+      {lastOrder?.status == 'prepared' && (
+        <Text label="Your order is on the way" />
+      )}
+    </Button>
   );
 };

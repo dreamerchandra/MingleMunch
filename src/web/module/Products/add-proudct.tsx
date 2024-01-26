@@ -250,7 +250,7 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 }}
               >
                 {categories?.map((category) => (
-                  <MenuItem value={category.categoryId}>
+                  <MenuItem value={category.categoryId} key={category.categoryId}>
                     {category.categoryName}
                   </MenuItem>
                 ))}

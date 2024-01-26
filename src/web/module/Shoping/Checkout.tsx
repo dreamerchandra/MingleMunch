@@ -1,4 +1,4 @@
-import { AddToHomeScreen, Check } from '@mui/icons-material';
+import { Check } from '@mui/icons-material';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { green } from '@mui/material/colors';
@@ -23,6 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import CardContent from '@mui/material/CardContent';
+import { AddToHomeScreen } from '../LastOrder/LastOrder';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -491,7 +492,7 @@ function SuccessCheckout() {
           <div>We will call you shortly to confirm the order.</div>
         </Alert>
         <Button href="/" color="info">
-          Back to home
+          Back to Home
         </Button>
         <AddToHomeScreen />
       </div>
