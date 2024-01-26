@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "ES2015",
+    "module": "Node16",
     "moduleResolution": "node16",
     "outDir": "./dist",
     "esModuleInterop": true,

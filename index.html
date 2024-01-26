@@ -8,16 +8,22 @@
     <meta name="theme-color" content="#Cfff04" />
     <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="apple-touch-icon" href="/logo.png" />
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json" />
     <title>BURN</title>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           //registering of serviceWorker.
-          navigator
-            .serviceWorker.register('./service-worker-v2.js')
+          navigator.serviceWorker
+            .register('./service-worker-v2.js')
             .then((reg) => console.log('Success:', reg.scope))
             .catch((err) => console.log('Failure: ', err));
+        });
+        // This variable will save the event for later use.
+        window.installEvent;
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          installEvent = e;
         });
       }
     </script>

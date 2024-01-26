@@ -1,4 +1,4 @@
-import { Check } from '@mui/icons-material';
+import { AddToHomeScreen, Check } from '@mui/icons-material';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { green } from '@mui/material/colors';
@@ -136,66 +136,7 @@ export const Checkout: FC = () => {
       }}
     >
       {success ? (
-        <div
-          style={{
-            height: '92vh',
-            width: '100vw',
-            backgroundImage: 'url(/abstract_emoji.png)',
-            filter: 'brightness(70%)',
-            backgroundSize: 'contain',
-            overflow: 'hidden'
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '20px',
-              height: '75vh'
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: '#d1ff04',
-                color: 'white',
-                height: '0px',
-                width: '0px',
-                borderRadius: '50%',
-                padding: '125px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                margin: 'auto'
-              }}
-            >
-              <Check
-                style={{
-                  width: 60,
-                  height: 60,
-                  color: green[900]
-                }}
-              />
-            </div>
-            <Alert
-              severity="success"
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: '#d1ff04'
-              }}
-              icon={null}
-            >
-              <div>Order placed successfully.</div>
-              <div>We will call you shortly to confirm the order.</div>
-            </Alert>
-            <Button href="/" color="info">
-              Back to home
-            </Button>
-          </div>
-        </div>
+        <SuccessCheckout />
       ) : (
         <Box
           sx={{
@@ -458,7 +399,7 @@ export const Checkout: FC = () => {
                   <Button
                     color="inherit"
                     size="small"
-                    href='tel:+91-8754791569'
+                    href="tel:+91-8754791569"
                   >
                     Call Us
                   </Button>
@@ -491,3 +432,69 @@ export const Checkout: FC = () => {
     </Container>
   );
 };
+
+function SuccessCheckout() {
+  return (
+    <div
+      style={{
+        height: '92vh',
+        width: '100vw',
+        backgroundImage: 'url(/abstract_emoji.png)',
+        filter: 'brightness(70%)',
+        backgroundSize: 'contain',
+        overflow: 'hidden'
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '20px',
+          height: '75vh'
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: '#d1ff04',
+            color: 'white',
+            height: '0px',
+            width: '0px',
+            borderRadius: '50%',
+            padding: '125px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            margin: 'auto'
+          }}
+        >
+          <Check
+            style={{
+              width: 60,
+              height: 60,
+              color: green[900]
+            }}
+          />
+        </div>
+        <Alert
+          severity="success"
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#d1ff04'
+          }}
+          icon={null}
+        >
+          <div>Order placed successfully.</div>
+          <div>We will call you shortly to confirm the order.</div>
+        </Alert>
+        <Button href="/" color="info">
+          Back to home
+        </Button>
+        <AddToHomeScreen />
+      </div>
+    </div>
+  );
+}

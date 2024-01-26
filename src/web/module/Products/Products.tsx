@@ -16,6 +16,7 @@ import { useUser } from '../../firebase/auth';
 import { useShopQuery } from '../Shop/shop-query';
 import { useCart } from '../Shoping/cart-activity';
 import { CategoryList } from '../category/category-list';
+import { useCategoryQuery } from '../category/category-query';
 import { useMutationProductEdit, useProductQuery } from './product-query';
 
 const FooterActions: FC<{ product: Product }> = ({ product }) => {
@@ -138,7 +139,9 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
           <FooterActions product={product} />
         </div>
       </div>
-      <Divider />
+      <Divider sx={{
+        borderColor: '#eab6b637'
+      }}/>
     </div>
   );
 };
@@ -157,6 +160,7 @@ export const Products: FC<{
   } = useUser();
   const { data: shops } = useShopQuery();
   const [selectedCategoryIds, setCategory] = useState<string[]>([]);
+  const { data: categories } = useCategoryQuery(shopId);
 
   const { data, isLoading } = useProductQuery({
     search: '',
@@ -192,7 +196,7 @@ export const Products: FC<{
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          mb: 20,
+          mb: 20
         }}
       >
         <Typography variant="h2" component="h1" sx={{ margin: 'auto' }}>
@@ -235,9 +239,40 @@ export const Products: FC<{
             </Button>
           </Container>
         )}
-        {filteredList?.map((product) => (
-          <ProductItem product={product} key={product.itemId} />
-        ))}
+        <div style={{ height: '25px' }}></div>
+        {selectedCategoryIds.length > 0
+          ? filteredList?.map((product) => (
+              <ProductItem product={product} key={product.itemId} />
+            ))
+          : categories?.map((category) => (
+              <Typography key={category.categoryId} variant="h5" component="h2">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 5,
+                    width: 'min(90vw, 800px)',
+                    justifyContent: 'space-between',
+                    color: '#d1ff04c7',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {category.categoryName}
+                  <Divider
+                    sx={{
+                      width: '200px',
+                      borderColor: '#d1ff04'
+                    }}
+                  />
+                </Box>
+                {filteredList
+                  .filter((p) => p.category.id === category.categoryId)
+                  ?.map((product) => (
+                    <ProductItem product={product} key={product.itemId} />
+                  ))}
+              </Typography>
+            ))}
       </Box>
     </>
   );
