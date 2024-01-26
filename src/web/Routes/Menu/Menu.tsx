@@ -9,7 +9,6 @@ import { CheckoutHeadsUp } from '../../module/Shoping/CheckoutHeadup';
 import { AddCategory } from '../../module/category/add-category';
 
 export const MenuPage = () => {
-  // useProtectedRoute();
   const [search, onSearch] = useState('');
   const { shopId = '' } = useParams();
   return (

@@ -6,6 +6,7 @@ import {
   collection,
   doc,
   getDocs,
+  limit,
   onSnapshot,
   orderBy,
   query,
@@ -100,4 +101,31 @@ export const updateOrderStatus = async ({
 }): Promise<void> => {
   const docRef = doc(firebaseDb, 'orders', orderId);
   return setDoc(docRef, { status: orderStatus }, { merge: true });
+};
+
+export const getLastOrderPendingOrder = async (
+  userId: string,
+  onChange: (order: Order) => void,
+  onAdded: (order: Order) => void
+): Promise<{ order: Order | null; unsubscribe: Unsubscribe }> => {
+  const q = query(
+    collection(firebaseDb, 'orders').withConverter(orderConverters),
+    where('userId', '==', userId),
+    orderBy('createdAt', 'desc'),
+    limit(1)
+  );
+  const querySnap = await getDocs(q);
+  const orders = querySnap.docs.map((doc) => doc.data());
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    querySnapshot.docChanges().forEach((change) => {
+      if (change.type === 'modified') {
+        onChange(change.doc.data());
+      }
+      if (change.type === 'added') {
+        onAdded(change.doc.data());
+      }
+    });
+    return querySnapshot.docs.map((doc) => doc.data());
+  });
+  return { order: orders[0] ?? null, unsubscribe: unsubscribe };
 };

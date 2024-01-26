@@ -1,10 +1,11 @@
+const cacheName = 'cache-v2';
+
+
 // service-worker.js
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open('cache-v2').then((cache) => {
-      return cache.addAll([
-        '/manifest.json',
-      ]);
+    caches.open(cacheName).then((cache) => {
+      return cache.addAll(['/manifest.json']);
     })
   );
 });
@@ -12,7 +13,23 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+      if (response) {
+        return response;
+      }
+      return fetch(event.request).then((response) => {
+        if (
+          response &&
+          response?.headers?.get('Content-Type')?.includes('image')
+        ) {
+          // Cache a copy of the image response for future use
+          return caches.open(cacheName).then((cache) => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        } else {
+          return response;
+        }
+      });
     })
   );
 });

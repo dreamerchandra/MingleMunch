@@ -15,7 +15,7 @@
         window.addEventListener('load', () => {
           //registering of serviceWorker.
           navigator
-            .serviceWorker.register('./service-worker.js')
+            .serviceWorker.register('./service-worker-v2.js')
             .then((reg) => console.log('Success:', reg.scope))
             .catch((err) => console.log('Failure: ', err));
         });
