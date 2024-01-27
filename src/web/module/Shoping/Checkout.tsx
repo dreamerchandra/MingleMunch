@@ -23,7 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import CardContent from '@mui/material/CardContent';
-import { AddToHomeScreen } from '../LastOrder/LastOrder';
+import { LastOrder } from '../LastOrder/LastOrder';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -494,7 +494,7 @@ function SuccessCheckout() {
         <Button href="/" color="info">
           Back to Home
         </Button>
-        <AddToHomeScreen />
+        <LastOrder />
       </div>
     </div>
   );

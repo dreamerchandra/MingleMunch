@@ -1,3 +1,4 @@
+import { User, getIdTokenResult } from 'firebase/auth';
 import {
   FC,
   ReactNode,
@@ -6,7 +7,6 @@ import {
   useEffect,
   useState
 } from 'react';
-import { User, getIdTokenResult } from 'firebase/auth';
 import { Role } from '../../../common/types/roles';
 import { firebaseAuth } from '../../firebase/firebase/auth';
 
@@ -23,9 +23,24 @@ export const InitProvider: FC<{ children: ReactNode }> = ({ children }) => {
     role: '' as Role
   });
   useEffect(() => {
+    const isLoggedOut = !firebaseAuth.currentUser;
+    let timerId: any = null;
+    if(isLoggedOut) {
+      timerId = setTimeout(() => {
+        setUser({
+          user: null,
+          loading: false,
+          role: 'user'
+        })
+      }, 1000)
+    }
     const unsubs = firebaseAuth.onAuthStateChanged(async (user) => {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
       if (user) {
         const tokenResult = await getIdTokenResult(user, true);
+        localStorage.setItem('isLoggedIn', 'true');
         setUser({
           user: user,
           loading: false,
@@ -33,6 +48,7 @@ export const InitProvider: FC<{ children: ReactNode }> = ({ children }) => {
         });
         return;
       }
+      localStorage.setItem('isLoggedIn', 'false');
       setUser({
         user: user,
         loading: false,

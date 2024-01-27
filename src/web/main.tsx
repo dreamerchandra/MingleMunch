@@ -12,18 +12,12 @@ import packageJson from '../../package.json';
 import { InitProvider } from './module/Context/InitProvider';
 import { CartProvider } from './module/Shoping/cart-activity';
 import { theme as GlobalTheme } from './theme';
-
-// if ('serviceWorker' in navigator) {
-//   navigator.serviceWorker
-//     .register('/service-worker.js')
-//     .then((registration) => {
-//       console.log('Service Worker registered with scope:', registration.scope);
-//     })
-//     .catch((error) => {
-//       console.error('Service Worker registration failed:', error);
-//     });
-// }
-
+import { LoginPage } from './Routes/Login/Login';
+import { ShopPage } from './Routes/Shop/shop';
+import { MenuPage } from './Routes/Menu/Menu';
+import { SplashPage } from './Routes/Splash/Splash';
+import { CartPage } from './Routes/Cart/cart';
+import { OrderHistoryRoute } from './Routes/OrderHistory/order-history';
 
 if (process.env.NODE_ENV === 'production') {
   console.log(`init logrocket with ${packageJson.version}`);
@@ -34,53 +28,28 @@ if (process.env.NODE_ENV === 'production') {
 const router = createBrowserRouter([
   {
     path: '/login',
-    lazy: () =>
-      import('./Routes/Login/Login').then((m) => ({
-        element: <m.LoginPage />
-      }))
+    Component: LoginPage
   },
   {
     path: '/',
-    lazy: () =>
-      import('./Routes/Shop/shop').then((m) => ({
-        element: <m.ShopPage />
-      }))
+    Component: ShopPage
   },
   {
     path: '/shop/:shopId',
-    lazy: () =>
-      import('./Routes/Menu/Menu').then((m) => ({
-        element: <m.MenuPage />
-      }))
+    Component: MenuPage
   },
   {
     path: '/splash',
-    lazy: () =>
-      import('./Routes/Splash/Splash').then((m) => ({
-        element: <m.SplashPage />
-      }))
+    Component: SplashPage,
   },
   {
     path: '/cart',
-    lazy: () =>
-      import('./Routes/Cart/cart').then((m) => ({
-        element: <m.CartPage />
-      }))
+    Component: CartPage,
   },
   {
     path: '/order-history',
-    lazy: () =>
-      import('./Routes/OrderHistory/order-history').then((m) => ({
-        element: <m.OrderHistoryRoute />
-      }))
+    Component: OrderHistoryRoute,
   },
-  {
-    path: '/payments',
-    lazy: () =>
-      import('./Routes/Payment/Payment').then((m) => ({
-        element: <m.PaymentRoute />
-      }))
-  }
 ]);
 
 const theme = createTheme(GlobalTheme);

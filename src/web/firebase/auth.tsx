@@ -1,15 +1,15 @@
 import {
   ConfirmationResult,
   RecaptchaVerifier,
+  getIdToken,
   signInWithPhoneNumber,
-  updateProfile,
-  getIdToken
+  updateProfile
 } from 'firebase/auth';
+import LogRocket from 'logrocket';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { firebaseAuth } from './firebase/auth';
 import { useInit } from '../module/Context/InitProvider';
-import LogRocket from 'logrocket';
+import { firebaseAuth } from './firebase/auth';
 
 export const removeCountryCode = (phoneNumber: string) => {
   let phNo = phoneNumber;
@@ -120,6 +120,7 @@ export const useProtectedRoute = () => {
       localStorage.setItem('redirect', window.location.pathname);
       return navigation('/login');
     } else {
+      localStorage.removeItem('redirect');
       LogRocket.identify(user.uid, {
         name: user.displayName!,
         phone: user.phoneNumber!,

@@ -1,22 +1,10 @@
+import { Button, CircularProgress, Typography, styled } from '@mui/material';
 import Container from '@mui/material/Container';
-import BrandIcon from '../../../asserts/logo.png';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../firebase/auth';
 import Face1 from './face1.png';
 import Face2 from './face2.png';
-import { Button, Typography, styled } from '@mui/material';
-
-const Circle = styled('div')`
-  width: 73px;
-  height: 73px;
-  border-radius: 50%;
-  background-color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  img {
-    width: 45px;
-    height: 45px;
-  }
-`;
 
 const FaceWrapper = styled('div')(
   ({ theme }) => `
@@ -88,6 +76,17 @@ const ButtonWrapper = styled('div')(
 );
 
 export const Splash = () => {
+  const { userDetails } = useUser();
+  const userId = userDetails.user?.uid;
+  const loading = userDetails.loading;
+  const navigator = useNavigate();
+  useEffect(() => {
+    if (loading) return;
+    const location = localStorage.getItem('splash') || '/';
+    navigator(location, {
+      replace: true
+    });
+  }, [loading, navigator, userId]);
   return (
     <Container
       component="main"
@@ -102,9 +101,7 @@ export const Splash = () => {
         position: 'relative'
       }}
     >
-      <Circle>
-        <img src={BrandIcon} alt="logo" />
-      </Circle>
+      <img src="./logo.png" alt="logo" />
       <Typography variant="h1" sx={{ color: '#fff', ml: 2 }}>
         Food for Everyone
       </Typography>
@@ -119,19 +116,23 @@ export const Splash = () => {
         </div>
       </FaceWrapper>
       <ButtonWrapper>
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: 'common.white',
-            color: 'secondary.main',
-            '&:hover': {
-              backgroundColor: 'common.white'
-            }
-          }}
-          href="/login"
-        >
-          Get Stated
-        </Button>
+        {loading ? (
+          <CircularProgress color="info" />
+        ) : (
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: 'common.black',
+              color: 'secondary.main',
+              '&:hover': {
+                backgroundColor: 'common.white'
+              }
+            }}
+            href="/login"
+          >
+            Get Started
+          </Button>
+        )}
       </ButtonWrapper>
     </Container>
   );

@@ -65,7 +65,7 @@ const Text: FC<{ label: string }> = ({ label }) => {
   return (
     <>
       <Phone />
-      Taking Longer : ) Call Us
+      Taking longer : ) Call Us
     </>
   );
 };

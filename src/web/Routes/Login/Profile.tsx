@@ -20,14 +20,18 @@ export const Profile = () => {
     await updateUserDetails(name as string);
     const path = localStorage.getItem('redirect') || '/';
     localStorage.removeItem('redirect');
-    navigation(path);
+    navigation(path, {
+      replace: true
+    });
   };
 
   useEffect(() => {
     if (user?.displayName) {
       const path = localStorage.getItem('redirect') || '/';
       console.log('redirecting to', localStorage.getItem('redirect'));
-      navigation(path);
+      navigation(path, {
+        replace: true
+      });
     }
   }, [navigation, user]);
 
