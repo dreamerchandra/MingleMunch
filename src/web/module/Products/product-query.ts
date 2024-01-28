@@ -1,14 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ProductInput,
-  ProductQuery,
+  ProductsQuery,
+  getProduct,
   getProducts,
   insertProduct,
   updateProduct
 } from '../../firebase/product';
 import { getShops } from '../../firebase/shop';
-export const useProductQuery = (
-  params: ProductQuery & { isEnabled: boolean; shopId: string }
+import { Product } from '../../../common/types/Product';
+import { useCallback } from 'react';
+
+export const useProductsQuery = (
+  params: ProductsQuery & { isEnabled: boolean; shopId: string }
 ) =>
   useQuery({
     queryKey: ['shop', params.shopId, 'products', params.search],
@@ -43,3 +47,21 @@ export const useMutationProductEdit = () => {
     }
   });
 };
+
+
+export const useStaleProductQuery = (query: { shopId: string }) => {
+  const queryClient = useQueryClient();
+  return useCallback((productId: string) => {
+    const data = queryClient.getQueryData(['shop', query.shopId, 'products', '']) as Product[];
+    return data?.find((product: Product) => product.itemId === productId);
+  }, [query.shopId, queryClient]) 
+}
+
+export const useProductQuery = (productId: string) => {
+  return useQuery({
+    queryKey: ['product', productId],
+    queryFn: () => {
+      return getProduct(productId);
+    }
+  });
+}

@@ -18,4 +18,6 @@ export interface Product {
     name: string;
   };
   parcelCharges: number;
+  suggestionIds: string[];
+  cantOrderSeparately: boolean;
 }

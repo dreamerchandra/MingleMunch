@@ -5,6 +5,7 @@ import {
   Timestamp,
   collection,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -19,7 +20,6 @@ import { Product } from '../../common/types/Product';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Shop } from '../../common/types/shop';
 
-
 export interface ProductInput {
   itemName: string;
   itemDescription: string;
@@ -32,6 +32,9 @@ export interface ProductInput {
     name: string;
   };
   parcelCharges: number;
+  itemId?: string;
+  suggestionIds?: string[];
+  cantOrderSeparately: boolean;
 }
 
 const constructMandatoryMetaFields = () => ({
@@ -64,6 +67,8 @@ const constructProduct = (
       id: productInput.category.id,
       name: productInput.category.name
     },
+    suggestionIds: productInput.suggestionIds || [],
+    cantOrderSeparately: productInput.cantOrderSeparately,
     ...constructMandatoryMetaFields()
   };
 };
@@ -81,7 +86,7 @@ export const productConverter = {
   }
 };
 
-export interface ProductQuery {
+export interface ProductsQuery {
   search: string;
   isAvailable?: boolean;
   shopId: string;
@@ -91,7 +96,7 @@ export const getProducts = async ({
   search,
   isAvailable,
   shopId
-}: ProductQuery) => {
+}: ProductsQuery) => {
   const queryFns = [
     where('shopId', '==', shopId),
     orderBy('createdAt', 'desc')
@@ -110,11 +115,21 @@ export const getProducts = async ({
   return querySnap.docs.map((doc) => doc.data());
 };
 
+export const getProduct = async (productId: string) => {
+  const q = doc(collection(firebaseDb, 'food'), productId).withConverter(
+    productConverter
+  );
+  const querySnap = await getDoc(q);
+  return querySnap.data();
+};
+
 export const insertProduct = async (product: ProductInput, shop: Shop) => {
   const docRef = doc(
     collection(firebaseDb, 'food').withConverter(productConverter)
   );
-  console.log(constructProduct(product, shop));
+  if (product.itemId) {
+    return updateProduct({ ...product, productId: product.itemId });
+  }
   return setDoc(docRef, constructProduct(product, shop));
 };
 

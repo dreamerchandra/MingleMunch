@@ -7,21 +7,29 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   Input,
   InputLabel,
   MenuItem,
+  OutlinedInput,
   Select,
   TextareaAutosize
 } from '@mui/material';
 import Container from '@mui/material/Container';
 import { styled } from '@mui/material/styles';
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useUser } from '../../firebase/auth';
 import { uploadImage } from '../../firebase/product';
 import { useCategoryQuery } from '../category/category-query';
-import { useUpdateProductMutation } from './product-query';
+import {
+  useStaleProductQuery,
+  useProductsQuery,
+  useUpdateProductMutation
+} from './product-query';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const StyleImg = styled('img')`
   width: 100%;
@@ -83,16 +91,15 @@ const ChangeButton = styled(Button)`
 
 const CardActionsWrapper = styled(CardActions)`
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   margin: 0 16px;
 `;
 
-const PriceWrapper = styled('div')`
+const TwoCol = styled('div')`
   display: flex;
+  gap: 2;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
-  width: 20ch;
 `;
 const AddFilePicker: FC<{
   file: File | null;
@@ -134,17 +141,64 @@ const initialFormData = {
   price: '',
   isTaxIncluded: false,
   categoryId: '',
-  parcelCharges: ''
+  suggestionIds: [] as string[],
+  parcelCharges: '',
+  cantOrderSeparately: false
+};
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250
+    }
+  }
 };
 
 export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
   const [isUpdating, setUpdating] = useState(false);
   const { mutate } = useUpdateProductMutation();
   const { data: categories } = useCategoryQuery(shopId);
+  const params = useParams();
+  const { productId } = params;
   const {
     userDetails: { role, loading }
   } = useUser();
   const [formData, setFormData] = useState(initialFormData);
+  const { data: products } = useProductsQuery({
+    isEnabled: true,
+    shopId: shopId,
+    search: ''
+  });
+  const getProductById = useStaleProductQuery({ shopId });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!productId) {
+      return;
+    }
+    const product = getProductById(productId);
+    if (!product) {
+      navigate(`/shop/${shopId}`, {
+        replace: true
+      });
+      return;
+    }
+    setFormData({
+      file: null,
+      name: product.itemName,
+      description: product.itemDescription,
+      price: product.itemPrice.toString(),
+      isTaxIncluded: false,
+      categoryId: product.category.id,
+      parcelCharges: product.parcelCharges?.toString() ?? '',
+      suggestionIds: product.suggestionIds ?? [],
+      cantOrderSeparately: product.cantOrderSeparately ?? false
+    });
+  }, [getProductById, navigate, productId, shopId]);
+
   if (loading || role === 'user') {
     return null;
   }
@@ -174,13 +228,18 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
             name: categories.find((i) => i.categoryId == category)!
               .categoryName as string,
             id: category as string
-          }
+          },
+          suggestionIds: formData.suggestionIds,
+          cantOrderSeparately: formData.cantOrderSeparately
         };
         mutate(
-          { ...product, isAvailable: true, shopId },
+          { ...product, isAvailable: true, shopId, itemId: productId || '' },
           {
             onSuccess: () => {
               setFormData(initialFormData);
+              navigate(`/shop/${shopId}`, {
+                replace: true
+              });
               toast.success('Product updated successfully');
             },
             onSettled: () => {
@@ -228,14 +287,45 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
               }}
             />
           </FormControl>
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 2,
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}
-          >
+          <FormControl fullWidth>
+            <InputLabel id="suggestion">Suggestion</InputLabel>
+            <Select
+              labelId="suggestion"
+              name="suggestion"
+              value={formData.suggestionIds}
+              multiple
+              input={<OutlinedInput label="Tag" />}
+              renderValue={(selected) =>
+                selected
+                  .map((i) => products?.find((c) => c.itemId === i)?.itemName)
+                  .join(', ')
+              }
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  suggestionIds:
+                    typeof e.target.value === 'string'
+                      ? e.target.value.split(',')
+                      : e.target.value
+                });
+              }}
+              MenuProps={MenuProps}
+            >
+              {products
+                ?.filter((p) => p.cantOrderSeparately)
+                .map((product) => (
+                  <MenuItem value={product.itemId} key={product.itemId}>
+                    <Checkbox
+                      checked={
+                        formData.suggestionIds.indexOf(product.itemId) > -1
+                      }
+                    />
+                    {product.itemName}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+          <TwoCol>
             <FormControl fullWidth>
               <InputLabel id="category">Category</InputLabel>
               <Select
@@ -250,7 +340,10 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 }}
               >
                 {categories?.map((category) => (
-                  <MenuItem value={category.categoryId} key={category.categoryId}>
+                  <MenuItem
+                    value={category.categoryId}
+                    key={category.categoryId}
+                  >
                     {category.categoryName}
                   </MenuItem>
                 ))}
@@ -267,10 +360,8 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 }}
               />
             </FormControl>
-          </Box>
-        </CardContent>
-        <CardActionsWrapper>
-          <PriceWrapper>
+          </TwoCol>
+          <TwoCol>
             <FormControl fullWidth>
               <Input
                 placeholder="Packing Charges (Rs. 3)"
@@ -282,14 +373,43 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 }}
               />
             </FormControl>
-          </PriceWrapper>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="cantOrderSeparately"
+                  checked={formData.cantOrderSeparately}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      cantOrderSeparately: e.target.checked
+                    });
+                  }}
+                />
+              }
+              label="Customization"
+              labelPlacement="start"
+            />
+          </TwoCol>
+        </CardContent>
+        <CardActionsWrapper>
+          <Button
+            onClick={() => {
+              setFormData(initialFormData);
+              navigate(`/shop/${shopId}`, {
+                replace: true
+              });
+            }}
+          >
+            Reset
+          </Button>
           <LoadingButton
             size="small"
             type="submit"
             disabled={isUpdating}
             loading={isUpdating}
+            variant="outlined"
           >
-            Save
+            {productId ? 'Update' : 'Add'}
           </LoadingButton>
         </CardActionsWrapper>
       </Card>

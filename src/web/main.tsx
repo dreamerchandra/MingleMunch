@@ -35,6 +35,10 @@ const router = createBrowserRouter([
     Component: ShopPage
   },
   {
+    path: '/shop/:shopId/product/:productId',
+    Component: MenuPage
+  },
+  {
     path: '/shop/:shopId',
     Component: MenuPage
   },
