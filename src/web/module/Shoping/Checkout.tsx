@@ -39,6 +39,19 @@ const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   }
 }));
 
+const Background = styled('div')`
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: right center;
+  width: 75vw;
+  top: 0px;
+  background-image: url(/shield.png);
+  height: 140px;
+  position: absolute;
+  filter: opacity(0.15);
+  right: -55px;
+`;
+
 const TotalWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -280,20 +293,19 @@ export const Checkout: FC = () => {
           <Card
             sx={{
               borderRadius: 2,
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right',
               mb: 4,
               backgroundColor: '#c0eade',
+              position: 'relative',
               backgroundImage:
-                'linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5)), url(/shield.png)'
+                'linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.9))'
             }}
             elevation={4}
           >
             <CardContent>
+              <Background />
               <Typography variant="h3" sx={{ fontWeight: 900 }}>
-                Shielded you from paying <br /> Rs.{' '}
-                {Math.round(itemsTotal * 0.18)} extra.
+                Saved you from paying <br /> Rs.
+                {Math.round(grandTotal * 0.45)} extra.
               </Typography>
               <div
                 style={{
@@ -301,7 +313,19 @@ export const Checkout: FC = () => {
                   marginBottom: '6px'
                 }}
               />
-              <Typography variant="h6">Order Big for more benefits</Typography>
+              <TotalWrapper
+                sx={{
+                  width: '65vw',
+                  color: '#ff4b4b',
+                  justifyContent: 'normal',
+                  gap: 4,
+                }}
+              >
+                <Typography variant="h6" fontWeight='bold'>Competitor's Price</Typography>
+                <Typography variant="h6" fontWeight='bold'>
+                  Rs. {Math.round(grandTotal * 0.45 + grandTotal)}
+                </Typography>
+              </TotalWrapper>
             </CardContent>
           </Card>
           <div>
