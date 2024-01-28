@@ -10,6 +10,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInit } from '../module/Context/InitProvider';
 import { firebaseAuth } from './firebase/auth';
+import { logEvent } from 'firebase/analytics';
+import { analytics } from './firebase/firebsae-app';
 
 export const removeCountryCode = (phoneNumber: string) => {
   let phNo = phoneNumber;
@@ -19,6 +21,9 @@ export const removeCountryCode = (phoneNumber: string) => {
   }
   if (phoneNumber.startsWith('+91')) {
     phNo = phNo.replace(/^\+91/, '');
+  }
+  if(phoneNumber.length > 10 && phoneNumber.startsWith('91')) {
+    phNo = phNo.replace(/^91/, '');
   }
   return phNo;
 };
@@ -65,6 +70,7 @@ export const useToSignIn = () => {
       .catch((err) => {
         console.log('error triggering otp', err);
         LogRocket.captureException(err);
+        logEvent(analytics, 'otp_error');
         setError(err.message);
       })
       .finally(() => setIsOtpRequested(true));
@@ -82,6 +88,7 @@ export const useToSignIn = () => {
       .catch((err) => {
         setError('Invalid OTP');
         LogRocket.captureException(err);
+        logEvent(analytics, 'ph_error');
       });
   }, []);
   return {
@@ -121,11 +128,6 @@ export const useProtectedRoute = () => {
       return navigation('/login');
     } else {
       localStorage.removeItem('redirect');
-      LogRocket.identify(user.uid, {
-        name: user.displayName!,
-        phone: user.phoneNumber!,
-        uid: user.uid!
-      });
     }
   }, [navigation, userDetails]);
 };

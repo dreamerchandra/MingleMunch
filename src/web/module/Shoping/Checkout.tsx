@@ -24,6 +24,8 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import CardContent from '@mui/material/CardContent';
 import { LastOrder } from '../LastOrder/LastOrder';
+import { logEvent } from 'firebase/analytics';
+import { analytics } from '../../firebase/firebase/firebsae-app';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -93,6 +95,7 @@ export const Checkout: FC = () => {
       },
       {
         onSuccess: () => {
+          logEvent(analytics, 'order-placed');
           LogRocket.track('order-placed', {
             productCategory: 'Food',
             productSku: items.map((item) => item.product.itemId),

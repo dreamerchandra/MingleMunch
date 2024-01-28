@@ -139,9 +139,11 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
           <FooterActions product={product} />
         </div>
       </div>
-      <Divider sx={{
-        borderColor: '#eab6b637'
-      }}/>
+      <Divider
+        sx={{
+          borderColor: '#eab6b637'
+        }}
+      />
     </div>
   );
 };
@@ -245,33 +247,50 @@ export const Products: FC<{
               <ProductItem product={product} key={product.itemId} />
             ))
           : categories?.map((category) => (
-              <Typography key={category.categoryId} variant="h5" component="h2">
-                <Box
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid #f1f6dc',
+                  borderRadius: '10px',
+                  mb: 2,
+                }}
+              >
+                <Typography
+                  key={category.categoryId}
+                  variant="h5"
+                  component="h2"
                   sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 5,
-                    width: 'min(90vw, 800px)',
-                    justifyContent: 'space-between',
-                    color: '#d1ff04c7',
-                    fontWeight: 'bold'
+                    alignSelf: 'start'
                   }}
                 >
-                  {category.categoryName}
-                  <Divider
+                  <Box
                     sx={{
-                      width: '200px',
-                      borderColor: '#d1ff04'
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'start',
+                      gap: 5,
+                      width: 'fit-content',
+                      justifyContent: 'start',
+                      color: '#d1ff04',
+                      fontWeight: 'bold',
+                      backgroundColor: '#000000',
+                      pl: 2,
+                      pr: 2,
+                      borderRadius: '10px 0 0 0',
                     }}
-                  />
-                </Box>
-                {filteredList
-                  .filter((p) => p.category.id === category.categoryId)
-                  ?.map((product) => (
-                    <ProductItem product={product} key={product.itemId} />
-                  ))}
-              </Typography>
+                  >
+                    {category.categoryName}
+                  </Box>
+                  {filteredList
+                    .filter((p) => p.category.id === category.categoryId)
+                    ?.map((product) => (
+                      <ProductItem product={product} key={product.itemId} />
+                    ))}
+                </Typography>
+              </Box>
             ))}
       </Box>
     </>

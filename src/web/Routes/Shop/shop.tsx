@@ -2,7 +2,7 @@ import { Box, Container } from '@mui/material';
 import { Header } from '../../module/Header/header';
 import { SideMenu } from '../../module/Menu/SideMenu';
 import { Shops } from '../../module/Shop/shop-list';
-import { CheckoutHeadsUp } from '../../module/Shoping/CheckoutHeadup';
+import { CheckoutHeadsUp, NotificationFab } from '../../module/Shoping/CheckoutHeadup';
 import { OurStories } from '../../module/stories/stories';
 import { LastOrder } from '../../module/LastOrder/LastOrder';
 import { useEffect } from 'react';
@@ -38,6 +38,7 @@ export const ShopPage = () => {
           <Shops />
           <CheckoutHeadsUp />
           <LastOrder />
+          <NotificationFab />
         </Box>
       </Container>
     </>

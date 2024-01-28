@@ -67,6 +67,7 @@ export const Shops = () => {
         pt: 4,
         alignItems: 'center',
         gap: 1,
+        pb: 16,
       }}
     >
       <Typography variant="h6" sx={{ letterSpacing: 4, mb: 2 }}>

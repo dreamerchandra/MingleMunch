@@ -2,6 +2,9 @@ import ShoppingCart from '@mui/icons-material/ShoppingCart';
 import { Badge, Fab, styled } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from './cart-activity';
+import { useUser } from '../../firebase/auth';
+import { NotificationImportant } from '@mui/icons-material';
+import { initFCM } from '../../firebase/firebase/fcm';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   position: 'fixed',
@@ -31,6 +34,34 @@ export function CheckoutHeadsUp() {
           }}
         >
           <ShoppingCart />
+        </Fab>
+      </StyledBadge>
+    </>
+  );
+}
+
+
+export function NotificationFab() {
+  const { userDetails } = useUser();
+  console.log(userDetails.user?.phoneNumber)
+  if(!userDetails.user?.phoneNumber?.includes('8754791569') ) {
+    return null;
+  }
+  return (
+    <>
+      <StyledBadge
+        badgeContent={0}
+        color="primary"
+        aria-label="checkout"
+      >
+        <Fab
+          color="primary"
+          aria-label="checkout"
+          onClick={() => {
+            initFCM(userDetails.user!.uid);
+          }}
+        >
+          <NotificationImportant />
         </Fab>
       </StyledBadge>
     </>

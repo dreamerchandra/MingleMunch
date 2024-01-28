@@ -6,5 +6,3 @@ export const firebaseDb = getFirestore(firebaseApp);
 if (location.hostname === 'localhost') {
   connectFirestoreEmulator(firebaseDb, 'localhost', 8080);
 }
-// Initialize Firebase
-// const analytics = getAnalytics(firebaseApp);

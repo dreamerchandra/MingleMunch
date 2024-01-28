@@ -48,7 +48,6 @@ export const get = async (
     throw e;
   }
 };
-
 export const post = async (
   urlString: string,
   params: any,
