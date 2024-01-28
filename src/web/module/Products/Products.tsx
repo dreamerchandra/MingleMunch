@@ -23,7 +23,7 @@ import {
 import Edit from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 import { Drawer } from '@mui/material';
-import { Add, AddIcCall, Remove } from '@mui/icons-material';
+import { Add, Remove } from '@mui/icons-material';
 
 const FooterActions: FC<{ product: Product; onAdd: () => void }> = ({
   product,
