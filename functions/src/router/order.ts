@@ -1,52 +1,69 @@
-import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import { logger } from 'firebase-functions';
-import client from 'twilio';
+import { HttpError } from '../error.js';
 import { firebaseDb } from '../firebase.js';
+import { AppConfig, getConfig } from '../firestore/app-config.js';
 import { getProducts } from '../firestore/product.js';
 import { getShops } from '../firestore/shop.js';
+import { Product } from '../types/Product.js';
+import { Shop } from '../types/Shop.js';
+import { OrderDb } from './order-helper.js';
+import { updateWhatsapp } from './twilio.js';
+import {
+  canProceedApplyingCoupon,
+  removeCoupon,
+  updateFreeDeliveryForInvitedUser
+} from './user.js';
 
-console.log(process.env.TWILIO_AUTH_TOKEN);
-dotenv.config();
-const accountSid = 'AC8d9667b8ce34ed5473965c348b3d0d19';
-const authToken = process.env.TWILIO_AUTH_TOKEN;
+interface OrderBody {
+  details: [{ itemId: string; quantity: number }];
+  appliedCoupon?: string;
+}
 
-const twilio = client(accountSid, authToken);
-
-export const updateWhatsapp = async ({
-  name,
-  phoneNumber
-}: {
-  name: string;
-  phoneNumber: string;
-}) => {
-  if (process.env.FIRESTORE_EMULATOR_HOST) {
-    return;
-  }
-  return twilio.messages
-    .create({
-      body: `New order from ${name} and phone number is ${phoneNumber}`,
-      from: 'whatsapp:+14155238886',
-      to: 'whatsapp:+916374140416'
-    })
-    .then((message) => logger.log(`twilio whatsapp message sent ${message.sid}`))
-    .catch((err) => logger.error(`twilio whatsapp message error ${err.message}`));
-};
-
-export const createOrder = async (req: Request, res: Response) => {
-  const { details } = req.body as {
-    details: [{ itemId: string; quantity: number }];
-  };
-  logger.log(`incoming request payload, ${JSON.stringify(details)}`)
-  const products = await getProducts(details.map((d) => d.itemId));
-  const shops = await getShops(products.map((p) => p.shopDetails.shopId));
-  if (!shops.every((s) => s.isOpen)) {
-    return res.status(400).json({
-      error: 'Invalid order',
-      message: 'Some shops are closed'
+const getAllData = async (productIds: string[]) => {
+  const products = await getProducts(productIds);
+  const isAllAvailable = products.every((p) => p.isAvailable);
+  if (!isAllAvailable) {
+    const nonAvailableItems = products.filter((p) => !p.isAvailable);
+    logger.warn(
+      'some items are not available',
+      nonAvailableItems.map((p) => p.itemId)
+    );
+    throw new HttpError(400, `Some items are not available`, {
+      products: nonAvailableItems
     });
   }
-  const { uid } = req.user;
+  const uniqueShopIds = [...new Set(products.map((p) => p.shopDetails.shopId))];
+  const [shops, appConfig] = await Promise.all([
+    await getShops(uniqueShopIds),
+    await getConfig()
+  ]);
+  if (!appConfig.isOpen) {
+    logger.warn(`Ordering is closed. Open by 10Am`);
+    throw new HttpError(400, `Ordering is closed`, {
+      appConfig
+    });
+  }
+  if (!shops.every((s) => s.isOpen)) {
+    logger.warn(
+      `some shops are closed ${shops
+        .filter((s) => !s.isOpen)
+        .map((s) => s.shopId)}`
+    );
+    throw new HttpError(400, `Some shops are closed`, {
+      shops: shops.filter((s) => !s.isOpen)
+    });
+  }
+  return { products, shops, uniqueShopIds, appConfig };
+};
+
+const getTotal = (
+  details: OrderBody['details'],
+  products: Product[],
+  shops: Shop[],
+  appConfig: AppConfig,
+  appliedCoupon?: string
+) => {
   const detailsToQuantity = details.reduce((acc, d) => {
     acc[d.itemId] = Number(d.quantity);
     return acc;
@@ -55,80 +72,148 @@ export const createOrder = async (req: Request, res: Response) => {
     .map((p) => p.itemPrice * detailsToQuantity[p.itemId])
     .reduce((a, b) => a + b, 0);
   const parcelChargesTotal = products
-    .map((p) => (p.parcelCharges * detailsToQuantity[p.itemId]) || 0)
+    .map((p) => p.parcelCharges * detailsToQuantity[p.itemId] || 0)
     .reduce((a, b) => a + b, 0);
-  logger.log(`parcel charges ${JSON.stringify(products)}`)
-  const isAllAvailable = products.every((p) => p.isAvailable);
-  if (!isAllAvailable) {
-    const nonAvailableItems = products.filter((p) => !p.isAvailable);
-    logger.log(
-      'some items are not available',
-      nonAvailableItems.map((p) => p.itemId)
-    );
-    return res.status(400).json({
-      error: 'Invalid order',
-      message: 'Some items are not available',
-      products: nonAvailableItems
-    });
-  }
+  const deliveryFee = appliedCoupon
+    ? 0
+    : shops.reduce((a, b) => a + (b?.deliveryFee ?? 0), 0);
+  const { platformFee } = appConfig;
+  const grandTotal =
+    itemsTotal + deliveryFee + platformFee + parcelChargesTotal;
+  return {
+    itemsTotal,
+    deliveryFee,
+    platformFee,
+    parcelChargesTotal,
+    grandTotal,
+    detailsToQuantity
+  };
+};
 
-  const shopIds = products.map((p) => p.shopDetails.shopId);
-  const isSameShop = shopIds.every((v) => v === shopIds[0]);
-  if (!isSameShop) {
-    return res.status(400).json({
-      error: 'Invalid order'
-    });
+const createOrderInDb = async (
+  user: {
+    uid: string;
+    name?: string;
+    phone_number: string;
+  },
+  {
+    products,
+    detailsToQuantity,
+    grandTotal,
+    itemsTotal,
+    deliveryFee,
+    platformFee,
+    appliedCoupon
+  }: {
+    products: Product[];
+    detailsToQuantity: { [key: string]: number };
+    grandTotal: number;
+    itemsTotal: number;
+    deliveryFee: number;
+    platformFee: number;
+    appliedCoupon?: string;
   }
-  const deliveryFee = 25;
-  const platformFee = 3;
-  const grandTotal = 
-    (itemsTotal + deliveryFee + platformFee + parcelChargesTotal);
-  logger.info(`grand total is ${grandTotal} ${JSON.stringify({ grandTotal, itemsTotal, deliveryFee, platformFee, parcelChargesTotal  })}` )
-  if (grandTotal <= 0) {
-    return res.status(400).json({
-      error: 'Invalid order'
-    });
-  }
-  const shopDetails = products[0].shopDetails;
+) => {
   const ref = firebaseDb.collection('orders');
   const id = ref.doc().id;
   const orderRefId = Math.floor(Math.random() * 1000);
-  const orderDetails = {
+  const orderDetails: OrderDb = {
     orderId: id,
-    userId: uid,
+    userId: user.uid,
     items: products.map((p) => ({
       itemName: p.itemName,
       itemPrice: p.itemPrice,
       itemDescription: p.itemDescription,
-      itemImage: p?.itemImage,
+      itemImage: p.itemImage ?? '',
       quantity: detailsToQuantity[p.itemId],
       itemId: p.itemId,
       shopId: p.shopDetails.shopId,
-      shopDetails: p.shopDetails,
+      shopDetails: p.shopDetails
     })),
-    shopDetails: {
-      shopName: shopDetails.shopName,
-      shopAddress: shopDetails.shopAddress,
-      shopMapLocation: shopDetails.shopMapLocation,
-      shopId: shopDetails.shopId
-    },
     subTotal: itemsTotal,
+    deliveryFee,
     grandTotal,
     status: 'pending',
     createdAt: new Date(),
+    platformFee,
     user: {
-      name: req.user.name,
-      phone: req.user.phone_number
+      name: user.name ?? '',
+      phone: user.phone_number
     },
-    orderRefId: req.user.phone_number + ':: ' + orderRefId
+    orderRefId: user.phone_number + ':: ' + orderRefId,
+    appliedCoupon: appliedCoupon ?? ''
   };
   await firebaseDb.collection('orders').doc(id).create(orderDetails);
-  await updateWhatsapp({
-    name: req.user.name,
-    phoneNumber: req.user.phone_number
-  });
-  return res.status(200).json({
-    paymentLink: `mohammedashiqcool-3@okicici`,
-    ...orderDetails
-  });
+  return orderDetails;
+};
+
+export const createOrder = async (req: Request, res: Response) => {
+  const time = Date.now();
+  const { details, appliedCoupon } = req.body as OrderBody;
+  logger.log(`incoming request payload, ${JSON.stringify(details)}`);
+  logger.log(`started ${Date.now() - time}`);
+  const productIds = details.map((d) => d.itemId);
+  try {
+    await canProceedApplyingCoupon(req.user.uid, appliedCoupon);
+    const { products, shops, appConfig } = await getAllData(productIds);
+    const {
+      deliveryFee,
+      grandTotal,
+      itemsTotal,
+      parcelChargesTotal,
+      platformFee,
+      detailsToQuantity
+    } = getTotal(details, products, shops, appConfig, appliedCoupon);
+    logger.info(
+      `grand total is ${grandTotal} ${JSON.stringify({
+        grandTotal,
+        itemsTotal,
+        deliveryFee,
+        platformFee,
+        parcelChargesTotal,
+        timeTaken: Date.now() - time
+      })}`
+    );
+    if (grandTotal <= 0) {
+      return res.status(400).json({
+        error: 'Invalid order'
+      });
+    }
+    const orderDetails = await createOrderInDb(req.user, {
+      products,
+      detailsToQuantity,
+      grandTotal,
+      itemsTotal,
+      deliveryFee,
+      platformFee,
+      appliedCoupon
+    });
+    logger.log(`order created ${JSON.stringify(orderDetails)}`);
+    logger.log(`time taken ${Date.now() - time}`);
+    return res.status(200).json({
+      ...orderDetails
+    });
+  } catch (err) {
+    if (err instanceof HttpError) {
+      logger.error(`error while creating order ${err.message}`);
+      return res.status(400).json({
+        error: 'Invalid order',
+        message: err.message
+      });
+    }
+    logger.error(`error while creating order ${err}`);
+    return res.status(500).json({
+      error: 'Internal server error'
+    });
+  }
+};
+
+export const onOrderCreate = async (data: OrderDb) => {
+  const { user, appliedCoupon, userId } = data;
+  await updateWhatsapp({ name: user?.name ?? '', phoneNumber: user.phone });
+  await removeCoupon(userId, appliedCoupon);
+  await updateFreeDeliveryForInvitedUser(
+    `THANK_${user?.name?.substring(0, 4).toUpperCase() ?? 'YOU'}`,
+    appliedCoupon
+  );
 };

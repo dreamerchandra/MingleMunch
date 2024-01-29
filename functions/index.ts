@@ -1,10 +1,13 @@
+import cors from 'cors';
 import express, { Express, Request, Response } from 'express';
 import * as functions from 'firebase-functions';
-import cors from 'cors';
-import { updateUser } from './src/router/update-user.js';
+import { logger } from 'firebase-functions';
+import { fcm } from './src/firebase.js';
 import { authMiddle, authorizedAsAdmin } from './src/middleware/auth.js';
-import { createOrder } from './src/router/order.js';
-import { fcm, firebaseAuth } from './src/firebase.js';
+import { OrderDb } from './src/router/order-helper.js';
+import { createOrder, onOrderCreate } from './src/router/order.js';
+import { updateUser } from './src/router/update-user.js';
+import { onCreateUser } from './src/router/user.js';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -19,29 +22,64 @@ expressApp.get('/migrate', (req: Request, res: Response) => {
 });
 
 expressApp.put('/v1/update-user', authMiddle, authorizedAsAdmin, updateUser);
-expressApp.post('/v1/notification', authMiddle, authorizedAsAdmin, async (req: Request, res: Response) => {
-  const { token, title, body, link, analyticsLabel, data, requireInteraction = false } = req.body;
-  await fcm.send({
-    token,
-    fcmOptions: {
-      analyticsLabel: analyticsLabel,
-    },
-    webpush: {
-      notification: {
-        title,
-        body,
-        badge: 'https://delivery.goburn.in/logo.png',
-        icon: 'https://delivery.goburn.in/logo.png',
-        requireInteraction,
+expressApp.post(
+  '/v1/notification',
+  authMiddle,
+  authorizedAsAdmin,
+  async (req: Request, res: Response) => {
+    const {
+      token,
+      title,
+      body,
+      link,
+      analyticsLabel,
+      data,
+      requireInteraction = false
+    } = req.body;
+    await fcm.send({
+      token,
+      fcmOptions: {
+        analyticsLabel: analyticsLabel
       },
-      data: {
-        ...data,
-        link,
-      },
-    },
-  })
-  return res.sendStatus(200);
-});
+      webpush: {
+        notification: {
+          title,
+          body,
+          badge: 'https://delivery.goburn.in/logo.png',
+          icon: 'https://delivery.goburn.in/logo.png',
+          requireInteraction
+        },
+        data: {
+          ...data,
+          link
+        }
+      }
+    });
+    return res.sendStatus(200);
+  }
+);
 expressApp.post('/v1/order', authMiddle, createOrder);
 
-export const app = functions.https.onRequest(expressApp);
+export const onUserCreate = functions
+  .region('asia-south1')
+  .auth.user()
+  .onCreate(onCreateUser);
+
+export const onOrderCreated = functions
+  .region('asia-south1')
+  .firestore.document('orders/{orderId}')
+  .onCreate(async (snap) => {
+    const data = snap.data() as OrderDb;
+    logger.log(`on order created ${JSON.stringify(data)}`);
+    await onOrderCreate(data);
+  });
+
+export const order = functions
+  .runWith({
+    maxInstances: 3,
+    minInstances: 1,
+    memory: '128MB',
+    labels: { name: 'order' }
+  })
+  .region('asia-south1')
+  .https.onRequest(expressApp);

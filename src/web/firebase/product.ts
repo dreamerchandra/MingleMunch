@@ -51,7 +51,8 @@ const constructProduct = (
     shopName: shop.shopName,
     shopAddress: shop.shopAddress,
     shopMapLocation: shop.shopMapLocation,
-    shopId: shop.shopId
+    shopId: shop.shopId,
+    deliveryFee: shop.deliveryFee,
   };
   return {
     itemName,

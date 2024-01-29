@@ -26,7 +26,9 @@ interface AddToCartAction {
 
 interface RemoveFromCartAction {
   type: 'REMOVE_FROM_CART';
-  payload: Product;
+  payload: {
+    itemId: string;
+  };
 }
 interface RemoveAllFromCartAction {
   type: 'REMOVE_ALL';
@@ -47,11 +49,13 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
       const itemIndex = state.cart.findIndex(
         (item) => item.itemId === action.payload.itemId
       );
+      const product = state.cart[itemIndex];
+      if (!product) return state;
 
       return {
         ...state,
         cart: state.cart.filter((_, index) => index !== itemIndex),
-        total: state.total - action.payload.itemPrice,
+        total: state.total - product.itemPrice,
         totalItems: state.totalItems - 1
       };
     }
@@ -91,25 +95,33 @@ const useCartActivity = () => {
     dispatch({ type: 'ADD_TO_CART', payload: product });
     LogRocket.track('cart-added', {
       productCategory: 'Food',
-      productSku: product.itemId,
-   });
-   logEvent(analytics, 'cart-added');
+      productSku: product.itemId
+    });
+    logEvent(analytics, 'cart-added');
   }, []);
   const removeFromCart = useCallback((product: Product) => {
+    product.suggestionIds?.map((suggestion) => {
+      dispatch({
+        type: 'REMOVE_FROM_CART',
+        payload: {
+          itemId: suggestion
+        }
+      });
+    });
     dispatch({ type: 'REMOVE_FROM_CART', payload: product });
-   logEvent(analytics, 'cart-removed');
+    logEvent(analytics, 'cart-removed');
     LogRocket.track('cart-removed', {
       productCategory: 'Food',
-      productSku: product.itemId,
-   });
+      productSku: product.itemId
+    });
   }, []);
   const removeAll = useCallback(() => {
     dispatch({ type: 'REMOVE_ALL' });
-   logEvent(analytics, 'cart-removed');
+    logEvent(analytics, 'cart-removed');
     LogRocket.track('cart-removed', {
       productCategory: 'Food',
-      productSku: 'all',
-   });
+      productSku: 'all'
+    });
   }, []);
 
   return useMemo(

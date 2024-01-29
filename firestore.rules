@@ -6,7 +6,7 @@ service cloud.firestore {
     }
      match /shop/{shopId} {
       allow read: if true;
-      allow write: if request.auth.token.role in ['vendor', 'admin'];
+      allow write: if request.auth.token.role in ['admin'];
     }
     match /orders/{orderId} {
       allow read: if request.auth != null;
@@ -23,6 +23,14 @@ service cloud.firestore {
     match /fcmTokens/{userId} {
       allow read: if request.auth.uid == userId;
       allow write: if request.auth.uid == userId;
+    }
+    match /users/{userId} {
+      allow read: if request.auth.uid == userId;
+      allow write: if false;
+    }
+     match /appConfig/public {
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

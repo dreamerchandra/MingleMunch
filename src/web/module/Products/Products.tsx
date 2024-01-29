@@ -25,10 +25,11 @@ import { useNavigate } from 'react-router-dom';
 import { Drawer } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
 
-const FooterActions: FC<{ product: Product; onAdd: () => void }> = ({
-  product,
-  onAdd
-}) => {
+const FooterActions: FC<{
+  product: Product;
+  onAdd: () => void;
+  isSuggestion: boolean;
+}> = ({ product, onAdd }) => {
   const { addToCart, removeFromCart, cartDetails } = useCart();
   const {
     userDetails: { role }
@@ -61,7 +62,9 @@ const FooterActions: FC<{ product: Product; onAdd: () => void }> = ({
             <Button size="small" onClick={() => removeFromCart(product)}>
               <Remove color="warning" />
             </Button>
-            <Typography variant='h6' color='green'>{inCart.length}</Typography>
+            <Typography variant="h6" color="green">
+              {inCart.length}
+            </Typography>
             <Button
               size="small"
               onClick={() => {
@@ -148,10 +151,13 @@ const SuggestionProductItem: FC<{ productId: string }> = ({ productId }) => {
   const { data: product } = useProductQuery(productId);
   if (!product) return null;
   if (!product.isAvailable) return null;
-  return <ProductItem product={product} />;
+  return <ProductItem product={product} isSuggestion />;
 };
 
-const ProductItem: FC<{ product: Product }> = ({ product }) => {
+const ProductItem: FC<{ product: Product; isSuggestion?: boolean }> = ({
+  product,
+  isSuggestion = false
+}) => {
   const { itemDescription, itemName, itemPrice } = product;
   const [open, setOpen] = useState(false);
 
@@ -192,15 +198,23 @@ const ProductItem: FC<{ product: Product }> = ({ product }) => {
           <div style={{ height: '25px' }}></div>
           <FooterActions
             product={product}
+            isSuggestion={isSuggestion}
             onAdd={() => {
-              if (product.suggestionIds?.length > 0) {
+              if ((product.suggestionIds?.length ?? 0) > 0) {
                 setOpen(true);
               }
             }}
           />
         </div>
       </div>
-      <Drawer open={open} onClose={() => setOpen(false)} anchor="bottom">
+      <Drawer
+        open={open}
+        onClose={() => setOpen(false)}
+        anchor="bottom"
+        sx={{
+          zIndex: 2000
+        }}
+      >
         <Box
           sx={{
             backgroundColor: '#eab6b637'
@@ -323,6 +337,7 @@ export const Products: FC<{
             ))
           : categories?.map((category) => (
               <Box
+                key={category.categoryId}
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',

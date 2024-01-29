@@ -6,4 +6,5 @@ export interface Shop {
   shopImage: string;
   description: string;
   isOpen: boolean;
+  deliveryFee: number;
 }

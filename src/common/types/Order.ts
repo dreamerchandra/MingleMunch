@@ -38,11 +38,5 @@ export interface Order {
   orderPaymentRefId: string;
   orderPaymentMethod: string;
   orderPaymentAmount: number;
-  shopDetails: {
-    shopName: string;
-    shopAddress: string;
-    shopMapLocation: string;
-    shopId: string;
-  };
   orderRefId: string;
 }

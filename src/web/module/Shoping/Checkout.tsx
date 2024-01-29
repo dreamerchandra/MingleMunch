@@ -26,6 +26,8 @@ import CardContent from '@mui/material/CardContent';
 import { LastOrder } from '../LastOrder/LastOrder';
 import { logEvent } from 'firebase/analytics';
 import { analytics } from '../../firebase/firebase/firebsae-app';
+import { useShopQuery } from '../Shop/shop-query';
+import { useAppConfig } from '../appconfig';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -71,6 +73,8 @@ const SubSection = styled('div')(({ theme }) => ({
 
 export const Checkout: FC = () => {
   const { cartDetails, addToCart, removeFromCart, removeAll } = useCart();
+  const { data: shops } = useShopQuery();
+  const { data: appConfig } = useAppConfig();
   const items = cartDetails.cart.reduce((old, cartItem) => {
     const item = old.find((item) => item.product.itemId === cartItem.itemId);
     if (item) {
@@ -80,6 +84,16 @@ export const Checkout: FC = () => {
     }
     return old;
   }, [] as { product: Product; quantity: number }[]);
+  const navigate = useNavigate();
+  const { mutate, isLoading } = useMutationCreateOrder();
+  const [success, setShowSuccess] = useState(false);
+  const initialErrorState = { message: '', products: [] as string[] };
+  const [error, setError] = useState(initialErrorState);
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate(-1);
+    }
+  }, [items.length, navigate]);
 
   const itemsTotal = items.reduce(
     (old, item) => old + item.product.itemPrice * item.quantity,
@@ -89,15 +103,24 @@ export const Checkout: FC = () => {
     (old, item) => old + (item.product.parcelCharges ?? 0) * item.quantity,
     0
   );
-  const deliveryFee = 25;
-  const platformFee = 3;
+  if (!shops) {
+    return null;
+  }
+  if (!appConfig) {
+    return null;
+  }
+  const shopIds = [...new Set(items.map((i) => i.product.shopId))];
+  const deliveryFee = shopIds.reduce((old, shopId) => {
+    const s = shops?.find((s) => s.shopId === shopId);
+    if (!s) return old;
+    return old + s.deliveryFee;
+  }, 0);
+
+  const { platformFee } = appConfig;
   const grandTotal = Number(
     (itemsTotal + deliveryFee + platformFee + parcelChargesTotal).toFixed(2)
   );
-  const { mutate, isLoading } = useMutationCreateOrder();
-  const [success, setShowSuccess] = useState(false);
-  const initialErrorState = { message: '', products: [] as string[] };
-  const [error, setError] = useState(initialErrorState);
+
   const onPlaceOrder = () => {
     mutate(
       {
@@ -132,15 +155,6 @@ export const Checkout: FC = () => {
       }
     );
   };
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (items.length === 0) {
-      navigate(-1);
-    }
-  }, [items.length, navigate]);
-  if (!open) {
-    return null;
-  }
   return (
     <Container
       component="main"
@@ -318,11 +332,13 @@ export const Checkout: FC = () => {
                   width: '65vw',
                   color: '#ff4b4b',
                   justifyContent: 'normal',
-                  gap: 4,
+                  gap: 4
                 }}
               >
-                <Typography variant="h6" fontWeight='bold'>Competitor's Price</Typography>
-                <Typography variant="h6" fontWeight='bold'>
+                <Typography variant="h6" fontWeight="bold">
+                  Competitor's Price
+                </Typography>
+                <Typography variant="h6" fontWeight="bold">
                   Rs. {Math.round(grandTotal * 0.45 + grandTotal)}
                 </Typography>
               </TotalWrapper>
@@ -442,7 +458,7 @@ export const Checkout: FC = () => {
                   loadingPosition="start"
                   startIcon={<ShoppingCartCheckoutIcon />}
                   variant="contained"
-                  disabled={isLoading}
+                  disabled={isLoading || !appConfig.isOpen}
                   onClick={onPlaceOrder}
                   color="secondary"
                   style={{
@@ -450,7 +466,9 @@ export const Checkout: FC = () => {
                     marginBottom: '20px'
                   }}
                 >
-                  Place order ₹ {grandTotal}
+                  {appConfig.isOpen
+                    ? `Place order ₹ ${grandTotal}`
+                    : 'Opens by 7AM'}
                 </LoadingButton>
               </SubSection>
             )}

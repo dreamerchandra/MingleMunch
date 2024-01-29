@@ -28,8 +28,8 @@ const constructSearch = (params: any) => {
 };
 
 const baseUrl = isLocalhost()
-  ? 'http://localhost:5001/mingle-munch/us-central1/app'
-  : 'https://us-central1-mingle-munch.cloudfunctions.net/app';
+  ? 'http://localhost:5001/mingle-munch/asia-south1/order'
+  : 'https://asia-south1-mingle-munch.cloudfunctions.net/order';
 
 export const get = async (
   urlString: string,
@@ -54,7 +54,15 @@ export const post = async (
   signal?: AbortController['signal']
 ) => {
   const url = new URL(`${baseUrl}${urlString}`);
-  const token = await firebaseAuth.currentUser?.getIdToken();
+  let token = await firebaseAuth.currentUser?.getIdToken();
+  const result = await firebaseAuth.currentUser?.getIdTokenResult();
+  if(!result) {
+    throw new Error('No token found');
+  }
+  if(new Date(result.expirationTime).valueOf() < Date.now()) {
+    console.log('token expired, refreshing');
+    token = await firebaseAuth.currentUser?.getIdToken(true);
+  }
   try {
     const res = await fetch(url, {
       method: 'POST',
