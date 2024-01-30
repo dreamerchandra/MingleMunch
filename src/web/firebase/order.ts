@@ -19,6 +19,7 @@ import { firebaseDb } from './firebase/db';
 
 export interface OrderPayload {
   details: { itemId: string; quantity: number }[];
+  appliedCoupon: string;
 }
 
 export const createOrder = async (

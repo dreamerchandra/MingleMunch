@@ -12,6 +12,7 @@ import { useInit } from '../module/Context/InitProvider';
 import { firebaseAuth } from './firebase/auth';
 import { logEvent } from 'firebase/analytics';
 import { analytics } from './firebase/firebsae-app';
+import { post } from './fetch';
 
 export const removeCountryCode = (phoneNumber: string) => {
   let phNo = phoneNumber;
@@ -22,7 +23,7 @@ export const removeCountryCode = (phoneNumber: string) => {
   if (phoneNumber.startsWith('+91')) {
     phNo = phNo.replace(/^\+91/, '');
   }
-  if(phoneNumber.length > 10 && phoneNumber.startsWith('91')) {
+  if (phoneNumber.length > 10 && phoneNumber.startsWith('91')) {
     phNo = phNo.replace(/^91/, '');
   }
   return phNo;
@@ -111,7 +112,13 @@ export const useUser = () => {
       getIdToken(userDetails.user!, true);
     });
   };
-  return { userDetails, updateUserDetails };
+
+  const updateInviteCode = useCallback(async (code: string) => {
+    return await post('/v1/referral', {
+      inviteCode: code
+    });
+  }, []);
+  return { userDetails, updateUserDetails, updateInviteCode };
 };
 
 export const useProtectedRoute = () => {

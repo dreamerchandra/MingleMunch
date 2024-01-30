@@ -7,7 +7,7 @@ import { authMiddle, authorizedAsAdmin } from './src/middleware/auth.js';
 import { OrderDb } from './src/router/order-helper.js';
 import { createOrder, onOrderCreate } from './src/router/order.js';
 import { updateUser } from './src/router/update-user.js';
-import { onCreateUser } from './src/router/user.js';
+import { onCreateUser, updateReferralCode } from './src/router/user.js';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -59,6 +59,7 @@ expressApp.post(
   }
 );
 expressApp.post('/v1/order', authMiddle, createOrder);
+expressApp.post('/v1/referral', authMiddle, updateReferralCode);
 
 export const onUserCreate = functions
   .region('asia-south1')

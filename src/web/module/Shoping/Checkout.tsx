@@ -1,33 +1,35 @@
-import { Check } from '@mui/icons-material';
+import { Check, CopyAll, WhatsApp } from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/Check';
+import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { green } from '@mui/material/colors';
-import { styled } from '@mui/material/styles';
-import { FC, useEffect, useState } from 'react';
-import { Product } from '../../../common/types/Product';
-import { useCart } from './cart-activity';
-import { useMutationCreateOrder } from './checkout-query';
-import { useNavigate } from 'react-router-dom';
+import { SwipeableDrawer } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import CheckIcon from '@mui/icons-material/Check';
-import LogRocket from 'logrocket';
-import InfoIcon from '@mui/icons-material/Info';
-import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import CardContent from '@mui/material/CardContent';
-import { LastOrder } from '../LastOrder/LastOrder';
+import Typography from '@mui/material/Typography';
+import { green } from '@mui/material/colors';
+import { styled } from '@mui/material/styles';
 import { logEvent } from 'firebase/analytics';
+import LogRocket from 'logrocket';
+import { FC, useEffect, useState } from 'react';
+import Confetti from 'react-confetti';
+import { useNavigate } from 'react-router-dom';
+import { Product } from '../../../common/types/Product';
 import { analytics } from '../../firebase/firebase/firebsae-app';
+import { LastOrder } from '../LastOrder/LastOrder';
 import { useShopQuery } from '../Shop/shop-query';
-import { useAppConfig } from '../appconfig';
+import { useAppConfig, useUserConfig } from '../appconfig';
+import { useCart } from './cart-activity';
+import { useMutationCreateOrder } from './checkout-query';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -75,6 +77,14 @@ export const Checkout: FC = () => {
   const { cartDetails, addToCart, removeFromCart, removeAll } = useCart();
   const { data: shops } = useShopQuery();
   const { data: appConfig } = useAppConfig();
+  const { data: userConfig } = useUserConfig();
+  const [coupon, _setCoupon] = useState('');
+  const [confetti, setConfetti] = useState(false);
+  const setCoupon = (coupon: string) => {
+    setConfetti(true);
+    _setCoupon(coupon);
+    logEvent(analytics, 'coupon-applied', { coupon });
+  };
   const items = cartDetails.cart.reduce((old, cartItem) => {
     const item = old.find((item) => item.product.itemId === cartItem.itemId);
     if (item) {
@@ -89,6 +99,7 @@ export const Checkout: FC = () => {
   const [success, setShowSuccess] = useState(false);
   const initialErrorState = { message: '', products: [] as string[] };
   const [error, setError] = useState(initialErrorState);
+  const [model, setModel] = useState(false);
   useEffect(() => {
     if (items.length === 0) {
       navigate(-1);
@@ -109,12 +120,22 @@ export const Checkout: FC = () => {
   if (!appConfig) {
     return null;
   }
+  if (!userConfig) {
+    return null;
+  }
   const shopIds = [...new Set(items.map((i) => i.product.shopId))];
-  const deliveryFee = shopIds.reduce((old, shopId) => {
+  const originalDeliveryFee = shopIds.reduce((old, shopId) => {
     const s = shops?.find((s) => s.shopId === shopId);
     if (!s) return old;
     return old + s.deliveryFee;
   }, 0);
+  const deliveryFee = !coupon
+    ? shopIds.reduce((old, shopId) => {
+        const s = shops?.find((s) => s.shopId === shopId);
+        if (!s) return old;
+        return old + s.deliveryFee;
+      }, 0)
+    : 0;
 
   const { platformFee } = appConfig;
   const grandTotal = Number(
@@ -127,7 +148,8 @@ export const Checkout: FC = () => {
         details: items.map((item) => ({
           itemId: item.product.itemId,
           quantity: item.quantity
-        }))
+        })),
+        appliedCoupon: coupon || ''
       },
       {
         onSuccess: () => {
@@ -141,7 +163,12 @@ export const Checkout: FC = () => {
           setTimeout(() => {
             setShowSuccess(false);
             removeAll();
-          }, 10_000);
+            if (window.location.pathname === '/cart') {
+              navigate('/', {
+                replace: true
+              });
+            }
+          }, 7_000);
         },
         onError: (err) => {
           setError({
@@ -192,18 +219,20 @@ export const Checkout: FC = () => {
                   marginTop: 0
                 }}
               >
-                <Alert
-                  icon={<CheckIcon fontSize="inherit" />}
-                  severity="success"
-                  sx={{
-                    bgcolor: '#41b594',
-                    color: '#fff',
-                    borderRadius: '5px'
-                  }}
-                >
-                  You have saved Rs.{Math.round(itemsTotal * 0.18)} on this
-                  order.
-                </Alert>
+                {coupon && (
+                  <Alert
+                    icon={<CheckIcon fontSize="inherit" />}
+                    severity="success"
+                    sx={{
+                      bgcolor: '#41b594',
+                      color: '#fff',
+                      borderRadius: '5px'
+                    }}
+                  >
+                    You have saved Rs.{originalDeliveryFee} on this order.
+                  </Alert>
+                )}
+
                 <Card
                   sx={{ padding: 2, mt: 2 }}
                   elevation={2}
@@ -371,9 +400,13 @@ export const Checkout: FC = () => {
                   </TotalWrapper>
                   <TotalWrapper>
                     <Typography component="h6">
-                      Delivery{' '}
+                      Delivery
                       <Tooltip
-                        title="This helps our delivery partners to serve you better."
+                        title={
+                          !coupon
+                            ? 'This helps our delivery partners to serve you better.'
+                            : `Delivery fee Rs.${originalDeliveryFee} has been waved off`
+                        }
                         enterTouchDelay={20}
                         leaveTouchDelay={5_000}
                       >
@@ -382,7 +415,20 @@ export const Checkout: FC = () => {
                         </IconButton>
                       </Tooltip>
                     </Typography>
-                    <Typography component="h6">₹ {deliveryFee}</Typography>
+                    <div>
+                      {coupon && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            textDecoration: 'line-through',
+                            color: '#ff4b4b'
+                          }}
+                        >
+                          ₹ {originalDeliveryFee}
+                        </Typography>
+                      )}
+                      <Typography component="h6">₹ {deliveryFee}</Typography>
+                    </div>
                   </TotalWrapper>
                   <TotalWrapper>
                     <Typography component="h6">
@@ -452,7 +498,12 @@ export const Checkout: FC = () => {
                 {error.message}
               </Alert>
             ) : (
-              <SubSection>
+              <SubSection
+                sx={{
+                  gap: 1,
+                  marginBottom: 2
+                }}
+              >
                 <LoadingButton
                   loading={isLoading}
                   loadingPosition="start"
@@ -462,24 +513,177 @@ export const Checkout: FC = () => {
                   onClick={onPlaceOrder}
                   color="secondary"
                   style={{
-                    borderRadius: '10px',
-                    marginBottom: '20px'
+                    borderRadius: '10px'
                   }}
                 >
                   {appConfig.isOpen
                     ? `Place order ₹ ${grandTotal}`
                     : 'Opens by 7AM'}
                 </LoadingButton>
+                {coupon ? (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#41b594',
+                      width: 'fit-content',
+                      margin: 'auto'
+                    }}
+                  >
+                    Coupon applied: {coupon}
+                  </Typography>
+                ) : userConfig.myReferralCodes ? (
+                  <Button
+                    variant="text"
+                    color="info"
+                    onClick={() => setModel(true)}
+                  >
+                    Apply coupon
+                  </Button>
+                ) : null}
               </SubSection>
             )}
           </div>
         </Box>
+      )}
+      <SwipeableDrawer
+        open={model}
+        anchor="bottom"
+        onClose={() => setModel(false)}
+        onOpen={() => {
+          setModel(true);
+        }}
+      >
+        <Box
+          sx={{
+            width: 'min(100vw, 900px)',
+            p: 4,
+            padding: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            margin: 'auto',
+            background: '#000 url(/abstract_emoji.png)'
+          }}
+        >
+          {userConfig?.availableCoupons?.length === 0 ? (
+            <SubSection
+              sx={{
+                gap: 2
+              }}
+            >
+              <Typography variant="h6" color="secondary">
+                No coupons available for you
+              </Typography>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <Typography variant="caption" color="secondary">
+                  Pro Tip: You could
+                  <Typography
+                    variant="caption"
+                    color="secondary"
+                    sx={{ m: 1, textDecoration: 'underline' }}
+                  >
+                    refer and earn
+                  </Typography>
+                  coupons.
+                </Typography>
+                <Typography variant="caption" color="secondary">
+                  Your referral code is
+                  <Button variant="text" color="info" sx={{ p: 0, ml: 2 }}>
+                    {userConfig?.myReferralCodes}
+                  </Button>
+                </Typography>
+              </div>
+              <div
+                style={{
+                  height: '12px'
+                }}
+              />
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-evenly',
+                  gap: 2
+                }}
+              >
+                <ReferButton
+                  myReferralCodes={userConfig.myReferralCodes ?? ''}
+                />
+                <Button
+                  variant="contained"
+                  onClick={() => setModel(false)}
+                  color="secondary"
+                >
+                  Close
+                </Button>
+              </Box>
+            </SubSection>
+          ) : (
+            <Typography variant="h6" color="secondary">
+              Available coupons
+            </Typography>
+          )}
+          {userConfig.availableCoupons?.map((coupon) => (
+            <Card
+              key={coupon}
+              elevation={4}
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 2,
+                borderRadius: '10px',
+                backgroundColor: '#c0eade2c'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 2
+                }}
+              >
+                <Typography variant="h6" color="secondary">
+                  {coupon}
+                </Typography>
+                <Typography variant="caption" color="secondary">
+                  Free delivery
+                </Typography>
+              </div>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  setCoupon(coupon);
+                  setModel(false);
+                }}
+              >
+                Apply
+              </Button>
+            </Card>
+          ))}
+        </Box>
+      </SwipeableDrawer>
+      {confetti && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+        />
       )}
     </Container>
   );
 };
 
 function SuccessCheckout() {
+  const { removeAll } = useCart();
+  const navigate = useNavigate();
   return (
     <div
       style={{
@@ -536,7 +740,15 @@ function SuccessCheckout() {
           <div>Order placed successfully.</div>
           <div>We will call you shortly to confirm the order.</div>
         </Alert>
-        <Button href="/" color="info">
+        <Button
+          color="info"
+          onClick={() => {
+            removeAll();
+            navigate('/', {
+              replace: true
+            });
+          }}
+        >
           Back to Home
         </Button>
         <LastOrder />
@@ -544,3 +756,42 @@ function SuccessCheckout() {
     </div>
   );
 }
+
+const ReferButton: FC<{ myReferralCodes: string }> = ({ myReferralCodes }) => {
+  const [copied, setCoped] = useState(false);
+
+  if (typeof navigator.share === 'function') {
+    <Button
+      variant="outlined"
+      onClick={() => {
+        navigator.share({
+          title: 'Burn',
+          text: `Hey, I found this amazing app called Burn. It has the lowest prices for food ordering. \n You can also get free delivery on your first order. \n \n Use my referral code ${myReferralCodes} to get your first order delivered free. Use it from http://delivery.goburn.in/`,
+          url: 'http://delivery.goburn.in/'
+        });
+      }}
+      color="secondary"
+    >
+      <WhatsApp />
+      Refer and Earn
+    </Button>;
+  }
+  return (
+    <Button
+      variant="outlined"
+      onClick={() => {
+        navigator.clipboard.writeText(
+          `Food ordering is super cheap at http://delivery.goburn.in/. Use my coupon code to get first delivery free. \nCOUPON CODE: ${myReferralCodes}`
+        );
+        setCoped(true);
+        setTimeout(() => {
+          setCoped(false);
+        }, 1_000);
+      }}
+      color="secondary"
+    >
+      {copied ? <CheckIcon /> : <CopyAll />}
+      Copy Code
+    </Button>
+  );
+};

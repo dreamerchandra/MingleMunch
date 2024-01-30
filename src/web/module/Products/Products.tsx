@@ -335,60 +335,64 @@ export const Products: FC<{
           ? filteredList?.map((product) => (
               <ProductItem product={product} key={product.itemId} />
             ))
-          : categories?.map((category) => (
-              <Box
-                key={category.categoryId}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid #f1f6dc',
-                  borderRadius: '10px',
-                  mb: 2
-                }}
-              >
-                <Typography
+          : categories
+              ?.filter((category) =>
+                filteredList.some((i) => i.category.id === category.categoryId)
+              )
+              ?.map((category) => (
+                <Box
                   key={category.categoryId}
-                  variant="h5"
-                  component="h2"
                   sx={{
-                    alignSelf: 'start'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid #f1f6dc',
+                    borderRadius: '10px',
+                    mb: 2
                   }}
                 >
-                  <Box
+                  <Typography
+                    key={category.categoryId}
+                    variant="h5"
+                    component="h2"
                     sx={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'start',
-                      gap: 5,
-                      width: 'fit-content',
-                      justifyContent: 'start',
-                      color: '#d1ff04',
-                      fontWeight: 'bold',
-                      backgroundColor: '#000000',
-                      pl: 2,
-                      pr: 2,
-                      borderRadius: '10px 0 0 0'
+                      alignSelf: 'start'
                     }}
                   >
-                    {category.categoryName}
-                  </Box>
-                  {filteredList
-                    .filter((p) => p.category.id === category.categoryId)
-                    .filter((p) =>
-                      ['admin', 'vendor'].includes(role)
-                        ? true
-                        : p.cantOrderSeparately
-                        ? false
-                        : p.isAvailable
-                    )
-                    ?.map((product) => (
-                      <ProductItem product={product} key={product.itemId} />
-                    ))}
-                </Typography>
-              </Box>
-            ))}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'start',
+                        gap: 5,
+                        width: 'fit-content',
+                        justifyContent: 'start',
+                        color: '#d1ff04',
+                        fontWeight: 'bold',
+                        backgroundColor: '#000000',
+                        pl: 2,
+                        pr: 2,
+                        borderRadius: '10px 0 0 0'
+                      }}
+                    >
+                      {category.categoryName}
+                    </Box>
+                    {filteredList
+                      .filter((p) => p.category.id === category.categoryId)
+                      .filter((p) =>
+                        ['admin', 'vendor'].includes(role)
+                          ? true
+                          : p.cantOrderSeparately
+                          ? false
+                          : p.isAvailable
+                      )
+                      ?.map((product) => (
+                        <ProductItem product={product} key={product.itemId} />
+                      ))}
+                  </Typography>
+                </Box>
+              ))}
       </Box>
     </>
   );

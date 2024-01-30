@@ -21,7 +21,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
         height: 'fit-content',
         backgroundColor: '#fff',
         alignItems: 'center',
-        minWidth: '85vw',
+        minWidth: '85vw'
       }}
       elevation={0}
       onClick={() => {
@@ -67,7 +67,7 @@ export const Shops = () => {
         pt: 4,
         alignItems: 'center',
         gap: 1,
-        pb: 16,
+        pb: 16
       }}
     >
       <Typography variant="h6" sx={{ letterSpacing: 4, mb: 2 }}>
@@ -75,7 +75,7 @@ export const Shops = () => {
       </Typography>
       {data?.map((shop) => (
         <div key={shop.shopId}>
-          <Shop  shop={shop} />
+          <Shop shop={shop} />
           <Divider sx={{ width: '75vw', margin: 'auto' }} />
         </div>
       ))}
