@@ -1,11 +1,13 @@
-import { useContext, useEffect, useReducer } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer
+} from 'react';
+import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
-import { useMemo } from 'react';
-import { useCallback } from 'react';
-import { createContext } from 'react';
-import LogRocket from 'logrocket';
-import { logEvent } from 'firebase/analytics';
-import { analytics } from '../../firebase/firebase/firebsae-app';
 
 interface CartState {
   cart: Product[];
@@ -93,11 +95,10 @@ const useCartActivity = () => {
 
   const addToCart = useCallback((product: Product) => {
     dispatch({ type: 'ADD_TO_CART', payload: product });
-    LogRocket.track('cart-added', {
+    Analytics.pushEvent('cart-added', {
       productCategory: 'Food',
       productSku: product.itemId
     });
-    logEvent(analytics, 'cart-added');
   }, []);
   const removeFromCart = useCallback((product: Product) => {
     product.suggestionIds?.map((suggestion) => {
@@ -109,19 +110,14 @@ const useCartActivity = () => {
       });
     });
     dispatch({ type: 'REMOVE_FROM_CART', payload: product });
-    logEvent(analytics, 'cart-removed');
-    LogRocket.track('cart-removed', {
+    Analytics.pushEvent('cart-removed', {
       productCategory: 'Food',
       productSku: product.itemId
     });
   }, []);
   const removeAll = useCallback(() => {
     dispatch({ type: 'REMOVE_ALL' });
-    logEvent(analytics, 'cart-removed');
-    LogRocket.track('cart-removed', {
-      productCategory: 'Food',
-      productSku: 'all'
-    });
+    Analytics.pushEvent('cart-removed_all');
   }, []);
 
   return useMemo(

@@ -7,18 +7,15 @@ import {
   useEffect,
   useState
 } from 'react';
+import { Analytics } from '../../../common/analytics';
 import { Role } from '../../../common/types/roles';
 import { firebaseAuth } from '../../firebase/firebase/auth';
-import LogRocket from 'logrocket';
-import { setUserId } from 'firebase/analytics';
-import { analytics } from '../../firebase/firebase/firebsae-app';
 
 const InitContext = createContext({
   user: null as User | null,
   loading: true,
   role: '' as Role
 });
-
 
 declare global {
   interface Window {
@@ -33,32 +30,16 @@ export const InitProvider: FC<{ children: ReactNode }> = ({ children }) => {
     role: '' as Role
   });
   useEffect(() => {
-    const isLoggedOut = !firebaseAuth.currentUser;
-    let timerId: any = null;
-    if (isLoggedOut) {
-      timerId = setTimeout(() => {
-        setUser({
-          user: null,
-          loading: false,
-          role: 'user'
-        });
-      }, 1000);
-    }
     const unsubs = firebaseAuth.onAuthStateChanged(async (user) => {
-      if (timerId) {
-        clearTimeout(timerId);
-      }
       if (user) {
         const tokenResult = await getIdTokenResult(user, true);
         localStorage.setItem('isLoggedIn', 'true');
-        setUserId(analytics, user.uid);
         const token = await user?.getIdToken();
         window.token = token;
-        LogRocket.identify(user.uid, {
-          name: user.displayName!,
-          phone: user.phoneNumber!,
-          uid: user.uid!
-        });
+        Analytics.init(
+          user,
+          ['admin', 'vendor'].includes(tokenResult.claims.role)
+        );
         setUser({
           user: user,
           loading: false,

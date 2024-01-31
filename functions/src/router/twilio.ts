@@ -7,11 +7,9 @@ const accountSid = 'AC8d9667b8ce34ed5473965c348b3d0d19';
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 export const updateWhatsapp = async ({
-  name,
-  phoneNumber
+  message,
 }: {
-  name: string;
-  phoneNumber: string;
+  message: string;
 }) => {
   const twilio = client(accountSid, authToken);
   if (process.env.FIRESTORE_EMULATOR_HOST) {
@@ -19,7 +17,7 @@ export const updateWhatsapp = async ({
   }
   return twilio.messages
     .create({
-      body: `New order from ${name} and phone number is ${phoneNumber}`,
+      body: message,
       from: 'whatsapp:+14155238886',
       to: 'whatsapp:+916374140416'
     })

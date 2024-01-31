@@ -210,7 +210,9 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const onOrderCreate = async (data: OrderDb) => {
   const { user, appliedCoupon, userId } = data;
-  await updateWhatsapp({ name: user?.name ?? '', phoneNumber: user.phone });
+  await updateWhatsapp({
+    message: `New order from ${user.name} and phone number is ${user.phone}`
+  });
   await removeCoupon(userId, appliedCoupon);
   await updateFreeDeliveryForInvitedUser(
     `THANK_${user?.name?.substring(0, 4).toUpperCase() ?? 'YOU'}`,

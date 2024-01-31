@@ -43,7 +43,6 @@ export function CheckoutHeadsUp() {
 
 export function NotificationFab() {
   const { userDetails } = useUser();
-  console.log(userDetails.user?.phoneNumber)
   if(!userDetails.user?.phoneNumber?.includes('8754791569') ) {
     return null;
   }

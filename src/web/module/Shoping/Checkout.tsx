@@ -18,13 +18,11 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { green } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
-import { logEvent } from 'firebase/analytics';
-import LogRocket from 'logrocket';
 import { FC, useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
 import { useNavigate } from 'react-router-dom';
+import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
-import { analytics } from '../../firebase/firebase/firebsae-app';
 import { LastOrder } from '../LastOrder/LastOrder';
 import { useShopQuery } from '../Shop/shop-query';
 import { useAppConfig, useUserConfig } from '../appconfig';
@@ -83,7 +81,7 @@ export const Checkout: FC = () => {
   const setCoupon = (coupon: string) => {
     setConfetti(true);
     _setCoupon(coupon);
-    logEvent(analytics, 'coupon-applied', { coupon });
+    Analytics.pushEvent('coupon-applied', { coupon });
   };
   const items = cartDetails.cart.reduce((old, cartItem) => {
     const item = old.find((item) => item.product.itemId === cartItem.itemId);
@@ -153,8 +151,7 @@ export const Checkout: FC = () => {
       },
       {
         onSuccess: () => {
-          logEvent(analytics, 'order-placed');
-          LogRocket.track('order-placed', {
+          Analytics.pushEvent('order-placed', {
             productCategory: 'Food',
             productSku: items.map((item) => item.product.itemId),
             revenue: grandTotal

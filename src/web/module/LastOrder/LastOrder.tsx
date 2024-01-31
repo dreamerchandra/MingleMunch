@@ -1,10 +1,8 @@
 import { Phone } from '@mui/icons-material';
 import Button from '@mui/material/Button';
 import { FC, useEffect, useState } from 'react';
+import { Analytics } from '../../../common/analytics';
 import { useLastOrder } from './last-order';
-import LogRocket from 'logrocket';
-import { logEvent } from 'firebase/analytics';
-import { analytics } from '../../firebase/firebase/firebsae-app';
 
 declare global {
   interface Window {
@@ -25,11 +23,9 @@ export const AddToHomeScreen = () => {
       onClick={async () => {
         if (window.installEvent) {
           window.installEvent.prompt();
-          LogRocket.track('prompt-to-homescreen');
-          logEvent(analytics, 'prompt-to-homescreen');
+          Analytics.pushEvent('prompt-to-homescreen');
           const install = await window.installEvent.userChoice;
-          logEvent(analytics, 'added-to-homescreen');
-          LogRocket.track('added-to-homescreen', {
+          Analytics.pushEvent('added-to-homescreen', {
             install: install.outcome
           });
           window.installEvent = null;

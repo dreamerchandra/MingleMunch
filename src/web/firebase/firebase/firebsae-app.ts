@@ -12,4 +12,4 @@ const firebaseConfig = {
 };
 console.log(firebaseConfig.measurementId, 'firebaseConfig.measurementId');
 export const firebaseApp = initializeApp(firebaseConfig);
-export const analytics = getAnalytics(firebaseApp);
+export const analytics = window.location.hostname === 'localhost' ? undefined : getAnalytics(firebaseApp);

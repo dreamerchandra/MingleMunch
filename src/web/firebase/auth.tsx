@@ -1,3 +1,4 @@
+import { logEvent } from 'firebase/analytics';
 import {
   ConfirmationResult,
   RecaptchaVerifier,
@@ -8,11 +9,11 @@ import {
 import LogRocket from 'logrocket';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Analytics } from '../../common/analytics';
 import { useInit } from '../module/Context/InitProvider';
-import { firebaseAuth } from './firebase/auth';
-import { logEvent } from 'firebase/analytics';
-import { analytics } from './firebase/firebsae-app';
 import { post } from './fetch';
+import { firebaseAuth } from './firebase/auth';
+import { analytics } from './firebase/firebsae-app';
 
 export const removeCountryCode = (phoneNumber: string) => {
   let phNo = phoneNumber;
@@ -70,8 +71,8 @@ export const useToSignIn = () => {
       })
       .catch((err) => {
         console.log('error triggering otp', err);
+        Analytics.pushEvent('otp_error', { error: err.message });
         LogRocket.captureException(err);
-        logEvent(analytics, 'otp_error');
         setError(err.message);
       })
       .finally(() => setIsOtpRequested(true));
@@ -89,7 +90,7 @@ export const useToSignIn = () => {
       .catch((err) => {
         setError('Invalid OTP');
         LogRocket.captureException(err);
-        logEvent(analytics, 'ph_error');
+        logEvent(analytics!, 'ph_error');
       });
   }, []);
   return {
@@ -132,7 +133,9 @@ export const useProtectedRoute = () => {
     if (user == null) {
       if (window.location.pathname === '/login') return;
       localStorage.setItem('redirect', window.location.pathname);
-      return navigation('/login');
+      return navigation('/login', {
+        replace: true
+      });
     } else {
       localStorage.removeItem('redirect');
     }

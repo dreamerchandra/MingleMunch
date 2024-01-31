@@ -8,6 +8,7 @@ import { OrderDb } from './src/router/order-helper.js';
 import { createOrder, onOrderCreate } from './src/router/order.js';
 import { updateUser } from './src/router/update-user.js';
 import { onCreateUser, updateReferralCode } from './src/router/user.js';
+import { updateWhatsapp } from './src/router/twilio.js';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -60,6 +61,12 @@ expressApp.post(
 );
 expressApp.post('/v1/order', authMiddle, createOrder);
 expressApp.post('/v1/referral', authMiddle, updateReferralCode);
+expressApp.post('/v1/error', async (req: Request, res: Response) => {
+  const { phoneNumber } = req.body;
+  logger.error(`page not loading for ${phoneNumber}`);
+  await updateWhatsapp({ message: `Page not loading for ${phoneNumber}` });
+  return res.sendStatus(200);
+});
 
 export const onUserCreate = functions
   .region('asia-south1')
