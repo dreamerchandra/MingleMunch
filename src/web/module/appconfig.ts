@@ -11,6 +11,8 @@ import { useUser } from '../firebase/auth';
 interface AppConfig {
   isOpen: true;
   platformFee: number;
+  carousel: { image: string; url?: string, isPublished: boolean }[];
+
 }
 
 const appConfigConverter = {
@@ -61,7 +63,7 @@ export const useUserConfig = () => {
   return useQuery({
     queryKey: ['userConfig'],
     queryFn: async () => {
-      console.log(userDetails.user?.uid)
+      console.log(userDetails.user?.uid);
       const snap = await getDoc(
         doc(
           collection(firebaseDb, 'users').withConverter(userConverter),
@@ -69,10 +71,12 @@ export const useUserConfig = () => {
         )
       );
       const data = snap.data();
-      return data || {
-        availableCoupons: [],
-        myReferralCodes: ''
-      };
+      return (
+        data || {
+          availableCoupons: [],
+          myReferralCodes: ''
+        }
+      );
     },
     enabled: !!userDetails.user?.uid
   });

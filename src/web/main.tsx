@@ -35,7 +35,8 @@ window.addEventListener('focus', () => {
   }
 })
 
-if (process.env.NODE_ENV === 'production') {
+const internal = localStorage.getItem('internal');
+if (process.env.NODE_ENV === 'production' && !internal) {
   console.log(`init logrocket with ${packageJson.version}`);
   LogRocket.init('oedyyk/chandra', {
     release: process.env.REACT_APP_VERSION

@@ -345,7 +345,7 @@ export const Checkout: FC = () => {
               <Background />
               <Typography variant="h3" sx={{ fontWeight: 900 }}>
                 Saved you from paying <br /> Rs.
-                {Math.round(grandTotal * 0.45)} extra.
+                {Math.round(grandTotal * 0.28)} extra.
               </Typography>
               <div
                 style={{
@@ -365,7 +365,7 @@ export const Checkout: FC = () => {
                   Competitor's Price
                 </Typography>
                 <Typography variant="h6" fontWeight="bold">
-                  Rs. {Math.round(grandTotal * 0.45 + grandTotal)}
+                  Rs. {Math.round(grandTotal * 0.28 + grandTotal)}
                 </Typography>
               </TotalWrapper>
             </CardContent>

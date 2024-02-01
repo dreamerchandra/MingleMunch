@@ -11,6 +11,7 @@ export class Analytics {
     this.userId = user.uid;
     this.internalUser = isInternal;
     if (isInternal) {
+      localStorage.setItem('internal', 'true');
       return;
     }
     setUserId(analytics!, user.uid);

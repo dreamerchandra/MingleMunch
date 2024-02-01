@@ -12,7 +12,7 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "migration:env": "export FIRESTORE_EMULATOR_HOST=\"localhost:8080\"",
-    "migration": "npm run migration:env && npx fireway migrate --projectId=mingle-munch --forceWait"
+    "migration": " npx fireway migrate --projectId=mingle-munch --forceWait"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -30,6 +30,7 @@
     "react-confetti": "^6.1.0",
     "react-dom": "^18.2.0",
     "react-insta-stories": "^2.6.2",
+    "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^6.10.0",
     "react-toastify": "^9.1.2"
   },

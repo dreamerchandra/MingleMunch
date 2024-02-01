@@ -104,6 +104,37 @@ const migrate = async () => {
   });
 };
 
-migrate().then((res) => {
-  console.log('Migration completed', res);
+const fetchItems = async (res) => {
+  const shopId = 'AGsSfba8AK8HL8KOIRzh';
+  const ref = firebaseDb.collection('food');
+  const query = ref
+    .where('shopId', '==', shopId)
+    .where('category.id', '==', 'tuU3hBwQKRbZJruo1G2N');
+  //Mm0Mhd7lolIQ88jdxiP1
+  const snap = await query.get();
+  const items = [];
+  snap.forEach(async (doc) => {
+    const data = doc.data();
+    const updatedData = {
+      ...data,
+      shopId: 'MZWXNkOyexhAvNlBG9l2',
+      shopDetails: {
+        shopMapLocation: 'https://maps.app.goo.gl/KKuJjeCGUvmMd3aw7',
+        shopName: 'Green Leaf',
+        shopId: 'MZWXNkOyexhAvNlBG9l2',
+        shopAddress: 'Saravanampatti'
+      },
+      category: {
+        id: 'dCzWKt4c9TAGVLjaSNz2',
+        name: 'Biriyani'
+      },
+    };
+    items.push(updatedData);
+  });
+  await Promise.all(items.map(i => firebaseDb.collection('food').add(i)));
+  return items;
+};
+
+fetchItems().then((items) => {
+  console.log('Migration completed', items.length);
 });

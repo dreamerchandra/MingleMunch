@@ -12,6 +12,7 @@ export const initFCM = async (userId: string) => {
   });
   Analytics.pushEvent('fcm init');
   const granted = await Notification.requestPermission();
+  localStorage.setItem('notification', granted);
   if (granted !== 'granted') {
     Analytics.pushEvent('notification denied');
     return;

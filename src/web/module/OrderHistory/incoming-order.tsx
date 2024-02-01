@@ -39,7 +39,8 @@ export const IncomingOrder = () => {
               display: 'flex',
               flexDirection: 'column',
               gap: 2,
-              width: '100%'
+              width: '100%',
+              backgroundColor: order.status === 'pending' ? 'rgb(255 0 0 / 50%)' : ''
             }}
           >
             <Container

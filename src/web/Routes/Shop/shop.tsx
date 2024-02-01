@@ -1,18 +1,30 @@
 import { Box, Container } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Carousel } from 'react-responsive-carousel';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../firebase/auth';
 import { Header } from '../../module/Header/header';
+import { LastOrder } from '../../module/LastOrder/LastOrder';
 import { SideMenu } from '../../module/Menu/SideMenu';
 import { Shops } from '../../module/Shop/shop-list';
-import { CheckoutHeadsUp, NotificationFab } from '../../module/Shoping/CheckoutHeadup';
+import {
+  CheckoutHeadsUp,
+  NotificationInfo
+} from '../../module/Shoping/CheckoutHeadup';
 import { OurStories } from '../../module/stories/stories';
-import { LastOrder } from '../../module/LastOrder/LastOrder';
-import { useEffect } from 'react';
-import { useUser } from '../../firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import { useAppConfig } from '../../module/appconfig';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
   const loading = userDetails?.loading;
   const navigate = useNavigate();
+  const { data: appConfig } = useAppConfig();
+  const [notificationGranted, setNotification] = useState(
+    () => !!localStorage.getItem('notification')
+  );
+  const isAdmin = ['admin', 'vendor'].includes(userDetails?.role) || false;
+  console.log(userDetails.role);
   useEffect(() => {
     if (loading) {
       localStorage.setItem('splash', window.location.pathname);
@@ -26,19 +38,51 @@ export const ShopPage = () => {
     <>
       <Header Menu={SideMenu} />
       <Container component="main">
-        <OurStories />
-        <img
+        {notificationGranted ? (
+          <OurStories />
+        ) : (
+          <NotificationInfo onClick={() => setNotification(true)} />
+        )}
+        <div
           style={{
-            width: 'min(90vw, 900px)'
+            height: '20px'
           }}
-          alt="banner"
-          src="https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/banner.png?alt=media&token=c52454d1-4154-417f-9f68-b876782895dc"
-        />
+        ></div>
+        <Carousel
+          showThumbs={false}
+          infiniteLoop
+          interval={2500}
+          autoPlay
+          showStatus={false}
+          showArrows={false}
+        >
+          {appConfig?.carousel
+            .filter((c) => (isAdmin ? true : c.isPublished))
+            .map((c) => (
+              <div
+                key={c.image}
+                style={{
+                  aspectRatio: '16/9'
+                }}
+                onClick={() => {
+                  c.url && navigate(c.url);
+                }}
+              >
+                <img
+                  src={c.image}
+                  style={{
+                    objectFit: 'cover',
+                    height: '100%',
+                    borderRadius: '10px'
+                  }}
+                />
+              </div>
+            ))}
+        </Carousel>
         <Box marginTop={2}>
           <Shops />
           <CheckoutHeadsUp />
           <LastOrder />
-          <NotificationFab />
         </Box>
       </Container>
     </>

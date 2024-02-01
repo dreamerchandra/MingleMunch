@@ -1,10 +1,9 @@
 import ShoppingCart from '@mui/icons-material/ShoppingCart';
-import { Badge, Fab, styled } from '@mui/material';
+import { Badge, Box, Button, Fab, Typography, styled } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from './cart-activity';
 import { useUser } from '../../firebase/auth';
-import { NotificationImportant } from '@mui/icons-material';
 import { initFCM } from '../../firebase/firebase/fcm';
+import { useCart } from './cart-activity';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   position: 'fixed',
@@ -40,29 +39,44 @@ export function CheckoutHeadsUp() {
   );
 }
 
-
-export function NotificationFab() {
+export function NotificationInfo({ onClick }: { onClick: () => void }) {
   const { userDetails } = useUser();
-  if(!userDetails.user?.phoneNumber?.includes('8754791569') ) {
+  if (!userDetails.user) {
     return null;
   }
   return (
-    <>
-      <StyledBadge
-        badgeContent={0}
-        color="primary"
-        aria-label="checkout"
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'start',
+        mt: 2,
+        mb: 2
+      }}
+    >
+      <Typography variant="h3" sx={{ color: 'black' }}>
+        Get Notified
+      </Typography>
+      <Typography variant="caption">
+        For instant updates on our limited deals and offers, tap on allow
+        notification
+      </Typography>
+      <Button
+        color="error"
+        variant="contained"
+        sx={{
+          alignSelf: 'end',
+          fontSize: '0.70rem'
+        }}
+        onClick={async () => {
+          setTimeout(() => {
+            onClick();
+          }, 1000);
+          await initFCM(userDetails.user!.uid);
+        }}
       >
-        <Fab
-          color="primary"
-          aria-label="checkout"
-          onClick={() => {
-            initFCM(userDetails.user!.uid);
-          }}
-        >
-          <NotificationImportant />
-        </Fab>
-      </StyledBadge>
-    </>
+        Allow Notification
+      </Button>
+    </Box>
   );
 }
