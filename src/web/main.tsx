@@ -12,13 +12,14 @@ import packageJson from '../../package.json';
 import { InitProvider } from './module/Context/InitProvider';
 import { CartProvider } from './module/Shoping/cart-activity';
 import { theme as GlobalTheme } from './theme';
+import { User } from 'firebase/auth';
 
 declare global {
   interface Window {
     errorTimerId?: number;
+    u?: User;
   }
 }
-
 
 document.getElementById('errorMsg')?.remove();
 clearTimeout(window.errorTimerId);
@@ -33,8 +34,40 @@ window.addEventListener('focus', () => {
       window.location.reload();
     }
   }
-})
+});
 
+
+const pushToAnalytics = async () => {
+  setTimeout(() => {
+    let analyticsId = localStorage.getItem('analyticsId');
+    if (!analyticsId) {
+      analyticsId = `${Math.random()}`;
+      localStorage.setItem('analyticsId', analyticsId);
+    }
+    const baseUrl = window.location.href.includes('localhost')
+      ? 'http://localhost:5001/mingle-munch/asia-south1/order'
+      : 'https://asia-south1-mingle-munch.cloudfunctions.net/order';
+    console.log(window.u)
+    fetch(`${baseUrl}/v1/analytics`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        analyticsId,
+        userId: window.u?.uid
+      })
+    })
+      .then(() => {
+        console.log('done');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, 5000);
+};
+
+pushToAnalytics();
 const internal = localStorage.getItem('internal');
 if (process.env.NODE_ENV === 'production' && !internal) {
   console.log(`init logrocket with ${packageJson.version}`);

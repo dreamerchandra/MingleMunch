@@ -41,9 +41,6 @@ export function CheckoutHeadsUp() {
 
 export function NotificationInfo({ onClick }: { onClick: () => void }) {
   const { userDetails } = useUser();
-  if (!userDetails.user) {
-    return null;
-  }
   return (
     <Box
       sx={{
@@ -72,7 +69,7 @@ export function NotificationInfo({ onClick }: { onClick: () => void }) {
           setTimeout(() => {
             onClick();
           }, 1000);
-          await initFCM(userDetails.user!.uid);
+          await initFCM(userDetails.user?.uid);
         }}
       >
         Allow Notification

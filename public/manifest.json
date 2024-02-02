@@ -2,7 +2,7 @@
   "name": "BURN",
   "short_name": "Burn",
   "description": "The best price food app.",
-  "start_url": ".",
+  "start_url": "http://delivery.goburn.in/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#Cfff04",

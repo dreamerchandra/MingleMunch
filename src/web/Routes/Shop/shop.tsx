@@ -14,6 +14,7 @@ import {
 import { OurStories } from '../../module/stories/stories';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useAppConfig } from '../../module/appconfig';
+import { reuploadToken } from '../../firebase/firebase/fcm';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -24,7 +25,6 @@ export const ShopPage = () => {
     () => !!localStorage.getItem('notification')
   );
   const isAdmin = ['admin', 'vendor'].includes(userDetails?.role) || false;
-  console.log(userDetails.role);
   useEffect(() => {
     if (loading) {
       localStorage.setItem('splash', window.location.pathname);
@@ -34,6 +34,11 @@ export const ShopPage = () => {
       return () => clearTimeout(timer);
     }
   }, [loading, navigate]);
+  useEffect(() => {
+    reuploadToken().then(() => {
+      console.log('token uploaded');
+    });
+  }, []);
   return (
     <>
       <Header Menu={SideMenu} />

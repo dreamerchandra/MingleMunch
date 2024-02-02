@@ -51,17 +51,20 @@ export const get = async (
 export const post = async (
   urlString: string,
   params: any,
+  shouldLogin?: boolean,
   signal?: AbortController['signal']
 ) => {
   const url = new URL(`${baseUrl}${urlString}`);
   let token = await firebaseAuth.currentUser?.getIdToken();
-  const result = await firebaseAuth.currentUser?.getIdTokenResult();
-  if(!result) {
-    throw new Error('No token found');
-  }
-  if(new Date(result.expirationTime).valueOf() < Date.now()) {
-    console.log('token expired, refreshing');
-    token = await firebaseAuth.currentUser?.getIdToken(true);
+  if (shouldLogin) {
+    const result = await firebaseAuth.currentUser?.getIdTokenResult();
+    if (!result) {
+      throw new Error('No token found');
+    }
+    if (new Date(result.expirationTime).valueOf() < Date.now()) {
+      console.log('token expired, refreshing');
+      token = await firebaseAuth.currentUser?.getIdToken(true);
+    }
   }
   try {
     const res = await fetch(url, {

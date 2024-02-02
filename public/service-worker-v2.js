@@ -1,11 +1,11 @@
-const cacheName = 'cache-v2';
+const cacheName = 'cache-v3';
 
 
 // service-worker.js
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(cacheName).then((cache) => {
-      return cache.addAll(['/manifest.json']);
+      return cache.addAll([]);
     })
   );
 });

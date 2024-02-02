@@ -25,8 +25,10 @@ export class Analytics {
     if (typeof this.internalUser === 'boolean' && this.internalUser) {
       return;
     }
+    if(analytics === undefined) return;
+
     LogRocket.track(eventName, { ...eventParams, userId: this.userId });
-    logEvent(analytics!, eventName, { ...eventParams, userId: this.userId });
+    logEvent(analytics, eventName, { ...eventParams, userId: this.userId });
   }
 }
 

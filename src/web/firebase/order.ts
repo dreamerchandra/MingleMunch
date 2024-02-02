@@ -24,7 +24,7 @@ export interface OrderPayload {
 
 export const createOrder = async (
   params: OrderPayload
-): Promise<Order & { paymentLink: string }> => post('/v1/order', params);
+): Promise<Order & { paymentLink: string }> => post('/v1/order', params, true);
 
 export const orderConverters = {
   toFirestore(order: Order): DocumentData {

@@ -1,12 +1,41 @@
-import { arrayUnion, doc, setDoc } from 'firebase/firestore';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { Analytics } from '../../../common/analytics';
-import { firebaseDb } from './db';
+import { post } from '../fetch';
 import { firebaseApp } from './firebsae-app';
 
 export const fcm = getMessaging(firebaseApp);
 
-export const initFCM = async (userId: string) => {
+let init = false;
+
+const setup = async () => {
+  if (init) {
+    return;
+  }
+  init = true;
+  
+  const token = await getToken(fcm, {
+    vapidKey:
+      'BMZIXhbYHm5nWbOm_lyDHOpzR1e03DWVPV7Ab1ocsYkvZVdWt3En8K4Mpn6UUhuAHWdqSdvbMFj5khbk02cX_x0'
+  });
+  const lastToken =  localStorage.getItem('lastToken');
+  if (lastToken === token) {
+    return;
+  }
+  localStorage.setItem('lastToken', token);
+  const analyticId = localStorage.getItem('analyticsId');
+  await post('/v1/fcm-register', {
+    token,
+    analyticId
+  });
+};
+
+export const reuploadToken = async () => {
+  if (Notification.permission === 'granted') {
+    setup();
+  }
+};
+
+export const initFCM = async (userId?: string) => {
   onMessage(fcm, (payload) => {
     console.log('Message received. ', payload);
   });
@@ -14,18 +43,9 @@ export const initFCM = async (userId: string) => {
   const granted = await Notification.requestPermission();
   localStorage.setItem('notification', granted);
   if (granted !== 'granted') {
-    Analytics.pushEvent('notification denied');
+    Analytics.pushEvent('notification denied', { userId });
     return;
   }
   Analytics.pushEvent('notification granted', { userId });
-  const token = await getToken(fcm, {
-    vapidKey:
-      'BMZIXhbYHm5nWbOm_lyDHOpzR1e03DWVPV7Ab1ocsYkvZVdWt3En8K4Mpn6UUhuAHWdqSdvbMFj5khbk02cX_x0'
-  });
-
-  return await setDoc(
-    doc(firebaseDb, 'fcmTokens', userId),
-    { token: arrayUnion(token), userId },
-    { merge: true, mergeFields: ['token'] }
-  );
+  setup();
 };
