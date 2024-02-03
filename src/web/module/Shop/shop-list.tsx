@@ -1,4 +1,4 @@
-import { Divider, Paper } from '@mui/material';
+import { Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -21,7 +21,10 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
         height: 'fit-content',
         backgroundColor: '#fff',
         alignItems: 'center',
-        minWidth: '85vw'
+        width: 'min(90vw, 1000px)',
+        borderRadius: '10px',
+        pt: 1,
+        boxShadow: '0px 0px 5px 0px #0000001f'
       }}
       elevation={0}
       onClick={() => {
@@ -92,7 +95,6 @@ export const Shops = () => {
       {data?.map((shop) => (
         <div key={shop.shopId}>
           <Shop shop={shop} />
-          <Divider sx={{ width: '75vw', margin: 'auto' }} />
         </div>
       ))}
     </Box>

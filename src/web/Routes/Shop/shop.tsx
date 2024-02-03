@@ -21,7 +21,7 @@ export const ShopPage = () => {
   const navigate = useNavigate();
   const { data: appConfig } = useAppConfig();
   const [notificationGranted, setNotification] = useState(
-    () => !!localStorage.getItem('notification')
+    Notification.permission === 'granted'
   );
   const isAdmin = ['admin', 'vendor'].includes(userDetails?.role) || false;
   useEffect(() => {
@@ -41,10 +41,14 @@ export const ShopPage = () => {
   return (
     <>
       <Header />
-      <Container component="main" sx={{
-        maxHeight: '95vh',
-        overflow: 'auto'
-      }}>
+      <Container
+        component="main"
+        sx={{
+          height: '95vh',
+          overflow: 'auto',
+          backgroundColor: '#f5f5f5'
+        }}
+      >
         {notificationGranted ? (
           <OurStories />
         ) : (

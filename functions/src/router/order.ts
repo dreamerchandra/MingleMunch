@@ -216,6 +216,7 @@ export const onOrderCreate = async (data: OrderDb) => {
   await removeCoupon(userId, appliedCoupon);
   await updateFreeDeliveryForInvitedUser(
     `THANK_${user?.name?.substring(0, 4).toUpperCase() ?? 'YOU'}`,
+    userId,
     appliedCoupon
   );
 };

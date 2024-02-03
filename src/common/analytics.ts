@@ -14,7 +14,7 @@ export class Analytics {
       localStorage.setItem('internal', 'true');
       return;
     }
-    setUserId(analytics!, user.uid);
+    analytics && setUserId(analytics, user.uid);
     LogRocket.identify(user.uid, {
       name: user.displayName!,
       phone: user.phoneNumber!,
@@ -34,5 +34,5 @@ export class Analytics {
 
 export const logError = (error: Error) => {
   LogRocket.captureException(error);
-  logEvent(analytics!, 'error', { error });
+  analytics && logEvent(analytics, 'error', { error });
 };

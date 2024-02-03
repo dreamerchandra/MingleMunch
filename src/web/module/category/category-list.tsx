@@ -30,7 +30,6 @@ export const CategoryList: FC<{
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'start',
-        boxShadow: '0px 0px 10px 0px #0000001f',
         backgroundColor: '#fff',
         borderRadius: '5px',
         p: 1,
@@ -43,7 +42,8 @@ export const CategoryList: FC<{
           pl: 1,
           display: 'flex',
           alignItems: 'center',
-          gap: 1
+          gap: 1,
+          fontWeight: 'bold'
         }}
       >
         Categories
@@ -83,6 +83,9 @@ export const CategoryList: FC<{
               } else {
                 onChange([...selected, category.categoryId]);
               }
+            }}
+            sx={{
+              fontWeight: '800'
             }}
             icon={selected.includes(category.categoryId) ? <Tick /> : undefined}
           />

@@ -12,7 +12,14 @@ export const OrderHistoryRoute = () => {
   return (
     <div>
       <Header />
-      <Container component="main">
+      <Container
+        component="main"
+        sx={{
+          height: 'calc(100vh - 60px)',
+          overflow: 'auto',
+          p: 0,
+        }}
+      >
         <Box marginTop={2}>
           {['admin', 'vendor'].includes(role) ? (
             <IncomingOrder />

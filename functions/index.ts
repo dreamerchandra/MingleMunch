@@ -89,7 +89,7 @@ expressApp.post('/v1/fcm-analytics', async (req: Request, res: Response) => {
 
 expressApp.post('/v1/fcm-register', async (req: Request, res: Response) => {
   const { analyticId, token } = req.body;
-  if(!analyticId || !token) return res.sendStatus(400);
+  if (!analyticId || !token) return res.sendStatus(400);
   await firebaseDb.doc(`fcm-tokens/${analyticId}`).set(
     {
       token: FieldValue.arrayUnion(token)
@@ -103,6 +103,14 @@ expressApp.post('/v1/fcm-register', async (req: Request, res: Response) => {
 
 expressApp.post('/v1/order', authMiddle, createOrder);
 expressApp.post('/v1/referral', authMiddle, updateReferralCode);
+expressApp.post(
+  '/v1/onboard-referral',
+  authMiddle,
+  async (req: Request, res: Response) => {
+    await onCreateUser(req.user);
+    return res.json({});
+  }
+);
 expressApp.post('/v1/error', async (req: Request, res: Response) => {
   const { phoneNumber } = req.body;
   logger.error(`page not loading for ${phoneNumber}`);
@@ -153,11 +161,6 @@ expressApp.post('/v1/analytics', async (req: Request, res: Response) => {
   );
   return res.json({});
 });
-
-export const onUserCreate = functions
-  .region('asia-south1')
-  .auth.user()
-  .onCreate(onCreateUser);
 
 export const onOrderCreated = functions
   .region('asia-south1')

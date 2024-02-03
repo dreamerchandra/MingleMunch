@@ -90,7 +90,7 @@ export const useToSignIn = () => {
       .catch((err) => {
         setError('Invalid OTP');
         LogRocket.captureException(err);
-        logEvent(analytics!, 'ph_error');
+        analytics && logEvent(analytics, 'ph_error');
       });
   }, []);
   return {
@@ -114,9 +114,10 @@ export const useUser = () => {
     });
   };
 
-  const updateInviteCode = useCallback(async (code: string) => {
+  const updateInviteCode = useCallback(async (code: string, name: string) => {
     return await post('/v1/referral', {
-      inviteCode: code
+      inviteCode: code,
+      name: name
     });
   }, []);
   return { userDetails, updateUserDetails, updateInviteCode };

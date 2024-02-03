@@ -1,15 +1,21 @@
-import { UserRecord } from 'firebase-admin/auth';
+import { Request, Response } from 'express';
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { HttpError } from '../error.js';
 import { firebaseDb } from '../firebase.js';
-import { Request, Response } from 'express';
 
 type User = {
   availableCoupons?: string[];
   myReferralCodes: string;
   usedCoupons: string[];
-  isInvited?: boolean;
+  invitedBy?: boolean;
+  referredUsers?: Record<
+    string,
+    {
+      name: string;
+      hasOrdered: boolean;
+    }
+  >;
 } | null;
 
 const randomString = (length: number) => {
@@ -32,17 +38,23 @@ const checkIfReferralCodeExist = async (
   return newCodes[0];
 };
 
-export const onCreateUser = async (user: UserRecord) => {
-  const { uid, phoneNumber } = user;
-  logger.log('onUserCreate', uid, phoneNumber);
+export const onCreateUser = async (user: {
+  uid: string;
+  phone_number?: string;
+}) => {
+  const { uid, phone_number } = user;
+  logger.log('onUserCreate', uid, phone_number);
+  const oldDoc = await firebaseDb.doc(`users/${uid}`).get();
+  const oldUser = oldDoc.data();
+  if (oldUser?.myReferralCodes) {
+    return;
+  }
   const randomCodes = Array.from({ length: 20 }, () => randomString(5));
   const code = await checkIfReferralCodeExist(randomCodes);
-  const userDb: User = {
-    availableCoupons: [],
-    myReferralCodes: code!,
-    usedCoupons: []
+  const userDb = {
+    myReferralCodes: code!
   };
-  return await firebaseDb.doc(`users/${uid}`).set(userDb);
+  return await firebaseDb.doc(`users/${uid}`).set(userDb, { merge: true });
 };
 
 export const canProceedApplyingCoupon = async (
@@ -84,14 +96,17 @@ const getReferredUser = async (couponCode: string) => {
 
 export const updateFreeDeliveryForInvitedUser = async (
   newCode: string,
+  appliedUserId: string,
   couponCode?: string
 ) => {
   try {
     if (!couponCode) return;
     const user = await getReferredUser(couponCode);
     if (!user) return;
+    const updateField = `referredUsers.${appliedUserId}.hasOrdered`;
     return await firebaseDb.doc(`users/${user.uid}`).update({
-      availableCoupons: FieldValue.arrayUnion(newCode)
+      availableCoupons: FieldValue.arrayUnion(newCode),
+      [updateField]: true
     });
   } catch (err) {
     logger.error(`Error while updating free delivery for invited user, ${err}`);
@@ -100,34 +115,54 @@ export const updateFreeDeliveryForInvitedUser = async (
 
 export const updateReferralCode = async (req: Request, res: Response) => {
   const uid = req.user.uid;
-  const { inviteCode } = req.body;
+  const { inviteCode, name } = req.body;
   logger.log('updateReferralCode', uid, inviteCode);
   if (!inviteCode) {
     return res.status(400).json({
       error: 'Invalid request'
     });
   }
-  const isPresent = await getReferredUser(inviteCode);
-  logger.log(`isPresent: ${isPresent}`);
-  if (!isPresent) {
+  const referredUser = await getReferredUser(inviteCode);
+  logger.log(`isPresent: ${referredUser}`);
+  if (!referredUser) {
+    return res.status(400).json({
+      error: 'Invalid request'
+    });
+  }
+  const { referredUsers } = referredUser;
+  const numOfReferredUsers = referredUsers
+    ? Object.keys(referredUsers).length
+    : 0;
+  if (numOfReferredUsers > 2) {
     return res.status(400).json({
       error: 'Invalid request'
     });
   }
   const snap = await firebaseDb.doc(`users/${uid}`).get();
-  const user = snap.data() || { isInvited: false };
-  if (user.isInvited) {
+  const user = snap.data() || { invitedBy: '' };
+  if (user.invitedBy) {
     return res.status(400).json({
       error: 'Invalid request'
     });
   }
+  await firebaseDb.doc(`users/${referredUser.uid}`).set(
+    {
+      referredUsers: {
+        [uid]: {
+          name: name,
+          hasOrdered: false
+        }
+      }
+    },
+    { merge: true }
+  );
   await firebaseDb
     .collection('users')
     .doc(uid)
     .set(
       {
         availableCoupons: FieldValue.arrayUnion(inviteCode),
-        isInvited: true
+        invitedBy: referredUser.uid
       },
       {
         merge: true

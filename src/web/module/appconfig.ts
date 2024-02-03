@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   QueryDocumentSnapshot,
   collection,
@@ -7,12 +7,12 @@ import {
 } from 'firebase/firestore';
 import { firebaseDb } from '../firebase/firebase/db';
 import { useUser } from '../firebase/auth';
+import { post } from '../firebase/fetch';
 
 interface AppConfig {
   isOpen: true;
   platformFee: number;
-  carousel: { image: string; url?: string, isPublished: boolean }[];
-
+  carousel: { image: string; url?: string; isPublished: boolean }[];
 }
 
 const appConfigConverter = {
@@ -29,6 +29,13 @@ const appConfigConverter = {
 interface UserConfig {
   availableCoupons?: string[];
   myReferralCodes: string;
+  referredUsers?: Record<
+    string,
+    {
+      name: string;
+      hasOrdered: boolean;
+    }
+  >;
 }
 
 const userConverter = {
@@ -63,7 +70,6 @@ export const useUserConfig = () => {
   return useQuery({
     queryKey: ['userConfig'],
     queryFn: async () => {
-      console.log(userDetails.user?.uid);
       const snap = await getDoc(
         doc(
           collection(firebaseDb, 'users').withConverter(userConverter),
@@ -79,5 +85,17 @@ export const useUserConfig = () => {
       );
     },
     enabled: !!userDetails.user?.uid
+  });
+};
+
+export const useOnboardReferralProgram = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      await post('/v1/onboard-referral', {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['userConfig']);
+    }
   });
 };

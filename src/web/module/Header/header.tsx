@@ -1,8 +1,7 @@
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import CloseIcon from '@mui/icons-material/CloseOutlined';
 import History from '@mui/icons-material/History';
 import Home from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/SearchOutlined';
-import CloseIcon from '@mui/icons-material/CloseOutlined';
 import { InputAdornment, TextField } from '@mui/material';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
@@ -106,7 +105,7 @@ export const Header: FC<{
         <BottomNavigation
           showLabels
           value={location.pathname}
-          onChange={(event, newValue) => {
+          onChange={(_, newValue) => {
             console.log(newValue);
             navigate(newValue);
           }}
@@ -121,11 +120,11 @@ export const Header: FC<{
             value="/order-history"
             icon={<History />}
           />
-          <StyledBottomNavigationAction
-            label="Me"
+          {/* <StyledBottomNavigationAction
+            label="Refer & Earn"
             value="/profile"
-            icon={<AccountCircleIcon />}
-          />
+            icon={<ShareIcon />}
+          /> */}
         </BottomNavigation>
       </Paper>
     </>

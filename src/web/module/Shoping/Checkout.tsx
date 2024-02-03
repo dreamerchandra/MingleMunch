@@ -498,7 +498,7 @@ export const Checkout: FC = () => {
               <SubSection
                 sx={{
                   gap: 1,
-                  marginBottom: 2
+                  marginBottom: 7
                 }}
               >
                 <LoadingButton
@@ -528,13 +528,13 @@ export const Checkout: FC = () => {
                   >
                     Coupon applied: {coupon}
                   </Typography>
-                ) : userConfig.myReferralCodes ? (
+                ) : userConfig.availableCoupons?.length ? (
                   <Button
                     variant="text"
-                    color="info"
+                    color="success"
                     onClick={() => setModel(true)}
                   >
-                    Apply coupon
+                    {userConfig.availableCoupons.length} COUPON AVAILABLE
                   </Button>
                 ) : null}
               </SubSection>
@@ -684,7 +684,7 @@ function SuccessCheckout() {
   return (
     <div
       style={{
-        height: '92vh',
+        height: 'calc(100vh - 80px)',
         width: '100vw',
         backgroundImage: 'url(/abstract_emoji.png)',
         filter: 'brightness(70%)',
@@ -748,7 +748,7 @@ function SuccessCheckout() {
         >
           Back to Home
         </Button>
-        <LastOrder />
+        <LastOrder bottom={0} />
       </div>
     </div>
   );

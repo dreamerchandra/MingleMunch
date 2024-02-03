@@ -25,7 +25,7 @@ export const Profile = () => {
     if (referralCode) {
       setError(null);
       try {
-        const updateReferral = await updateInviteCode((referralCode as string).toUpperCase());
+        const updateReferral = await updateInviteCode((referralCode as string).toUpperCase(), name as string);
         if (updateReferral) {
           toast.success('Your first delivery is on us!');
         }

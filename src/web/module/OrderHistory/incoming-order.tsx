@@ -1,12 +1,12 @@
-import CardContent from '@mui/material/CardContent';
 import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
+import Container from '@mui/material/Container';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
 import { OrderStatus } from '../../../common/types/Order';
+import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
 
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
@@ -20,7 +20,8 @@ export const IncomingOrder = () => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 3
+        gap: 3,
+        p: 2,
       }}
     >
       {orders?.map((order) => (
@@ -30,7 +31,6 @@ export const IncomingOrder = () => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             gap: 3,
-            width: 'sm'
           }}
           key={order.orderId}
         >
@@ -40,7 +40,8 @@ export const IncomingOrder = () => {
               flexDirection: 'column',
               gap: 2,
               width: '100%',
-              backgroundColor: order.status === 'pending' ? 'rgb(255 0 0 / 50%)' : ''
+              backgroundColor:
+                order.status !== 'delivered' ? 'rgb(255 0 0 / 50%)' : ''
             }}
           >
             <Container

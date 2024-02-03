@@ -1,282 +1,28 @@
+import { useTheme } from '@emotion/react';
 import {
-  Add,
   ArrowDropDown,
   ArrowDropUp,
-  Remove,
   UnfoldLess,
   UnfoldMore
 } from '@mui/icons-material';
-import AddToCart from '@mui/icons-material/AddShoppingCart';
-import Edit from '@mui/icons-material/Edit';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { Drawer, Paper } from '@mui/material';
+import { Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Fuse from 'fuse.js';
 import { FC, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Product } from '../../../common/types/Product';
 import { useUser } from '../../firebase/auth';
 import { useShopQuery } from '../Shop/shop-query';
-import { useCart } from '../Shoping/cart-activity';
 import { CategoryList } from '../category/category-list';
 import { useCategoryQuery } from '../category/category-query';
 import {
-  useMutationProductEdit,
-  useProductQuery,
   useProductsQuery
 } from './product-query';
+import { ProductItem } from './Product-iitems';
 
-const FooterActions: FC<{
-  product: Product;
-  onAdd: () => void;
-  isSuggestion: boolean;
-  allowEdit: boolean;
-}> = ({ product, onAdd, allowEdit }) => {
-  const { addToCart, removeFromCart, cartDetails } = useCart();
-  const inCart = cartDetails.cart.filter(
-    (item) => item.itemId === product.itemId
-  );
-  const { mutateAsync, isLoading } = useMutationProductEdit();
-  const navigator = useNavigate();
-
-  return (
-    <Container
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'end',
-        p: 0,
-        pr: 1
-      }}
-    >
-      <div>
-        {inCart.length ? (
-          <Container
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'end'
-            }}
-          >
-            <Button size="small" onClick={() => removeFromCart(product)}>
-              <Remove color="warning" />
-            </Button>
-            <Typography variant="h6" color="green">
-              {inCart.length}
-            </Typography>
-            <Button
-              size="small"
-              onClick={() => {
-                onAdd();
-                addToCart(product);
-              }}
-            >
-              <Add color="info" />
-            </Button>
-          </Container>
-        ) : (
-          <Container
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'end'
-            }}
-          >
-            {allowEdit ? (
-              <>
-                <LoadingButton
-                  size="small"
-                  onClick={() =>
-                    mutateAsync({
-                      productId: product.itemId,
-                      isAvailable: !product.isAvailable
-                    })
-                  }
-                  variant="outlined"
-                  disabled={isLoading}
-                  loading={isLoading}
-                >
-                  {product.isAvailable ? 'Can Order' : 'Out of stock'}
-                </LoadingButton>
-                <IconButton
-                  aria-label="Edit"
-                  color="primary"
-                  onClick={() => {
-                    navigator(
-                      `/shop/${product.shopId}/product/${product.itemId}`,
-                      { replace: true }
-                    );
-                    window.scrollTo(0, 0);
-                  }}
-                >
-                  <Edit />
-                </IconButton>
-                <IconButton
-                  aria-label="add to cart"
-                  color="primary"
-                  onClick={() => {
-                    onAdd();
-                    addToCart(product);
-                  }}
-                  disabled={!product.isAvailable}
-                >
-                  <AddToCart />
-                </IconButton>
-              </>
-            ) : (
-              <Button
-                onClick={() => {
-                  onAdd();
-                  addToCart(product);
-                }}
-                variant="outlined"
-                sx={{
-                  borderRadius: '10px',
-                  fontWeight: '900',
-                  border: '2px solid #4caf50',
-                  boxShadow:
-                    '1px 1px 0px 0px, 1px 1px 0px 0px, 1px 1px 0px 0px, 2px 2px 0px 0px, 2px 2px 0px 0px',
-                  position: 'relative',
-                  ':active': {
-                    boxShadow: '0px 0px 0px 0px',
-                    top: '5px',
-                    left: '5px'
-                  }
-                }}
-                disableRipple
-              >
-                <Add />
-                ADD
-              </Button>
-            )}
-          </Container>
-        )}
-      </div>
-      {product.suggestionIds && product.suggestionIds.length > 0 && (
-        <Typography variant="caption">Customization</Typography>
-      )}
-    </Container>
-  );
-};
-
-const SuggestionProductItem: FC<{ productId: string }> = ({ productId }) => {
-  const { data: product } = useProductQuery(productId);
-  if (!product) return null;
-  if (!product.isAvailable) return null;
-  return <ProductItem product={product} isSuggestion allowEdit={false} />;
-};
-
-const ItemDescription: FC<{ description: string }> = ({ description }) => {
-  const [more, setMore] = useState(false);
-  return (
-    <div>
-      <Typography
-        variant="body1"
-        color="text.secondary"
-        sx={{
-          display: '-webkit-box',
-          overflow: 'hidden',
-          WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: !more ? 2 : 'none'
-        }}
-      >
-        {description}
-      </Typography>
-      {description.length > 15 ? (
-        <Button
-          onClick={() => {
-            setMore(!more);
-          }}
-          size="small"
-        >
-          Read More
-        </Button>
-      ) : null}
-    </div>
-  );
-};
-
-const ProductItem: FC<{
-  product: Product;
-  isSuggestion?: boolean;
-  allowEdit: boolean;
-}> = ({ product, isSuggestion = false, allowEdit }) => {
-  const { itemDescription, itemName, itemPrice } = product;
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div style={{}}>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '16px'
-        }}
-      >
-        <div style={{ padding: '8px' }}>
-          <Typography variant="h3" component="h2">
-            {itemName}
-          </Typography>
-          <ItemDescription description={itemDescription} />
-
-          <Typography variant="h3" color="text.secondary">
-            ₹{itemPrice}
-          </Typography>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}
-        >
-          <div style={{ height: '25px' }}></div>
-          <FooterActions
-            product={product}
-            isSuggestion={isSuggestion}
-            onAdd={() => {
-              if ((product.suggestionIds?.length ?? 0) > 0) {
-                setOpen(true);
-              }
-            }}
-            allowEdit={allowEdit}
-          />
-        </div>
-      </div>
-      <Drawer
-        open={open}
-        onClose={() => setOpen(false)}
-        anchor="bottom"
-        sx={{
-          zIndex: 2000
-        }}
-      >
-        <Box
-          sx={{
-            backgroundColor: '#eab6b637'
-          }}
-        >
-          <Typography variant="h3" sx={{ fontWeight: 700, p: 2 }}>
-            Customization
-          </Typography>
-          {product.suggestionIds?.map((id) => (
-            <SuggestionProductItem productId={id} key={id} />
-          ))}
-        </Box>
-      </Drawer>
-    </div>
-  );
-};
 
 const fuseOptions = {
   shouldSort: true,
@@ -316,6 +62,7 @@ export const Products: FC<{
       .map((item) => item.item)
       .filter(filterByCategory);
   }, [data, search, selectedCategoryIds]);
+  const theme = useTheme() as { breakpoints: { down: (key: string) => string } };
 
   if (isLoading) {
     return <CircularProgress />;
@@ -514,19 +261,24 @@ export const Products: FC<{
                         p: 0
                       }}
                     >
-                      <Typography
-                        variant="h5"
-                        component="h2"
+                      <Box
                         sx={{
-                          fontWeight: 'bold',
-                          backgroundColor: '#000',
-                          px: 2,
+                          background: 'black',
                           borderRadius: '5px',
-                          color: '#d1ff04'
+                          px: 1
                         }}
                       >
-                        {category.categoryName}
-                      </Typography>
+                        <Typography
+                          variant="h5"
+                          component="h2"
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#d1ff04'
+                          }}
+                        >
+                          {category.categoryName}
+                        </Typography>
+                      </Box>
                       {collapsed.includes(category.categoryId) ? (
                         <ArrowDropDown
                           sx={{
@@ -572,8 +324,11 @@ export const Products: FC<{
         <Box
           sx={{
             position: 'fixed',
-            bottom: '56px',
-            left: 0
+            bottom: 60,
+            boxShadow: '2px 2px 10px 0px #0000001f',
+            [theme.breakpoints.down('md')]: {
+              left: 10,
+            }
           }}
         >
           <CategoryList

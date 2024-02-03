@@ -172,6 +172,20 @@ const router = createBrowserRouter([
             element: null
           };
         })
+  },
+  {
+    path: '/profile',
+    lazy: () =>
+      import('./Routes/Profile/Profile')
+        .then((m) => ({
+          element: <m.Profile />
+        }))
+        .catch(() => {
+          window.location.reload();
+          return {
+            element: null
+          };
+        })
   }
 ]);
 

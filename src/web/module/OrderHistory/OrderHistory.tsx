@@ -65,8 +65,9 @@ export const OrderHistory = () => {
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
-            gap: 3,
-            width: 'sm'
+            gap: 1,
+            p: 0,
+            backgroundColor: order.status !== 'delivered' ? '#f1fbeb': '#f5f5f5',
           }}
           key={order.orderId}
         >
@@ -81,9 +82,6 @@ export const OrderHistory = () => {
           >
             <Container
               component="div"
-              style={{
-                padding: 0
-              }}
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -98,9 +96,6 @@ export const OrderHistory = () => {
             </Container>
             <Container
               component="div"
-              style={{
-                padding: 0
-              }}
               sx={{
                 display: 'flex',
                 flexDirection: 'row',
