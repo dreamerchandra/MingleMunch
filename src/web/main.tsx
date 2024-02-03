@@ -47,7 +47,6 @@ const pushToAnalytics = async () => {
     const baseUrl = window.location.href.includes('localhost')
       ? 'http://localhost:5001/mingle-munch/asia-south1/order'
       : 'https://asia-south1-mingle-munch.cloudfunctions.net/order';
-    console.log(window.u)
     fetch(`${baseUrl}/v1/analytics`, {
       method: 'POST',
       headers: {

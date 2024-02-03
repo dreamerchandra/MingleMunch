@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../firebase/auth';
 import { Header } from '../../module/Header/header';
 import { LastOrder } from '../../module/LastOrder/LastOrder';
-import { SideMenu } from '../../module/Menu/SideMenu';
 import { Shops } from '../../module/Shop/shop-list';
 import {
   CheckoutHeadsUp,
@@ -41,8 +40,11 @@ export const ShopPage = () => {
   }, []);
   return (
     <>
-      <Header Menu={SideMenu} />
-      <Container component="main">
+      <Header />
+      <Container component="main" sx={{
+        maxHeight: '95vh',
+        overflow: 'auto'
+      }}>
         {notificationGranted ? (
           <OurStories />
         ) : (
@@ -50,7 +52,7 @@ export const ShopPage = () => {
         )}
         <div
           style={{
-            height: '20px'
+            height: '10px'
           }}
         ></div>
         <Carousel
@@ -84,7 +86,7 @@ export const ShopPage = () => {
               </div>
             ))}
         </Carousel>
-        <Box marginTop={2}>
+        <Box marginTop={1}>
           <Shops />
           <CheckoutHeadsUp />
           <LastOrder />

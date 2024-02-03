@@ -1,138 +1,133 @@
-import AppBar from '@mui/material/AppBar';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import History from '@mui/icons-material/History';
+import Home from '@mui/icons-material/Home';
+import SearchIcon from '@mui/icons-material/SearchOutlined';
+import CloseIcon from '@mui/icons-material/CloseOutlined';
+import { InputAdornment, TextField } from '@mui/material';
+import BottomNavigation from '@mui/material/BottomNavigation';
+import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import MenuIcon from '@mui/icons-material/Menu';
-import { FC, useState } from 'react';
-import { DrawerProps } from '../type';
-import Container from '@mui/material/Container';
-import { useNavigate } from 'react-router-dom';
-import InputBase from '@mui/material/InputBase';
-import { styled, alpha } from '@mui/material/styles';
-import SearchIcon from '@mui/icons-material/Search';
+import Paper from '@mui/material/Paper';
+import { styled } from '@mui/material/styles';
+import { FC, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25)
-  },
-  marginLeft: 0,
-  width: '100%',
-  transition: 'width 0.5s',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(1),
-    width: 'auto'
+const StyledBottomNavigationAction = styled(BottomNavigationAction)(`
+  &.Mui-selected {
+    color: #ff0404e2;
   }
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center'
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      width: '12ch',
-      '&:focus': {
-        width: '20ch'
-      }
-    }
-  }
-}));
+`);
 
 export const Header: FC<{
-  Menu: FC<DrawerProps>;
   onSearch?: (search: string) => void;
   search?: string;
-}> = ({ Menu, onSearch, search }) => {
-  const [open, setOpen] = useState(false);
+}> = ({ onSearch, search }) => {
   const navigate = useNavigate();
-  const [searchFocus, setSearchFocus] = useState(false);
+  const location = useLocation();
+  const [searchPlaceHolder, setSearchPlaceholder] = useState('');
+  useEffect(() => {
+    const allPlaceHolders = [
+      'Try Mutton Biryani',
+      'Try Panner Noodles',
+      'Search For Products | Categories',
+      'Search For Breads'
+    ];
+    const intervalId = setInterval(() => {
+      setSearchPlaceholder(
+        allPlaceHolders[Math.floor(Math.random() * allPlaceHolders.length)]
+      );
+    }, 2000);
+    setSearchPlaceholder(
+      allPlaceHolders[Math.floor(Math.random() * allPlaceHolders.length)]
+    );
+    return () => clearInterval(intervalId);
+  }, []);
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar
-            style={{
-              width: '100%'
+      {onSearch ? (
+        <Box
+          sx={{
+            m: 1,
+            position: 'sticky',
+            height: '74px',
+            top: 10,
+            width: 'min(90vw, 900px)',
+            margin: 'auto'
+          }}
+        >
+          <TextField
+            id="search"
+            variant="outlined"
+            fullWidth
+            value={search}
+            autoCorrect="off"
+            autoCapitalize="off"
+            autoComplete="off"
+            spellCheck="true"
+            onChange={(e) => {
+              onSearch && onSearch(e.target.value);
             }}
-          >
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{ mr: 2 }}
-              onClick={() => {
-                setOpen(true);
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Container
-              component="div"
-              style={{
-                cursor: 'pointer',
-                marginLeft: 0,
-                display: searchFocus ? 'none' : 'block'
-              }}
-              onClick={() => {
-                navigate('/');
-              }}
-            >
-              <Typography
-                variant="h6"
-                noWrap
-                component="div"
-                sx={{ flexGrow: 1 }}
-              >
-                BURN
-              </Typography>
-            </Container>
-            {onSearch && (
-              <Search
-                style={{
-                  width: searchFocus ? '80vw' : 'auto'
-                }}
-              >
-                <SearchIconWrapper>
+            sx={{
+              position: 'relative',
+              boxShadow: '0px 0px 10px 0px #00000050'
+            }}
+            placeholder={searchPlaceHolder}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
                   <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search…"
-                  inputProps={{ 'aria-label': 'search' }}
-                  value={search ?? ''}
-                  onFocus={() => {
-                    setSearchFocus(true);
+                </InputAdornment>
+              ),
+              endAdornment: search && (
+                <InputAdornment
+                  position="end"
+                  sx={{
+                    p: 2,
+                    cursor: 'pointer',
+                    position: 'absolute',
+                    right: 0
                   }}
-                  onBlur={() => {
-                    setSearchFocus(false);
+                  onClick={() => {
+                    search && onSearch && onSearch('');
                   }}
-                  onChange={(e) => {
-                    onSearch(e.target.value);
-                  }}
-                />
-              </Search>
-            )}
-          </Toolbar>
-        </AppBar>
-      </Box>
-      <Menu open={open} setOpen={setOpen} />
+                >
+                  <CloseIcon />
+                </InputAdornment>
+              )
+            }}
+          />
+        </Box>
+      ) : null}
+
+      <Paper
+        sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
+        elevation={3}
+      >
+        <BottomNavigation
+          showLabels
+          value={location.pathname}
+          onChange={(event, newValue) => {
+            console.log(newValue);
+            navigate(newValue);
+          }}
+        >
+          <StyledBottomNavigationAction
+            label="Home"
+            value="/"
+            icon={<Home />}
+          />
+          <StyledBottomNavigationAction
+            label="Order History"
+            value="/order-history"
+            icon={<History />}
+          />
+          <StyledBottomNavigationAction
+            label="Me"
+            value="/profile"
+            icon={<AccountCircleIcon />}
+          />
+        </BottomNavigation>
+      </Paper>
     </>
   );
 };

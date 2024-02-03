@@ -22,9 +22,7 @@ export const CategoryList: FC<{
     const fuse = new Fuse(categories, fuseOptions);
     setFuse(fuse);
   }, [categories]);
-  const res = search ? fuse
-  ?.search(search)
-  .map((i) => i.item) : categories;
+  const res = search ? fuse?.search(search).map((i) => i.item) : categories;
 
   return (
     <Box
@@ -32,46 +30,63 @@ export const CategoryList: FC<{
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'start',
-
-        mt: 2,
+        boxShadow: '0px 0px 10px 0px #0000001f',
+        backgroundColor: '#fff',
+        borderRadius: '5px',
+        p: 1,
         gap: 1
       }}
     >
-      <Typography variant="caption">Categories(Tap to apply filter)</Typography>
+      <Typography
+        variant="h6"
+        sx={{
+          pl: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}
+      >
+        Categories
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'GrayText'
+          }}
+        >
+          (Tap to apply filter)
+        </Typography>
+      </Typography>
       <Box
         sx={{
           display: 'flex',
           gap: 1,
           pb: 2,
           overflowX: 'auto',
-          width: 'min(90vw, 900px)'
+          width: 'min(100vw, 900px)'
         }}
       >
-        {res
-          ?.map((category) => (
-            <Chip
-              key={category.categoryId}
-              label={category.categoryName}
-              color={
-                selected.includes(category.categoryId) ? 'secondary' : 'default'
+        {res?.map((category) => (
+          <Chip
+            key={category.categoryId}
+            label={category.categoryName}
+            color={
+              selected.includes(category.categoryId) ? 'secondary' : 'info'
+            }
+            variant={
+              selected.includes(category.categoryId) ? 'filled' : 'outlined'
+            }
+            onClick={() => {
+              if (selected.includes(category.categoryId)) {
+                onChange(
+                  selected.filter((item) => item !== category.categoryId)
+                );
+              } else {
+                onChange([...selected, category.categoryId]);
               }
-              variant={
-                selected.includes(category.categoryId) ? 'filled' : 'outlined'
-              }
-              onClick={() => {
-                if (selected.includes(category.categoryId)) {
-                  onChange(
-                    selected.filter((item) => item !== category.categoryId)
-                  );
-                } else {
-                  onChange([...selected, category.categoryId]);
-                }
-              }}
-              icon={
-                selected.includes(category.categoryId) ? <Tick /> : undefined
-              }
-            />
-          ))}
+            }}
+            icon={selected.includes(category.categoryId) ? <Tick /> : undefined}
+          />
+        ))}
       </Box>
     </Box>
   );

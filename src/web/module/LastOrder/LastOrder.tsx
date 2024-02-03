@@ -34,7 +34,7 @@ export const AddToHomeScreen = () => {
       }}
       sx={{
         position: 'fixed',
-        bottom: 0,
+        bottom: 58,
         left: 0,
         display: 'flex',
         justifyContent: 'center',
@@ -83,7 +83,7 @@ export const LastOrder = () => {
     <Button
       sx={{
         position: 'fixed',
-        bottom: 0,
+        bottom: 58,
         left: 0,
         display: 'flex',
         justifyContent: 'center',

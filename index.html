@@ -82,27 +82,33 @@
         };
 
         r.onsuccess = function (event) {
-          var db = event.target.result;
+          try {
+            var db = event.target.result;
 
-          var transaction = db.transaction(
-            ['firebaseLocalStorage'],
-            'readonly'
-          );
-          var objectStore = transaction.objectStore('firebaseLocalStorage');
+            var transaction = db.transaction(
+              ['firebaseLocalStorage'],
+              'readonly'
+            );
+            var objectStore = transaction.objectStore('firebaseLocalStorage');
 
-          // Open a cursor to iterate over the data
-          objectStore.openCursor().onsuccess = function (event) {
-            var cursor = event.target.result;
+            // Open a cursor to iterate over the data
+            objectStore.openCursor().onsuccess = function (event) {
+              var cursor = event.target.result;
 
-            if (cursor) {
-              console.log('Name for SSN ' + cursor.key + ' is ' + cursor.value);
-              res(cursor.value.value);
-            } else {
-              // No more data
-              console.log('Finished reading data from IndexedDB');
-              res({});
-            }
-          };
+              if (cursor) {
+                console.log(
+                  'Name for SSN ' + cursor.key + ' is ' + cursor.value
+                );
+                res(cursor.value.value);
+              } else {
+                // No more data
+                console.log('Finished reading data from IndexedDB');
+                res({});
+              }
+            };
+          } catch (e) {
+            res({});
+          }
         };
       });
     };

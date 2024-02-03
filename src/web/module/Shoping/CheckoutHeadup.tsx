@@ -7,7 +7,7 @@ import { useCart } from './cart-activity';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   position: 'fixed',
-  bottom: '16px',
+  bottom: '58px',
   right: '16px',
   zIndex: theme?.zIndex?.drawer + 1
 }));

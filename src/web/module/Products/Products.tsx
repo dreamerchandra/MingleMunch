@@ -1,14 +1,24 @@
+import {
+  Add,
+  ArrowDropDown,
+  ArrowDropUp,
+  Remove,
+  UnfoldLess,
+  UnfoldMore
+} from '@mui/icons-material';
 import AddToCart from '@mui/icons-material/AddShoppingCart';
+import Edit from '@mui/icons-material/Edit';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { Drawer, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
+import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
 import Fuse from 'fuse.js';
 import { FC, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Product } from '../../../common/types/Product';
 import { useUser } from '../../firebase/auth';
 import { useShopQuery } from '../Shop/shop-query';
@@ -17,23 +27,17 @@ import { CategoryList } from '../category/category-list';
 import { useCategoryQuery } from '../category/category-query';
 import {
   useMutationProductEdit,
-  useProductsQuery,
-  useProductQuery
+  useProductQuery,
+  useProductsQuery
 } from './product-query';
-import Edit from '@mui/icons-material/Edit';
-import { useNavigate } from 'react-router-dom';
-import { Drawer } from '@mui/material';
-import { Add, Remove } from '@mui/icons-material';
 
 const FooterActions: FC<{
   product: Product;
   onAdd: () => void;
   isSuggestion: boolean;
-}> = ({ product, onAdd }) => {
+  allowEdit: boolean;
+}> = ({ product, onAdd, allowEdit }) => {
   const { addToCart, removeFromCart, cartDetails } = useCart();
-  const {
-    userDetails: { role }
-  } = useUser();
   const inCart = cartDetails.cart.filter(
     (item) => item.itemId === product.itemId
   );
@@ -46,7 +50,9 @@ const FooterActions: FC<{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'end'
+        justifyContent: 'end',
+        p: 0,
+        pr: 1
       }}
     >
       <div>
@@ -84,7 +90,7 @@ const FooterActions: FC<{
               justifyContent: 'end'
             }}
           >
-            {['admin', 'vendor'].includes(role) ? (
+            {allowEdit ? (
               <>
                 <LoadingButton
                   size="small"
@@ -127,14 +133,28 @@ const FooterActions: FC<{
               </>
             ) : (
               <Button
-                size="small"
                 onClick={() => {
                   onAdd();
                   addToCart(product);
                 }}
                 variant="outlined"
+                sx={{
+                  borderRadius: '10px',
+                  fontWeight: '900',
+                  border: '2px solid #4caf50',
+                  boxShadow:
+                    '1px 1px 0px 0px, 1px 1px 0px 0px, 1px 1px 0px 0px, 2px 2px 0px 0px, 2px 2px 0px 0px',
+                  position: 'relative',
+                  ':active': {
+                    boxShadow: '0px 0px 0px 0px',
+                    top: '5px',
+                    left: '5px'
+                  }
+                }}
+                disableRipple
               >
-                Add to cart
+                <Add />
+                ADD
               </Button>
             )}
           </Container>
@@ -151,23 +171,49 @@ const SuggestionProductItem: FC<{ productId: string }> = ({ productId }) => {
   const { data: product } = useProductQuery(productId);
   if (!product) return null;
   if (!product.isAvailable) return null;
-  return <ProductItem product={product} isSuggestion />;
+  return <ProductItem product={product} isSuggestion allowEdit={false} />;
 };
 
-const ProductItem: FC<{ product: Product; isSuggestion?: boolean }> = ({
-  product,
-  isSuggestion = false
-}) => {
+const ItemDescription: FC<{ description: string }> = ({ description }) => {
+  const [more, setMore] = useState(false);
+  return (
+    <div>
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{
+          display: '-webkit-box',
+          overflow: 'hidden',
+          WebkitBoxOrient: 'vertical',
+          WebkitLineClamp: !more ? 2 : 'none'
+        }}
+      >
+        {description}
+      </Typography>
+      {description.length > 15 ? (
+        <Button
+          onClick={() => {
+            setMore(!more);
+          }}
+          size="small"
+        >
+          Read More
+        </Button>
+      ) : null}
+    </div>
+  );
+};
+
+const ProductItem: FC<{
+  product: Product;
+  isSuggestion?: boolean;
+  allowEdit: boolean;
+}> = ({ product, isSuggestion = false, allowEdit }) => {
   const { itemDescription, itemName, itemPrice } = product;
   const [open, setOpen] = useState(false);
 
   return (
-    <div
-      style={{
-        width: 'min(90vw, 800px)',
-        margin: 'auto'
-      }}
-    >
+    <div style={{}}>
       <div
         style={{
           display: 'flex',
@@ -181,9 +227,8 @@ const ProductItem: FC<{ product: Product; isSuggestion?: boolean }> = ({
           <Typography variant="h3" component="h2">
             {itemName}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {itemDescription}
-          </Typography>
+          <ItemDescription description={itemDescription} />
+
           <Typography variant="h3" color="text.secondary">
             ₹{itemPrice}
           </Typography>
@@ -204,6 +249,7 @@ const ProductItem: FC<{ product: Product; isSuggestion?: boolean }> = ({
                 setOpen(true);
               }
             }}
+            allowEdit={allowEdit}
           />
         </div>
       </div>
@@ -228,11 +274,6 @@ const ProductItem: FC<{ product: Product; isSuggestion?: boolean }> = ({
           ))}
         </Box>
       </Drawer>
-      <Divider
-        sx={{
-          borderColor: '#eab6b637'
-        }}
-      />
     </div>
   );
 };
@@ -245,13 +286,16 @@ export const Products: FC<{
   search: string;
   shopId: string;
   onSearch: (str: string) => void;
-}> = ({ search, shopId, onSearch }) => {
+  allowEdit: boolean;
+  setAllowEdit: (edit: boolean) => void;
+}> = ({ search, shopId, onSearch, allowEdit, setAllowEdit }) => {
   const {
     userDetails: { role, loading }
   } = useUser();
   const { data: shops } = useShopQuery();
   const [selectedCategoryIds, setCategory] = useState<string[]>([]);
   const { data: categories } = useCategoryQuery(shopId);
+  const [collapsed, setCollapsed] = useState<string[]>([]);
 
   const { data, isLoading } = useProductsQuery({
     search: '',
@@ -276,8 +320,8 @@ export const Products: FC<{
   if (isLoading) {
     return <CircularProgress />;
   }
-  const shopName =
-    shops?.find((shop) => shop.shopId === shopId)?.shopName ?? 'Loading...';
+  const shop = shops?.find((shop) => shop.shopId === shopId);
+  const shopName = shop?.shopName ?? 'Loading...';
 
   return (
     <>
@@ -290,15 +334,74 @@ export const Products: FC<{
           mb: 20
         }}
       >
-        <Typography variant="h2" component="h1" sx={{ margin: 'auto' }}>
+        <Typography
+          variant="h2"
+          component="h1"
+          sx={{ margin: 'auto' }}
+          onClick={() => {
+            if (['admin', 'vendor'].includes(role)) {
+              setAllowEdit(!allowEdit);
+            }
+          }}
+        >
           {shopName}
         </Typography>
-        <CategoryList
-          shopId={shopId}
-          search={search}
-          selected={selectedCategoryIds}
-          onChange={(e) => setCategory(e)}
-        />
+        {selectedCategoryIds.length === 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              width: '100%',
+              mb: 1
+            }}
+          >
+            {shop?.deliveryFee === 0 ? (
+              <Paper
+                sx={{
+                  background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
+                  px: 1,
+                  py: 1,
+                  color: '#fff',
+                  borderRadius: '5px',
+                  fontSize: '13px',
+                  width: 'fit-content',
+                  fontWeight: '900'
+                }}
+              >
+                # FREE DELIVERY
+              </Paper>
+            ) : (
+              <>.</>
+            )}
+            <button
+              color="info"
+              onClick={() => {
+                if (collapsed.length) {
+                  setCollapsed([]);
+                } else {
+                  setCollapsed(categories?.map((c) => c.categoryId) ?? []);
+                }
+              }}
+              style={{
+                width: '35px',
+                height: '35px',
+                borderRadius: '50%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+            >
+              {categories?.length === collapsed.length ? (
+                <UnfoldMore />
+              ) : (
+                <UnfoldLess />
+              )}
+            </button>
+          </Box>
+        )}
+
+        <div style={{ height: '4px' }}></div>
         {filteredList.length === 0 && (
           <Container
             sx={{
@@ -306,7 +409,8 @@ export const Products: FC<{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              p: 0
             }}
           >
             <Typography variant="h3" component="h2">
@@ -330,69 +434,155 @@ export const Products: FC<{
             </Button>
           </Container>
         )}
-        <div style={{ height: '25px' }}></div>
-        {selectedCategoryIds.length > 0
-          ? filteredList?.map((product) => (
-              <ProductItem product={product} key={product.itemId} />
-            ))
-          : categories
-              ?.filter((category) =>
-                filteredList.some((i) => i.category.id === category.categoryId)
-              )
-              ?.map((category) => (
-                <Box
+        {selectedCategoryIds.length > 0 ? (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              width: 'min(90vw, 900px)',
+              px: 1,
+              backgroundColor: '#fff',
+              justifyItems: 'space-between',
+              borderRadius: '10px',
+              boxShadow: '0px 0px 10px 0px #0000001f'
+            }}
+          >
+            {filteredList?.map((product) => (
+              <ProductItem
+                product={product}
+                key={product.itemId}
+                allowEdit={allowEdit}
+              />
+            ))}
+          </Box>
+        ) : (
+          categories
+            ?.filter((category) =>
+              filteredList.some((i) => i.category.id === category.categoryId)
+            )
+            ?.map((category) => (
+              <Box
+                key={category.categoryId}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '10px',
+                  mb: 2,
+                  background: '#fff',
+                  p: 1,
+                  boxShadow: '0px 0px 10px 0px #0000001f'
+                }}
+              >
+                <Typography
                   key={category.categoryId}
+                  variant="h5"
+                  component="h2"
                   sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid #f1f6dc',
-                    borderRadius: '10px',
-                    mb: 2
+                    alignSelf: 'start',
+                    width: 'min(90vw, 900px)'
                   }}
                 >
-                  <Typography
-                    key={category.categoryId}
-                    variant="h5"
-                    component="h2"
+                  <Box
                     sx={{
-                      alignSelf: 'start'
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'start',
+                      gap: 5,
+                      justifyContent: 'start',
+                      width: '100%',
+                      position: 'sticky',
+                      top: '5px',
+                      zIndex: 100
+                    }}
+                    onClick={() => {
+                      if (collapsed.includes(category.categoryId)) {
+                        setCollapsed((prev) =>
+                          prev.filter((c) => c !== category.categoryId)
+                        );
+                      } else {
+                        setCollapsed((prev) => [...prev, category.categoryId]);
+                      }
                     }}
                   >
-                    <Box
+                    <Container
                       sx={{
                         display: 'flex',
                         flexDirection: 'row',
-                        alignItems: 'start',
-                        gap: 5,
-                        width: 'fit-content',
-                        justifyContent: 'start',
-                        color: '#d1ff04',
-                        fontWeight: 'bold',
-                        backgroundColor: '#000000',
-                        pl: 2,
-                        pr: 2,
-                        borderRadius: '10px 0 0 0'
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        p: 0
                       }}
                     >
-                      {category.categoryName}
-                    </Box>
-                    {filteredList
-                      .filter((p) => p.category.id === category.categoryId)
-                      .filter((p) =>
-                        ['admin', 'vendor'].includes(role)
-                          ? true
-                          : p.cantOrderSeparately
-                          ? false
-                          : p.isAvailable
-                      )
-                      ?.map((product) => (
-                        <ProductItem product={product} key={product.itemId} />
-                      ))}
-                  </Typography>
-                </Box>
-              ))}
+                      <Typography
+                        variant="h5"
+                        component="h2"
+                        sx={{
+                          fontWeight: 'bold',
+                          backgroundColor: '#000',
+                          px: 2,
+                          borderRadius: '5px',
+                          color: '#d1ff04'
+                        }}
+                      >
+                        {category.categoryName}
+                      </Typography>
+                      {collapsed.includes(category.categoryId) ? (
+                        <ArrowDropDown
+                          sx={{
+                            fontSize: '25px',
+                            color: '#ff0000',
+                            backgroundColor: '#c3c0c0a2',
+                            borderRadius: '50%'
+                          }}
+                        />
+                      ) : (
+                        <ArrowDropUp
+                          sx={{
+                            fontSize: '25px',
+                            color: '#ff0000',
+                            backgroundColor: '#c3c0c0a2',
+                            borderRadius: '50%'
+                          }}
+                        />
+                      )}
+                    </Container>
+                  </Box>
+                  {filteredList
+                    .filter((p) => p.category.id === category.categoryId)
+                    .filter(() => !collapsed.includes(category.categoryId))
+                    .filter((p) =>
+                      ['admin', 'vendor'].includes(role)
+                        ? true
+                        : p.cantOrderSeparately
+                        ? false
+                        : p.isAvailable
+                    )
+                    ?.map((product) => (
+                      <ProductItem
+                        product={product}
+                        key={product.itemId}
+                        allowEdit={allowEdit}
+                      />
+                    ))}
+                </Typography>
+              </Box>
+            ))
+        )}
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: '56px',
+            left: 0
+          }}
+        >
+          <CategoryList
+            shopId={shopId}
+            search={search}
+            selected={selectedCategoryIds}
+            onChange={(e) => setCategory(e)}
+          />
+        </Box>
       </Box>
     </>
   );

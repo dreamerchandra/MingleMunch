@@ -1,4 +1,4 @@
-import { Divider } from '@mui/material';
+import { Divider, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -38,6 +38,22 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
           <Typography component="h6" variant="h6" color="GrayText">
             {shop.isOpen ? shop.description : 'Currently Closed'}
           </Typography>
+          {shop.deliveryFee === 0 && (
+            <Paper
+              sx={{
+                background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
+                px: 1,
+                py: 1,
+                color: '#fff',
+                borderRadius: '5px',
+                fontSize: '13px',
+                width: 'fit-content',
+                fontWeight: '900'
+              }}
+            >
+              # FREE DELIVERY
+            </Paper>
+          )}
         </CardContent>
       </Box>
       <CardMedia
@@ -64,7 +80,7 @@ export const Shops = () => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        pt: 4,
+        pt: 2,
         alignItems: 'center',
         gap: 1,
         pb: 16

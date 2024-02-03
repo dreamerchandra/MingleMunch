@@ -57,9 +57,8 @@ export const OurStories = () => {
         alignItems: 'center',
         justifyContent: 'center',
         gap: 2,
-        mt: 4,
-        m: 2,
-        mb: 4
+        mt: 2,
+        mr: 2,
       }}
     >
       <Typography variant="h6" sx={{ letterSpacing: 4 }}>
