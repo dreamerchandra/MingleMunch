@@ -1,4 +1,4 @@
-import { Check, CopyAll, WhatsApp } from '@mui/icons-material';
+import { Add, Check, CopyAll, WhatsApp } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
@@ -12,7 +12,6 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Container from '@mui/material/Container';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
@@ -24,7 +23,12 @@ import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
 import { LastOrder } from '../LastOrder/LastOrder';
 import { useShopQuery } from '../Shop/shop-query';
-import { useAppConfig, useUserConfig } from '../appconfig';
+import {
+  AppConfig,
+  UserConfig,
+  useAppConfig,
+  useUserConfig
+} from '../appconfig';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
 
@@ -34,7 +38,7 @@ const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   justifyContent: 'space-between',
   gap: theme.spacing(2),
   width: '100%',
-  margin: theme.spacing(1, 0),
+  margin: theme.spacing(2, 0),
   '> *': {
     color: error ? theme.palette.error.main : ''
   }
@@ -67,11 +71,472 @@ const SubSection = styled('div')(({ theme }) => ({
   flexDirection: 'column',
   justifyContent: 'space-between',
   width: '100%',
-  marginTop: theme.spacing(2)
+  padding: theme.spacing(2),
+  gap: theme.spacing(2)
 }));
 
+const CheckoutCard: FC<{
+  items: { quantity: number; product: Product }[];
+  error: any;
+}> = ({ items, error }) => {
+  const { addToCart, removeFromCart } = useCart();
+  return (
+    <Card
+      elevation={2}
+      color="white"
+      sx={{
+        boxShadow: '0px 0px 10px 0px #0000001f',
+        background: '#fff',
+        px: 2
+      }}
+    >
+      {items
+        .sort((a, b) => a.product.itemName.localeCompare(b.product.itemName))
+        .map((item) => (
+          <StyledProduct
+            key={item.product.itemId}
+            error={error.products.includes(item.product.itemId)}
+          >
+            <div>
+              <Typography component="h6">{item.product.itemName}</Typography>
+              <Typography component="h6">₹{item.product.itemPrice}</Typography>
+            </div>
+            <div>
+              <ButtonGroup
+                variant="outlined"
+                aria-label="update cart"
+                sx={{
+                  p: 0,
+                  m: 0
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  sx={{
+                    border: 0
+                  }}
+                  onClick={() => removeFromCart(item.product)}
+                >
+                  -
+                </Button>
+                <Button variant="outlined" sx={{ maxWidth: '2ch', border: 0 }}>
+                  {item.quantity}
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    border: 0
+                  }}
+                  onClick={() => addToCart(item.product)}
+                >
+                  +
+                </Button>
+              </ButtonGroup>
+            </div>
+          </StyledProduct>
+        ))}
+    </Card>
+  );
+};
+
+const CompetitorBanner: FC<{ grandTotal: number }> = ({ grandTotal }) => {
+  return (
+    <Card
+      sx={{
+        flexShrink: 0,
+        borderRadius: 2,
+        backgroundColor: '#c0eade',
+        position: 'relative',
+        boxShadow: '0px 0px 10px 0px #0000001f',
+        backgroundImage:
+          'linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.9))'
+      }}
+    >
+      <CardContent>
+        <Background />
+        <Typography
+          variant="h3"
+          sx={{ fontWeight: 900 }}
+          color="text.secondary"
+        >
+          Saved you from paying <br /> Rs.
+          {Math.round(grandTotal * 0.28)} extra.
+        </Typography>
+        <div
+          style={{
+            border: '1px dashed #c0f09e',
+            marginBottom: '6px'
+          }}
+        />
+        <TotalWrapper
+          sx={{
+            width: '65vw',
+            color: '#ff4b4b',
+            justifyContent: 'normal',
+            gap: 4
+          }}
+        >
+          <Typography variant="h6" fontWeight="semibold">
+            Competitor's Price
+          </Typography>
+          <Typography variant="h6" fontWeight="semibold">
+            Rs. {Math.round(grandTotal * 0.28 + grandTotal)}
+          </Typography>
+        </TotalWrapper>
+      </CardContent>
+    </Card>
+  );
+};
+
+const TotalCard: FC<{
+  itemsTotal: number;
+  coupon: string;
+  originalDeliveryFee: number;
+  deliveryFee: number;
+  platformFee: number;
+  parcelChargesTotal: number;
+  grandTotal: number;
+}> = ({
+  itemsTotal,
+  coupon,
+  originalDeliveryFee,
+  deliveryFee,
+  platformFee,
+  parcelChargesTotal,
+  grandTotal
+}) => {
+  return (
+    <Card
+      sx={{
+        flexShrink: 0,
+        borderRadius: 2,
+        backgroundColor: '#fff',
+        position: 'relative',
+        boxShadow: '0px 0px 10px 0px #0000001f'
+      }}
+    >
+      <Box
+        sx={{
+          alignSelf: 'flex-end'
+        }}
+      >
+        <Container
+          component="div"
+          sx={{
+            padding: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%'
+          }}
+        >
+          <TotalWrapper>
+            <Typography component="h6">Item Total </Typography>
+            <Typography component="h6">₹{itemsTotal}</Typography>
+          </TotalWrapper>
+          <TotalWrapper>
+            <Typography component="h6">
+              Delivery
+              <Tooltip
+                title={
+                  !coupon
+                    ? 'This helps our delivery partners to serve you better.'
+                    : `Delivery fee Rs.${originalDeliveryFee} has been waved off`
+                }
+                enterTouchDelay={20}
+                leaveTouchDelay={5_000}
+              >
+                <IconButton sx={{ p: 0, ml: 1 }}>
+                  <InfoIcon sx={{ width: 20 }} />
+                </IconButton>
+              </Tooltip>
+            </Typography>
+            <div>
+              {coupon && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    textDecoration: 'line-through',
+                    color: '#ff4b4b'
+                  }}
+                >
+                  ₹ {originalDeliveryFee}
+                </Typography>
+              )}
+              <Typography component="h6">₹ {deliveryFee}</Typography>
+            </div>
+          </TotalWrapper>
+          <TotalWrapper>
+            <Typography component="h6">
+              Platform Fee
+              <Tooltip
+                title="This small fee helps us to keep this platform running."
+                enterTouchDelay={20}
+                leaveTouchDelay={5_000}
+              >
+                <IconButton sx={{ p: 0, ml: 1 }}>
+                  <InfoIcon sx={{ width: 20 }} />
+                </IconButton>
+              </Tooltip>
+            </Typography>
+            <Typography component="h6">₹ {platformFee}</Typography>
+          </TotalWrapper>
+          {parcelChargesTotal > 0 ? (
+            <TotalWrapper>
+              <Typography component="h6">
+                Parcel Charges
+                <Tooltip
+                  title="Industry's lowest ever parcel charges by burn!"
+                  enterTouchDelay={20}
+                  leaveTouchDelay={5_000}
+                >
+                  <IconButton sx={{ p: 0, ml: 1 }}>
+                    <InfoIcon sx={{ width: 20 }} />
+                  </IconButton>
+                </Tooltip>
+              </Typography>
+              <Typography component="h6">₹ {parcelChargesTotal}</Typography>
+            </TotalWrapper>
+          ) : null}
+          <TotalWrapper>
+            <Typography component="h6">GrandTotal </Typography>
+            <Typography
+              component="h6"
+              sx={{
+                fontWeight: 'bold'
+              }}
+            >
+              ₹{Math.round(grandTotal)}
+            </Typography>
+          </TotalWrapper>
+        </Container>
+      </Box>
+    </Card>
+  );
+};
+const initialErrorState = { message: '', products: [] as string[] };
+
+const ApplyCouponDrawer: FC<{
+  model: boolean;
+  setModel: (open: boolean) => void;
+  userConfig: UserConfig;
+  setCoupon: (c: string) => void;
+}> = ({ model, setModel, userConfig, setCoupon }) => {
+  return (
+    <SwipeableDrawer
+      open={model}
+      anchor="bottom"
+      onClose={() => setModel(false)}
+      onOpen={() => {
+        setModel(true);
+      }}
+    >
+      <Box
+        sx={{
+          width: 'min(100vw, 900px)',
+          p: 4,
+          padding: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          margin: 'auto',
+          background: '#000 url(/abstract_emoji.png)'
+        }}
+      >
+        {userConfig?.availableCoupons?.length === 0 ? (
+          <SubSection
+            sx={{
+              gap: 2
+            }}
+          >
+            <Typography variant="h6" color="secondary">
+              No coupons available for you
+            </Typography>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+              <Typography variant="caption" color="secondary">
+                Pro Tip: You could
+                <Typography
+                  variant="caption"
+                  color="secondary"
+                  sx={{ m: 1, textDecoration: 'underline' }}
+                >
+                  refer and earn
+                </Typography>
+                coupons.
+              </Typography>
+              <Typography variant="caption" color="secondary">
+                Your referral code is
+                <Button variant="text" color="info" sx={{ p: 0, ml: 2 }}>
+                  {userConfig?.myReferralCodes}
+                </Button>
+              </Typography>
+            </div>
+            <div
+              style={{
+                height: '12px'
+              }}
+            />
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-evenly',
+                gap: 2
+              }}
+            >
+              <ReferButton myReferralCodes={userConfig.myReferralCodes ?? ''} />
+              <Button
+                variant="contained"
+                onClick={() => setModel(false)}
+                color="secondary"
+              >
+                Close
+              </Button>
+            </Box>
+          </SubSection>
+        ) : (
+          <Typography variant="h6" color="secondary">
+            Available coupons
+          </Typography>
+        )}
+        {userConfig.availableCoupons?.map((coupon) => (
+          <Card
+            key={coupon}
+            elevation={4}
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 2,
+              borderRadius: '10px',
+              backgroundColor: '#c0eade2c'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 2
+              }}
+            >
+              <Typography variant="h6" color="secondary">
+                {coupon}
+              </Typography>
+              <Typography variant="caption" color="secondary">
+                Free delivery
+              </Typography>
+            </div>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => {
+                setCoupon(coupon);
+                setModel(false);
+              }}
+            >
+              Apply
+            </Button>
+          </Card>
+        ))}
+      </Box>
+    </SwipeableDrawer>
+  );
+};
+
+const Footer: FC<{
+  error: any;
+  setError: (a: any) => void;
+  isLoading: boolean;
+  onPlaceOrder: () => void;
+  grandTotal: number;
+  coupon: string;
+  setModel: (show: boolean) => void;
+  appConfig: AppConfig;
+  userConfig: UserConfig;
+}> = ({
+  error,
+  setError,
+  isLoading,
+  appConfig,
+  onPlaceOrder,
+  grandTotal,
+  coupon,
+  userConfig,
+  setModel
+}) => {
+  const { removeAll } = useCart();
+  return (
+    <>
+      {error.message ? (
+        <Alert
+          severity="error"
+          onClose={() => {
+            removeAll();
+            setError(initialErrorState);
+          }}
+          action={
+            <Button color="inherit" size="small" href="tel:+91-8754791569">
+              Call Us
+            </Button>
+          }
+        >
+          {error.message}
+        </Alert>
+      ) : (
+        <SubSection
+          sx={{
+            gap: 1,
+            marginBottom: 2
+          }}
+        >
+          <LoadingButton
+            loading={isLoading}
+            loadingPosition="start"
+            startIcon={<ShoppingCartCheckoutIcon />}
+            variant="contained"
+            disabled={isLoading || !appConfig.isOpen}
+            onClick={onPlaceOrder}
+            color="secondary"
+            disableElevation
+          >
+            {appConfig.isOpen ? `Place order ₹ ${grandTotal}` : 'Opens by 7AM'}
+          </LoadingButton>
+          {coupon ? (
+            <Typography
+              variant="caption"
+              sx={{
+                color: '#41b594',
+                width: 'fit-content',
+                margin: 'auto'
+              }}
+            >
+              Coupon applied: {coupon}
+            </Typography>
+          ) : userConfig.availableCoupons?.length ? (
+            <Button
+              variant="text"
+              color="success"
+              onClick={() => setModel(true)}
+              sx={{
+                fontWeight: 800
+              }}
+            >
+              {userConfig.availableCoupons.length} COUPON AVAILABLE
+            </Button>
+          ) : null}
+        </SubSection>
+      )}
+    </>
+  );
+};
+
 export const Checkout: FC = () => {
-  const { cartDetails, addToCart, removeFromCart, removeAll } = useCart();
+  const { cartDetails, removeAll } = useCart();
   const { data: shops } = useShopQuery();
   const { data: appConfig } = useAppConfig();
   const { data: userConfig } = useUserConfig();
@@ -106,12 +571,11 @@ export const Checkout: FC = () => {
   const navigate = useNavigate();
   const { mutate, isLoading } = useMutationCreateOrder();
   const [success, setShowSuccess] = useState(false);
-  const initialErrorState = { message: '', products: [] as string[] };
   const [error, setError] = useState(initialErrorState);
   const [model, setModel] = useState(false);
   useEffect(() => {
     if (items.length === 0) {
-      navigate(-1);
+      navigate('/');
     }
   }, [items.length, navigate]);
 
@@ -190,500 +654,104 @@ export const Checkout: FC = () => {
       }
     );
   };
+  if (success) {
+    return <SuccessCheckout />;
+  }
   return (
-    <Container
-      component="main"
+    <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        width: '100%',
         justifyContent: 'space-between',
-        p: 0,
-        pt: 3
+        minHeight: '87dvh',
       }}
     >
-      {success ? (
-        <SuccessCheckout />
-      ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            justifyContent: 'space-between',
-            height: 'calc(100dvh - 125px)',
-            overflow: 'auto'
+      <SubSection>
+        {coupon && (
+          <Alert
+            icon={<CheckIcon fontSize="inherit" />}
+            severity="success"
+            sx={{
+              bgcolor: '#41b594',
+              color: '#fff',
+              borderRadius: '5px'
+            }}
+          >
+            You have saved Rs.{originalDeliveryFee} on this order.
+          </Alert>
+        )}
+        <CheckoutCard items={items} error={error} />
+        <Button
+          onClick={() => {
+            navigate(-1);
           }}
+          sx={{
+            margin: 'auto'
+          }}
+          variant="outlined"
+          color="success"
         >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              justifyContent: 'space-between'
-            }}
-          >
-            <div>
-              <SubSection
-                style={{
-                  marginTop: 0
-                }}
-              >
-                {coupon && (
-                  <Alert
-                    icon={<CheckIcon fontSize="inherit" />}
-                    severity="success"
-                    sx={{
-                      bgcolor: '#41b594',
-                      color: '#fff',
-                      borderRadius: '5px'
-                    }}
-                  >
-                    You have saved Rs.{originalDeliveryFee} on this order.
-                  </Alert>
-                )}
-
-                <Card
-                  sx={{ padding: 2, mt: 2 }}
-                  elevation={2}
-                  style={{
-                    borderRadius: '10px'
-                  }}
-                >
-                  {items
-                    .sort((a, b) =>
-                      a.product.itemName.localeCompare(b.product.itemName)
-                    )
-                    .map((item, idx) => (
-                      <div key={item.product.itemId}>
-                        <StyledProduct
-                          key={item.product.itemId}
-                          error={error.products.includes(item.product.itemId)}
-                        >
-                          <div>
-                            <Typography component="h6">
-                              {item.product.itemName}
-                            </Typography>
-                            <Typography component="h6">
-                              ₹{item.product.itemPrice}
-                            </Typography>
-                          </div>
-                          <div>
-                            <ButtonGroup
-                              variant="outlined"
-                              aria-label="update cart"
-                            >
-                              <Button
-                                variant="outlined"
-                                onClick={() => removeFromCart(item.product)}
-                              >
-                                -
-                              </Button>
-                              <Button
-                                variant="outlined"
-                                style={{ maxWidth: '2ch' }}
-                              >
-                                {item.quantity}
-                              </Button>
-                              <Button
-                                variant="outlined"
-                                onClick={() => addToCart(item.product)}
-                              >
-                                +
-                              </Button>
-                            </ButtonGroup>
-                          </div>
-                        </StyledProduct>
-                        {idx != items.length - 1 && (
-                          <Divider
-                            style={{
-                              backgroundColor: '#f3faf8',
-                              margin: 'auto',
-                              width: '40vw'
-                            }}
-                          />
-                        )}
-                      </div>
-                    ))}
-                </Card>
-              </SubSection>
-              <SubSection>
-                <Button
-                  onClick={() => {
-                    navigate(-1);
-                  }}
-                  sx={{
-                    margin: 'auto'
-                  }}
-                  variant="outlined"
-                  color="success"
-                >
-                  <Typography variant="caption" sx={{ fontWeight: 800 }}>
-                    Add more items
-                  </Typography>
-                </Button>
-                <Button
-                  onClick={() => {
-                    removeAll();
-                    navigate('/');
-                  }}
-                  sx={{
-                    margin: 'auto'
-                  }}
-                  variant="text"
-                  color="warning"
-                >
-                  <DeleteIcon sx={{ height: 16 }} />
-                  <Typography variant="caption">Clear all</Typography>
-                </Button>
-              </SubSection>
-              <Divider
-                style={{ width: '40vw', margin: '10px auto' }}
-                sx={{ bgcolor: 'primary.main' }}
-              />
-            </div>
-          </Box>
-          <Card
-            sx={{
-              flexShrink: 0,
-              borderRadius: 2,
-              mb: 4,
-              backgroundColor: '#c0eade',
-              position: 'relative',
-              backgroundImage:
-                'linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.9))'
-            }}
-            elevation={4}
-          >
-            <CardContent>
-              <Background />
-              <Typography variant="h3" sx={{ fontWeight: 900 }}>
-                Saved you from paying <br /> Rs.
-                {Math.round(grandTotal * 0.28)} extra.
-              </Typography>
-              <div
-                style={{
-                  border: '1px dashed #c0f09e',
-                  marginBottom: '6px'
-                }}
-              />
-              <TotalWrapper
-                sx={{
-                  width: '65vw',
-                  color: '#ff4b4b',
-                  justifyContent: 'normal',
-                  gap: 4
-                }}
-              >
-                <Typography variant="h6" fontWeight="bold">
-                  Competitor's Price
-                </Typography>
-                <Typography variant="h6" fontWeight="bold">
-                  Rs. {Math.round(grandTotal * 0.28 + grandTotal)}
-                </Typography>
-              </TotalWrapper>
-            </CardContent>
-          </Card>
-          <div>
-            <Card
-              elevation={1}
-              style={{
-                borderRadius: '5px'
-              }}
-            >
-              <Box
-                sx={{
-                  alignSelf: 'flex-end'
-                }}
-              >
-                <Container
-                  component="div"
-                  sx={{
-                    padding: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    width: '100%'
-                  }}
-                >
-                  <TotalWrapper>
-                    <Typography component="h6">Item Total </Typography>
-                    <Typography component="h6">₹{itemsTotal}</Typography>
-                  </TotalWrapper>
-                  <TotalWrapper>
-                    <Typography component="h6">
-                      Delivery
-                      <Tooltip
-                        title={
-                          !coupon
-                            ? 'This helps our delivery partners to serve you better.'
-                            : `Delivery fee Rs.${originalDeliveryFee} has been waved off`
-                        }
-                        enterTouchDelay={20}
-                        leaveTouchDelay={5_000}
-                      >
-                        <IconButton sx={{ p: 0, ml: 1 }}>
-                          <InfoIcon sx={{ width: 20 }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Typography>
-                    <div>
-                      {coupon && (
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            textDecoration: 'line-through',
-                            color: '#ff4b4b'
-                          }}
-                        >
-                          ₹ {originalDeliveryFee}
-                        </Typography>
-                      )}
-                      <Typography component="h6">₹ {deliveryFee}</Typography>
-                    </div>
-                  </TotalWrapper>
-                  <TotalWrapper>
-                    <Typography component="h6">
-                      Platform Fee
-                      <Tooltip
-                        title="This small fee helps us to keep this platform running."
-                        enterTouchDelay={20}
-                        leaveTouchDelay={5_000}
-                      >
-                        <IconButton sx={{ p: 0, ml: 1 }}>
-                          <InfoIcon sx={{ width: 20 }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Typography>
-                    <Typography component="h6">₹ {platformFee}</Typography>
-                  </TotalWrapper>
-                  {parcelChargesTotal > 0 ? (
-                    <TotalWrapper>
-                      <Typography component="h6">
-                        Parcel Charges
-                        <Tooltip
-                          title="Industry's lowest ever parcel charges by burn!"
-                          enterTouchDelay={20}
-                          leaveTouchDelay={5_000}
-                        >
-                          <IconButton sx={{ p: 0, ml: 1 }}>
-                            <InfoIcon sx={{ width: 20 }} />
-                          </IconButton>
-                        </Tooltip>
-                      </Typography>
-                      <Typography component="h6">
-                        ₹ {parcelChargesTotal}
-                      </Typography>
-                    </TotalWrapper>
-                  ) : null}
-                  <TotalWrapper>
-                    <Typography component="h6">GrandTotal </Typography>
-                    <Typography
-                      component="h6"
-                      sx={{
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      ₹{Math.round(grandTotal)}
-                    </Typography>
-                  </TotalWrapper>
-                </Container>
-              </Box>
-            </Card>
-            {error.message ? (
-              <Alert
-                severity="error"
-                onClose={() => {
-                  removeAll();
-                  setError(initialErrorState);
-                }}
-                action={
-                  <Button
-                    color="inherit"
-                    size="small"
-                    href="tel:+91-8754791569"
-                  >
-                    Call Us
-                  </Button>
-                }
-              >
-                {error.message}
-              </Alert>
-            ) : (
-              <SubSection
-                sx={{
-                  gap: 1,
-                  marginBottom: 7
-                }}
-              >
-                <LoadingButton
-                  loading={isLoading}
-                  loadingPosition="start"
-                  startIcon={<ShoppingCartCheckoutIcon />}
-                  variant="contained"
-                  disabled={isLoading || !appConfig.isOpen}
-                  onClick={onPlaceOrder}
-                  color="secondary"
-                  style={{
-                    borderRadius: '10px'
-                  }}
-                >
-                  {appConfig.isOpen
-                    ? `Place order ₹ ${grandTotal}`
-                    : 'Opens by 7AM'}
-                </LoadingButton>
-                {coupon ? (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: '#41b594',
-                      width: 'fit-content',
-                      margin: 'auto'
-                    }}
-                  >
-                    Coupon applied: {coupon}
-                  </Typography>
-                ) : userConfig.availableCoupons?.length ? (
-                  <Button
-                    variant="text"
-                    color="success"
-                    onClick={() => setModel(true)}
-                    sx={{
-                      fontWeight: 800
-                    }}
-                  >
-                    {userConfig.availableCoupons.length} COUPON AVAILABLE
-                  </Button>
-                ) : null}
-              </SubSection>
-            )}
-          </div>
-        </Box>
-      )}
-      <SwipeableDrawer
-        open={model}
-        anchor="bottom"
-        onClose={() => setModel(false)}
-        onOpen={() => {
-          setModel(true);
+          <Add />
+          <Typography variant="caption" sx={{ fontWeight: 800 }}>
+            Add More
+          </Typography>
+        </Button>
+        <Button
+          onClick={() => {
+            removeAll();
+            navigate('/');
+          }}
+          sx={{
+            margin: 'auto',
+            mt: -1
+          }}
+          variant="text"
+          color="warning"
+        >
+          <DeleteIcon sx={{ height: 16 }} />
+          <Typography variant="caption">Clear all</Typography>
+        </Button>
+      </SubSection>
+      <SubSection>
+        <CompetitorBanner grandTotal={grandTotal} />
+      </SubSection>
+      <SubSection>
+        <TotalCard
+          itemsTotal={itemsTotal}
+          coupon={coupon}
+          originalDeliveryFee={originalDeliveryFee}
+          deliveryFee={deliveryFee}
+          platformFee={platformFee}
+          parcelChargesTotal={parcelChargesTotal}
+          grandTotal={grandTotal}
+        />
+      </SubSection>
+      <SubSection
+        sx={{
+          mt: -1
         }}
       >
-        <Box
-          sx={{
-            width: 'min(100vw, 900px)',
-            p: 4,
-            padding: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            margin: 'auto',
-            background: '#000 url(/abstract_emoji.png)'
-          }}
-        >
-          {userConfig?.availableCoupons?.length === 0 ? (
-            <SubSection
-              sx={{
-                gap: 2
-              }}
-            >
-              <Typography variant="h6" color="secondary">
-                No coupons available for you
-              </Typography>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}
-              >
-                <Typography variant="caption" color="secondary">
-                  Pro Tip: You could
-                  <Typography
-                    variant="caption"
-                    color="secondary"
-                    sx={{ m: 1, textDecoration: 'underline' }}
-                  >
-                    refer and earn
-                  </Typography>
-                  coupons.
-                </Typography>
-                <Typography variant="caption" color="secondary">
-                  Your referral code is
-                  <Button variant="text" color="info" sx={{ p: 0, ml: 2 }}>
-                    {userConfig?.myReferralCodes}
-                  </Button>
-                </Typography>
-              </div>
-              <div
-                style={{
-                  height: '12px'
-                }}
-              />
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-evenly',
-                  gap: 2
-                }}
-              >
-                <ReferButton
-                  myReferralCodes={userConfig.myReferralCodes ?? ''}
-                />
-                <Button
-                  variant="contained"
-                  onClick={() => setModel(false)}
-                  color="secondary"
-                >
-                  Close
-                </Button>
-              </Box>
-            </SubSection>
-          ) : (
-            <Typography variant="h6" color="secondary">
-              Available coupons
-            </Typography>
-          )}
-          {userConfig.availableCoupons?.map((coupon) => (
-            <Card
-              key={coupon}
-              elevation={4}
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: 2,
-                borderRadius: '10px',
-                backgroundColor: '#c0eade2c'
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 2
-                }}
-              >
-                <Typography variant="h6" color="secondary">
-                  {coupon}
-                </Typography>
-                <Typography variant="caption" color="secondary">
-                  Free delivery
-                </Typography>
-              </div>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => {
-                  setCoupon(coupon);
-                  setModel(false);
-                }}
-              >
-                Apply
-              </Button>
-            </Card>
-          ))}
-        </Box>
-      </SwipeableDrawer>
+        <Footer
+          appConfig={appConfig}
+          coupon={coupon}
+          error={error}
+          grandTotal={grandTotal}
+          isLoading={isLoading}
+          onPlaceOrder={onPlaceOrder}
+          setError={setError}
+          setModel={setModel}
+          userConfig={userConfig}
+        />
+      </SubSection>
+      {userConfig.availableCoupons && (
+        <ApplyCouponDrawer
+          model={model}
+          setCoupon={setCoupon}
+          setModel={setModel}
+          userConfig={userConfig}
+        />
+      )}
       {confetti.show && (
         <div
           style={{
@@ -700,7 +768,7 @@ export const Checkout: FC = () => {
           <img src="https://media.tenor.com/aKPcD7T8KtUAAAAi/confetti-glitter.gif" />
         </div>
       )}
-    </Container>
+    </Box>
   );
 };
 
@@ -712,26 +780,12 @@ function SuccessCheckout() {
       style={{
         height: 'calc(100dvh - 80px)',
         width: '100vw',
-        // backgroundImage: 'url(/abstract_emoji.png)',
+        backgroundImage: 'url(/abstract_emoji.png)',
         filter: 'brightness(70%)',
         backgroundSize: 'contain',
         overflow: 'hidden'
       }}
     >
-      <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            height: '80vh',
-            width: '100vw',
-            display: 'flex',
-            alignItems: 'end',
-            filter: `opacity(0.15)`
-          }}
-        >
-          <img src="https://media.tenor.com/NJEMIcZ249gAAAAi/full-toothed-grin-party-popper.gif" />
-        </div>
       <div
         style={{
           display: 'flex',

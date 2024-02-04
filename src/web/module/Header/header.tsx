@@ -58,8 +58,8 @@ export const Header: FC<{
         <Box
           sx={{
             position: 'sticky',
-            height: '74px',
-            top: 10,
+            height: '70px',
+            top: 6,
             width: 'min(93vw, 1200px)',
             display: 'flex',
             justifyContent: 'center',

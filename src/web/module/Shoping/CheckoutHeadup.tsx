@@ -20,23 +20,26 @@ export function CheckoutHeadsUp() {
 
   return (
     <>
-      <StyledBadge
-        badgeContent={cartDetails.cart.length}
-        color="primary"
-        aria-label="checkout"
-      >
+      <StyledBadge color="success" aria-label="checkout">
         <Fab
           aria-label="checkout"
-          size='large'
-          variant='extended'
+          size="large"
+          variant="extended"
           onClick={() => {
             navigate('/cart');
           }}
           sx={{
-            backgroundColor: 'aliceblue',
+            backgroundColor: '#5f9ea0',
+            color: 'white',
+            gap: 1,
           }}
         >
-          <ShoppingCart />
+          <ShoppingCart
+            sx={{
+              color: 'white'
+            }}
+          />
+          {cartDetails.cart.length}
         </Fab>
       </StyledBadge>
     </>

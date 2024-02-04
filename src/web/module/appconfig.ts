@@ -9,7 +9,7 @@ import { firebaseDb } from '../firebase/firebase/db';
 import { useUser } from '../firebase/auth';
 import { post } from '../firebase/fetch';
 
-interface AppConfig {
+export interface AppConfig {
   isOpen: true;
   platformFee: number;
   carousel: { image: string; url?: string; isPublished: boolean }[];
@@ -26,7 +26,7 @@ const appConfigConverter = {
   }
 };
 
-interface UserConfig {
+export interface UserConfig {
   availableCoupons?: string[];
   myReferralCodes: string;
   referredUsers?: Record<

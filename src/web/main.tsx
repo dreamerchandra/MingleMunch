@@ -37,7 +37,6 @@ window.addEventListener('focus', () => {
   }
 });
 
-
 const pushToAnalytics = async () => {
   setTimeout(() => {
     let analyticsId = localStorage.getItem('analyticsId');
@@ -77,13 +76,15 @@ if (window.location.hostname !== 'localhost' && !internal) {
 }
 
 const onError = (e: Error) => {
-  if( e && e.name === 'ChunkLoadError' && window?.location?.reload ) {
+  const isChunkLoadError =
+    e && e.message.includes('Failed to fetch dynamically imported module');
+  if (isChunkLoadError && window?.location?.reload) {
     window.location.reload();
   }
   return {
     element: null
   };
-}
+};
 const router = createBrowserRouter([
   {
     path: '/login',
