@@ -48,6 +48,10 @@ export const Products: FC<{
         ?.map((c) => c.categoryId) ?? []
     );
   }, [categories]);
+  useEffect(() => {
+    if (search === '') return;
+    setCollapsed([]);
+  }, [search]);
 
   const { data, isLoading } = useProductsQuery({
     search: '',
@@ -199,7 +203,7 @@ export const Products: FC<{
               backgroundColor: '#fff',
               justifyItems: 'space-between',
               borderRadius: '10px',
-              boxShadow: '0px 0px 10px 0px #0000001f'
+              boxShadow: '0px 0px 2px 0px #0000001f'
             }}
           >
             {filteredList?.map((product) => (
@@ -372,6 +376,7 @@ export const Products: FC<{
           sx={{
             position: 'fixed',
             bottom: 60,
+            zIndex: 100,
             boxShadow: '2px 2px 10px 0px #0000001f',
             [theme.breakpoints.down('md')]: {
               left: 10

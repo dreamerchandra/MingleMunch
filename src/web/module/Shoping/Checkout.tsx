@@ -19,7 +19,6 @@ import Typography from '@mui/material/Typography';
 import { green } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
 import { FC, useEffect, useState } from 'react';
-import Confetti from 'react-confetti';
 import { useNavigate } from 'react-router-dom';
 import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
@@ -77,9 +76,21 @@ export const Checkout: FC = () => {
   const { data: appConfig } = useAppConfig();
   const { data: userConfig } = useUserConfig();
   const [coupon, _setCoupon] = useState('');
-  const [confetti, setConfetti] = useState(false);
+  const [confetti, setConfetti] = useState({
+    show: false,
+    opacity: 0.5
+  });
   const setCoupon = (coupon: string) => {
-    setConfetti(true);
+    setConfetti({ show: true, opacity: 0.5 });
+    const intervalId = setInterval(() => {
+      setConfetti((c) => {
+        if (c.opacity <= 0) {
+          clearInterval(intervalId);
+          setConfetti({ show: false, opacity: 0.5 });
+        }
+        return { ...c, opacity: c.opacity - 0.01 };
+      });
+    }, 100);
     _setCoupon(coupon);
     Analytics.pushEvent('coupon-applied', { coupon });
   };
@@ -187,7 +198,8 @@ export const Checkout: FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: 2
+        p: 0,
+        pt: 3
       }}
     >
       {success ? (
@@ -199,7 +211,8 @@ export const Checkout: FC = () => {
             flexDirection: 'column',
             width: '100%',
             justifyContent: 'space-between',
-            minHeight: '90vh'
+            height: 'calc(100dvh - 125px)',
+            overflow: 'auto'
           }}
         >
           <Box
@@ -332,6 +345,7 @@ export const Checkout: FC = () => {
           </Box>
           <Card
             sx={{
+              flexShrink: 0,
               borderRadius: 2,
               mb: 4,
               backgroundColor: '#c0eade',
@@ -533,6 +547,9 @@ export const Checkout: FC = () => {
                     variant="text"
                     color="success"
                     onClick={() => setModel(true)}
+                    sx={{
+                      fontWeight: 800
+                    }}
                   >
                     {userConfig.availableCoupons.length} COUPON AVAILABLE
                   </Button>
@@ -667,12 +684,21 @@ export const Checkout: FC = () => {
           ))}
         </Box>
       </SwipeableDrawer>
-      {confetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          recycle={false}
-        />
+      {confetti.show && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            height: '80vh',
+            width: '100vw',
+            display: 'flex',
+            alignItems: 'end',
+            filter: `opacity(${confetti.opacity})`
+          }}
+        >
+          <img src="https://media.tenor.com/aKPcD7T8KtUAAAAi/confetti-glitter.gif" />
+        </div>
       )}
     </Container>
   );
@@ -684,14 +710,28 @@ function SuccessCheckout() {
   return (
     <div
       style={{
-        height: 'calc(100vh - 80px)',
+        height: 'calc(100dvh - 80px)',
         width: '100vw',
-        backgroundImage: 'url(/abstract_emoji.png)',
+        // backgroundImage: 'url(/abstract_emoji.png)',
         filter: 'brightness(70%)',
         backgroundSize: 'contain',
         overflow: 'hidden'
       }}
     >
+      <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            height: '80vh',
+            width: '100vw',
+            display: 'flex',
+            alignItems: 'end',
+            filter: `opacity(0.15)`
+          }}
+        >
+          <img src="https://media.tenor.com/NJEMIcZ249gAAAAi/full-toothed-grin-party-popper.gif" />
+        </div>
       <div
         style={{
           display: 'flex',
@@ -748,7 +788,7 @@ function SuccessCheckout() {
         >
           Back to Home
         </Button>
-        <LastOrder bottom={0} />
+        <LastOrder />
       </div>
     </div>
   );

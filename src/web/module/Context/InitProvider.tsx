@@ -1,4 +1,4 @@
-import { User, getIdTokenResult } from 'firebase/auth';
+import { User, getIdTokenResult, onAuthStateChanged } from 'firebase/auth';
 import {
   FC,
   ReactNode,
@@ -30,7 +30,7 @@ export const InitProvider: FC<{ children: ReactNode }> = ({ children }) => {
     role: '' as Role
   });
   useEffect(() => {
-    const unsubs = firebaseAuth.onAuthStateChanged(async (user) => {
+    const unsubs = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user) {
         const tokenResult = await getIdTokenResult(user, true);
         localStorage.setItem('isLoggedIn', 'true');

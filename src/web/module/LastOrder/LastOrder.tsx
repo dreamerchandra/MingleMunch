@@ -75,7 +75,7 @@ const Text: FC<{ label: string }> = ({ label }) => {
   );
 };
 
-export const LastOrder: FC<{ bottom?: number }> = ({ bottom }) => {
+export const LastOrder: FC = () => {
   const lastOrder = useLastOrder();
   if (!lastOrder) return <AddToHomeScreen />;
   if (lastOrder?.status == 'delivered') return <AddToHomeScreen />;
@@ -83,7 +83,7 @@ export const LastOrder: FC<{ bottom?: number }> = ({ bottom }) => {
     <Button
       sx={{
         position: 'fixed',
-        bottom: bottom ?? 58,
+        bottom: 58,
         left: 0,
         display: 'flex',
         justifyContent: 'center',

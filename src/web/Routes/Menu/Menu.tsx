@@ -22,23 +22,22 @@ export const MenuPage = () => {
   const [allowEdit, setAllowEdit] = useState(false);
   return (
     <>
-      <Header  onSearch={onSearch} search={search} />
+      <Header onSearch={onSearch} search={search} title={`Menu - ${shop?.shopName}`}/>
       <Container
         component="main"
         sx={{
-          height: 'calc(100vh - 240px)',
+          height: 'calc(100dvh - 250px)',
           overflow: 'auto',
           backgroundColor: '#f5f5f5',
-          background:
-            'linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(/abstract_emoji.png)',
           backgroundSize: '100vw',
+          mt: 2
         }}
       >
         <Box marginTop={2}>
           <Carousel
             showThumbs={false}
             infiniteLoop
-            interval={2500}
+            interval={4500}
             autoPlay
             showStatus={false}
             showArrows={false}

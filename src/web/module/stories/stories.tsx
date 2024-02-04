@@ -56,9 +56,10 @@ export const OurStories = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 2,
+        gap: 1,
         mt: 2,
         mr: 2,
+        mb: 2
       }}
     >
       <Typography variant="h6" sx={{ letterSpacing: 4 }}>
@@ -78,9 +79,7 @@ export const OurStories = () => {
               key={id}
               style={{
                 border: `2px solid ${
-                  watched.includes(id)
-                    ? 'gray'
-                    : '#Cfff04'
+                  watched.includes(id) ? 'gray' : '#Cfff04'
                 }`,
                 borderRadius: '50%',
                 width: '70px',
@@ -116,7 +115,7 @@ export const OurStories = () => {
               top: 0,
               left: 0,
               width: '100vw',
-              height: '100vh',
+              height: '100dvh',
               zIndex: 9999
             }}
           >
@@ -150,10 +149,10 @@ export const OurStories = () => {
                 onStoryEnd={onNext}
                 onNext={onNext}
                 width="100vw"
-                height="100vh"
+                height="100dvh"
                 storyStyles={{
                   background: '#fff',
-                  height: '100vh',
+                  height: '100dvh',
                   objectFit: 'cover'
                 }}
               />

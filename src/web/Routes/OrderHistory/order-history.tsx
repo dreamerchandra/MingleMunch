@@ -11,13 +11,13 @@ export const OrderHistoryRoute = () => {
   } = useUser();
   return (
     <div>
-      <Header />
+      <Header title="Order History" />
       <Container
         component="main"
         sx={{
-          height: 'calc(100vh - 60px)',
+          height: 'calc(100dvh - 60px)',
           overflow: 'auto',
-          p: 0,
+          p: 0
         }}
       >
         <Box marginTop={2}>

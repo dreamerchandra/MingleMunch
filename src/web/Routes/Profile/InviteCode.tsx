@@ -23,7 +23,7 @@ export const GettingStarted = () => {
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
-        height: 'calc(100vh - 60px)',
+        height: 'calc(100dvh - 60px)',
         p: 0,
         backgroundColor: 'purple'
       }}
@@ -140,7 +140,7 @@ export const InvitePage = () => {
     <Box
       sx={{
         background: '#f5f5f5',
-        height: 'calc(100vh - 60px)'
+        height: 'calc(100dvh - 60px)'
       }}
     >
       <Box

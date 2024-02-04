@@ -2,18 +2,18 @@ import { ThemeProvider } from '@emotion/react';
 import { createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { User } from 'firebase/auth';
 import LogRocket from 'logrocket';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import packageJson from '../../package.json';
+import './index.css';
 import { InitProvider } from './module/Context/InitProvider';
 import { CartProvider } from './module/Shoping/cart-activity';
 import { theme as GlobalTheme } from './theme';
-import { User } from 'firebase/auth';
-import './index.css';
 
 declare global {
   interface Window {
@@ -75,6 +75,15 @@ if (process.env.NODE_ENV === 'production' && !internal) {
     release: process.env.REACT_APP_VERSION
   });
 }
+
+const onError = (e: Error) => {
+  if( e && e.name === 'ChunkLoadError' && window?.location?.reload ) {
+    window.location.reload();
+  }
+  return {
+    element: null
+  };
+}
 const router = createBrowserRouter([
   {
     path: '/login',
@@ -83,12 +92,7 @@ const router = createBrowserRouter([
         .then((m) => ({
           element: <m.LoginPage />
         }))
-        .catch(() => {
-          window.location.reload();
-          return {
-            element: null
-          };
-        })
+        .catch(onError)
   },
   {
     path: '/',
@@ -97,12 +101,7 @@ const router = createBrowserRouter([
         .then((m) => ({
           element: <m.ShopPage />
         }))
-        .catch(() => {
-          window.location.reload();
-          return {
-            element: null
-          };
-        })
+        .catch(onError)
   },
   {
     path: '/shop/:shopId',
@@ -111,12 +110,7 @@ const router = createBrowserRouter([
         .then((m) => ({
           element: <m.MenuPage />
         }))
-        .catch(() => {
-          window.location.reload();
-          return {
-            element: null
-          };
-        })
+        .catch(onError)
   },
   {
     path: '/shop/:shopId/product/:productId',
@@ -125,12 +119,7 @@ const router = createBrowserRouter([
         .then((m) => ({
           element: <m.MenuPage />
         }))
-        .catch(() => {
-          window.location.reload();
-          return {
-            element: null
-          };
-        })
+        .catch(onError)
   },
   {
     path: '/splash',
@@ -139,12 +128,7 @@ const router = createBrowserRouter([
         .then((m) => ({
           element: <m.SplashPage />
         }))
-        .catch(() => {
-          window.location.reload();
-          return {
-            element: null
-          };
-        })
+        .catch(onError)
   },
   {
     path: '/cart',
@@ -153,12 +137,7 @@ const router = createBrowserRouter([
         .then((m) => ({
           element: <m.CartPage />
         }))
-        .catch(() => {
-          window.location.reload();
-          return {
-            element: null
-          };
-        })
+        .catch(onError)
   },
   {
     path: '/order-history',
@@ -167,12 +146,7 @@ const router = createBrowserRouter([
         .then((m) => ({
           element: <m.OrderHistoryRoute />
         }))
-        .catch(() => {
-          window.location.reload();
-          return {
-            element: null
-          };
-        })
+        .catch(onError)
   },
   {
     path: '/profile',
@@ -181,12 +155,7 @@ const router = createBrowserRouter([
         .then((m) => ({
           element: <m.Profile />
         }))
-        .catch(() => {
-          window.location.reload();
-          return {
-            element: null
-          };
-        })
+        .catch(onError)
   }
 ]);
 

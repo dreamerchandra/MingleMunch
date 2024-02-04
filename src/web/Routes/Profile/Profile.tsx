@@ -7,11 +7,11 @@ export const Profile = () => {
   useProtectedRoute();
   return (
     <div>
-      <Header />
+      <Header title='Profile'/>
       <Container
         component="main"
         sx={{
-          height: 'calc(100vh - 60px)',
+          height: 'calc(100dvh - 60px)',
           overflow: 'auto',
           p: 0,
           width: 'min(100vw, 1000px)',

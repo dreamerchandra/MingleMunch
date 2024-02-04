@@ -1,15 +1,17 @@
+import { ArrowBackRounded } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/CloseOutlined';
 import History from '@mui/icons-material/History';
 import Home from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/SearchOutlined';
-import { InputAdornment, TextField } from '@mui/material';
+import { Button, InputAdornment, TextField, Typography } from '@mui/material';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import { FC, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 
 const StyledBottomNavigationAction = styled(BottomNavigationAction)(`
   &.Mui-selected {
@@ -20,7 +22,8 @@ const StyledBottomNavigationAction = styled(BottomNavigationAction)(`
 export const Header: FC<{
   onSearch?: (search: string) => void;
   search?: string;
-}> = ({ onSearch, search }) => {
+  title: string;
+}> = ({ onSearch, search, title }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchPlaceHolder, setSearchPlaceholder] = useState('');
@@ -41,19 +44,41 @@ export const Header: FC<{
     );
     return () => clearInterval(intervalId);
   }, []);
+  const theme = useTheme() as {
+    breakpoints: { up: (key: string) => string };
+  };
+
+  const { pathname } = useLocation();
   return (
     <>
+      <Helmet>
+        <title>{title}</title>
+      </Helmet>
       {onSearch ? (
         <Box
           sx={{
-            m: 1,
             position: 'sticky',
             height: '74px',
             top: 10,
-            width: 'min(96vw, 900px)',
-            margin: 'auto'
+            width: 'min(93vw, 1200px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            [theme.breakpoints.up('sm')]: [{ margin: 'auto' }]
           }}
         >
+          <Button
+            onClick={() => {
+              navigate(-1);
+            }}
+            sx={{
+              borderRadius: '50%',
+              height: '55px',
+              width: '55px'
+            }}
+          >
+            <ArrowBackRounded />
+          </Button>
           <TextField
             id="search"
             variant="outlined"
@@ -68,7 +93,7 @@ export const Header: FC<{
             }}
             sx={{
               position: 'relative',
-              boxShadow: '0px 0px 10px 0px #00000050'
+              boxShadow: '0px 0px 1px 0px #00000050'
             }}
             placeholder={searchPlaceHolder}
             InputProps={{
@@ -96,7 +121,45 @@ export const Header: FC<{
             }}
           />
         </Box>
-      ) : null}
+      ) : (
+        <Box
+          sx={{
+            top: 0,
+            zIndex: 100,
+            color: 'white',
+            [theme.breakpoints.up('sm')]: [{ margin: 'auto' }],
+            display: 'flex',
+            alignItems: 'center',
+            boxShadow: '0px 1px 0px #00000050',
+            height: '60px',
+            width: 'min(100vw, 1200px)'
+          }}
+        >
+          {pathname !== '/' ? (
+            <>
+              <Button
+                onClick={() => {
+                  navigate(-1);
+                }}
+                sx={{
+                  borderRadius: '50%',
+                  height: '55px',
+                  width: '55px'
+                }}
+              >
+                <ArrowBackRounded sx={{ p: 0.25 }} />
+              </Button>
+              <Typography variant="h6" color="text.secondary">
+                {title}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="h6" sx={{pl: 4}} color="text.secondary">
+              {title}
+            </Typography>
+          )}
+        </Box>
+      )}
 
       <Paper
         sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}

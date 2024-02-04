@@ -1,8 +1,10 @@
 import { Box, Container } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../firebase/auth';
+import { reuploadToken } from '../../firebase/firebase/fcm';
 import { Header } from '../../module/Header/header';
 import { LastOrder } from '../../module/LastOrder/LastOrder';
 import { Shops } from '../../module/Shop/shop-list';
@@ -10,10 +12,9 @@ import {
   CheckoutHeadsUp,
   NotificationInfo
 } from '../../module/Shoping/CheckoutHeadup';
-import { OurStories } from '../../module/stories/stories';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useAppConfig } from '../../module/appconfig';
-import { reuploadToken } from '../../firebase/firebase/fcm';
+import { Loading } from '../../module/loading';
+import { OurStories } from '../../module/stories/stories';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -38,9 +39,12 @@ export const ShopPage = () => {
       console.log('token uploaded');
     });
   }, []);
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <>
-      <Header />
+      <Header title="Burn Home" />
       <Container
         component="main"
         sx={{
@@ -62,7 +66,7 @@ export const ShopPage = () => {
         <Carousel
           showThumbs={false}
           infiniteLoop
-          interval={2500}
+          interval={4500}
           autoPlay
           showStatus={false}
           showArrows={false}
