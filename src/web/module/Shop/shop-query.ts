@@ -4,6 +4,6 @@ import { getShops } from "../../firebase/shop";
 export const useShopQuery = (
   ) =>
     useQuery({
-      queryKey: ['shop'],
+      queryKey: ['shops'],
       queryFn: () => getShops(),
     });

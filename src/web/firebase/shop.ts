@@ -26,5 +26,6 @@ export const shopConverter = {
 export const getShops = async () => {
   const q = query(collection(firebaseDb, 'shop').withConverter(shopConverter));
   const querySnap = await getDocs(q);
-  return querySnap.docs.map((doc) => doc.data());
+  const data = querySnap.docs.map((doc) => doc.data());
+  return data;
 };

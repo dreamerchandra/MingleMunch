@@ -5,6 +5,8 @@ import { useUser } from '../../firebase/auth';
 import '../Shop/shop-query';
 import '../appconfig';
 import { Loading } from '../loading';
+import { getShops } from '../../firebase/shop';
+import { getAppConfig } from '../appconfig';
 
 export const Splash = () => {
   const { userDetails } = useUser();
@@ -13,11 +15,13 @@ export const Splash = () => {
   const loading = userDetails.loading;
   const navigator = useNavigate();
   useEffect(() => {
-    queryClient.prefetchInfiniteQuery({
-      queryKey: ['shop'],
+    queryClient.prefetchQuery({
+      queryKey: ['shops'],
+      queryFn: getShops,
     })
-    queryClient.prefetchInfiniteQuery({
+    queryClient.prefetchQuery({
       queryKey: ['appConfig'],
+      queryFn: getAppConfig
     })
     if (loading) return;
     const timerId = setTimeout(() => {

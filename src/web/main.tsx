@@ -69,7 +69,7 @@ const pushToAnalytics = async () => {
 
 pushToAnalytics();
 const internal = localStorage.getItem('internal');
-if (process.env.NODE_ENV === 'production' && !internal) {
+if (window.location.hostname !== 'localhost' && !internal) {
   console.log(`init logrocket with ${packageJson.version}`);
   LogRocket.init('oedyyk/chandra', {
     release: process.env.REACT_APP_VERSION

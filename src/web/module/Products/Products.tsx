@@ -19,8 +19,8 @@ import { useUser } from '../../firebase/auth';
 import { useShopQuery } from '../Shop/shop-query';
 import { CategoryList } from '../category/category-list';
 import { useCategoryQuery } from '../category/category-query';
-import { useProductsQuery } from './product-query';
 import { ProductItem } from './Product-iitems';
+import { useProductsQuery } from './product-query';
 
 const fuseOptions = {
   shouldSort: true,
@@ -96,6 +96,7 @@ export const Products: FC<{
         <Typography
           variant="h2"
           component="h1"
+          color="text.secondary"
           sx={{ margin: 'auto' }}
           onClick={() => {
             if (['admin', 'vendor'].includes(role)) {
@@ -164,11 +165,11 @@ export const Products: FC<{
         {filteredList.length === 0 && (
           <Container
             sx={{
-              height: '200px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              height: 'calc(100vh - 400px)',
               p: 0
             }}
           >
@@ -216,14 +217,20 @@ export const Products: FC<{
           </Box>
         ) : (
           categories
-            ?.filter((category) =>
-              filteredList.some((i) =>
-                search === ''
-                  ? i.category.id === category.categoryId ||
-                    category.categoryId === '-1'
-                  : i.category.id === category.categoryId
-              )
-            )
+            ?.filter((category) => {
+              if (['admin', 'vendor'].includes(role)) {
+                return true;
+              }
+              if(search !== '' && category.categoryId === '-1') {
+                return false;
+              }
+              if (category.categoryId === '-1') {
+                return true;
+              }
+              return filteredList.some((i) => {
+                return i.category.id === category.categoryId;
+              });
+            })
             ?.map((category) => (
               <Box
                 key={category.categoryId}
@@ -384,7 +391,13 @@ export const Products: FC<{
           }}
         >
           <CategoryList
-            shopId={shopId}
+            categories={
+              categories?.filter(
+                (c) =>
+                  c.categoryId !== '-1' &&
+                  data?.some((i) => i.category.id === c.categoryId)
+              ) ?? []
+            }
             search={search}
             selected={selectedCategoryIds}
             onChange={(e) => setCategory(e)}

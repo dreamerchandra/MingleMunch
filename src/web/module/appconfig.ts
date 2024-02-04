@@ -49,18 +49,20 @@ const userConverter = {
   }
 };
 
+export const getAppConfig = async () => {
+  const snap = await getDoc(
+    doc(
+      collection(firebaseDb, 'appConfig').withConverter(appConfigConverter),
+      'public'
+    )
+  );
+  return snap.data();
+}
+
 export const useAppConfig = () => {
   return useQuery({
     queryKey: ['appConfig'],
-    queryFn: async () => {
-      const snap = await getDoc(
-        doc(
-          collection(firebaseDb, 'appConfig').withConverter(appConfigConverter),
-          'public'
-        )
-      );
-      return snap.data();
-    }
+    queryFn: getAppConfig,
   });
 };
 

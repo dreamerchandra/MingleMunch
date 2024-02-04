@@ -48,7 +48,7 @@ export const ShopPage = () => {
       <Container
         component="main"
         sx={{
-          height: '95vh',
+          height: '90vh',
           overflow: 'auto',
           backgroundColor: '#f5f5f5'
         }}

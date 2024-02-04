@@ -2,15 +2,14 @@ import Tick from '@mui/icons-material/CheckCircle';
 import { Box, Chip, Typography } from '@mui/material';
 import Fuse from 'fuse.js';
 import { FC, useEffect, useState } from 'react';
-import { Category, useCategoryQuery } from './category-query';
+import { Category } from './category-query';
 
 export const CategoryList: FC<{
-  shopId: string;
   selected: string[];
   onChange: (ids: string[]) => void;
   search: string;
-}> = ({ shopId, selected, onChange, search }) => {
-  const { data: categories } = useCategoryQuery(shopId);
+  categories?: Category[];
+}> = ({ selected, onChange, search, categories }) => {
   const [fuse, setFuse] = useState<Fuse<Category>>();
 
   useEffect(() => {
@@ -22,7 +21,9 @@ export const CategoryList: FC<{
     const fuse = new Fuse(categories, fuseOptions);
     setFuse(fuse);
   }, [categories]);
-  const res = search ? fuse?.search(search).map((i) => i.item) : categories;
+  const res = search
+    ? fuse?.search(search).map((i) => i.item)
+    : categories;
 
   return (
     <Box
@@ -62,10 +63,11 @@ export const CategoryList: FC<{
           gap: 1,
           pb: 2,
           overflowX: 'auto',
-          width: 'min(100vw, 900px)'
+          width: 'min(100vw, 900px)',
+          pr: 15,
         }}
       >
-        {res?.filter(c => c.categoryId !== '-1')?.map((category) => (
+        {res?.map((category) => (
           <Chip
             key={category.categoryId}
             label={category.categoryName}

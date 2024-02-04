@@ -1,4 +1,4 @@
-import ShoppingCart from '@mui/icons-material/ShoppingCart';
+import ShoppingCart from '@mui/icons-material/ShoppingCartOutlined';
 import { Badge, Box, Button, Fab, Typography, styled } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../firebase/auth';
@@ -7,7 +7,7 @@ import { useCart } from './cart-activity';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   position: 'fixed',
-  bottom: '58px',
+  bottom: '28px',
   right: '16px',
   zIndex: theme?.zIndex?.drawer + 1
 }));
@@ -26,10 +26,14 @@ export function CheckoutHeadsUp() {
         aria-label="checkout"
       >
         <Fab
-          color="primary"
           aria-label="checkout"
+          size='large'
+          variant='extended'
           onClick={() => {
             navigate('/cart');
+          }}
+          sx={{
+            backgroundColor: 'aliceblue',
           }}
         >
           <ShoppingCart />
@@ -51,10 +55,10 @@ export function NotificationInfo({ onClick }: { onClick: () => void }) {
         mb: 2
       }}
     >
-      <Typography variant="h3" sx={{ color: 'black' }}>
+      <Typography variant="h2" color="text.secondary">
         Get Notified
       </Typography>
-      <Typography variant="caption">
+      <Typography variant="body1" color="text.secondary">
         For instant updates on our limited deals and offers, tap on allow
         notification
       </Typography>
