@@ -13,6 +13,7 @@ import { InitProvider } from './module/Context/InitProvider';
 import { CartProvider } from './module/Shoping/cart-activity';
 import { theme as GlobalTheme } from './theme';
 import { User } from 'firebase/auth';
+import './index.css';
 
 declare global {
   interface Window {

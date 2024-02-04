@@ -65,7 +65,7 @@ export const CategoryList: FC<{
           width: 'min(100vw, 900px)'
         }}
       >
-        {res?.map((category) => (
+        {res?.filter(c => c.categoryId !== '-1')?.map((category) => (
           <Chip
             key={category.categoryId}
             label={category.categoryName}

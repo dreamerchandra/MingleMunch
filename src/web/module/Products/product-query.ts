@@ -48,14 +48,21 @@ export const useMutationProductEdit = () => {
   });
 };
 
-
 export const useStaleProductQuery = (query: { shopId: string }) => {
   const queryClient = useQueryClient();
-  return useCallback((productId: string) => {
-    const data = queryClient.getQueryData(['shop', query.shopId, 'products', '']) as Product[];
-    return data?.find((product: Product) => product.itemId === productId);
-  }, [query.shopId, queryClient]) 
-}
+  return useCallback(
+    (productId: string) => {
+      const data = queryClient.getQueryData([
+        'shop',
+        query.shopId,
+        'products',
+        ''
+      ]) as Product[];
+      return data?.find((product: Product) => product.itemId === productId);
+    },
+    [query.shopId, queryClient]
+  );
+};
 
 export const useProductQuery = (productId: string) => {
   return useQuery({
@@ -64,4 +71,4 @@ export const useProductQuery = (productId: string) => {
       return getProduct(productId);
     }
   });
-}
+};

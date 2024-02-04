@@ -35,6 +35,7 @@ export interface ProductInput {
   itemId?: string;
   suggestionIds?: string[];
   cantOrderSeparately: boolean;
+  isRecommended: boolean;
 }
 
 const constructMandatoryMetaFields = () => ({
@@ -70,6 +71,7 @@ const constructProduct = (
     },
     suggestionIds: productInput.suggestionIds || [],
     cantOrderSeparately: productInput.cantOrderSeparately,
+    isRecommended: productInput.isRecommended,
     ...constructMandatoryMetaFields()
   };
 };

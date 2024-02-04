@@ -50,7 +50,7 @@ export const Header: FC<{
             position: 'sticky',
             height: '74px',
             top: 10,
-            width: 'min(90vw, 900px)',
+            width: 'min(96vw, 900px)',
             margin: 'auto'
           }}
         >

@@ -2,6 +2,7 @@ import { useTheme } from '@emotion/react';
 import {
   ArrowDropDown,
   ArrowDropUp,
+  AutoAwesome,
   UnfoldLess,
   UnfoldMore
 } from '@mui/icons-material';
@@ -12,21 +13,19 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Fuse from 'fuse.js';
-import { FC, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useUser } from '../../firebase/auth';
 import { useShopQuery } from '../Shop/shop-query';
 import { CategoryList } from '../category/category-list';
 import { useCategoryQuery } from '../category/category-query';
-import {
-  useProductsQuery
-} from './product-query';
+import { useProductsQuery } from './product-query';
 import { ProductItem } from './Product-iitems';
-
 
 const fuseOptions = {
   shouldSort: true,
-  keys: ['itemName', 'itemDescription']
+  keys: ['itemName'],
+  threshold: 0.3
 };
 export const Products: FC<{
   search: string;
@@ -42,6 +41,13 @@ export const Products: FC<{
   const [selectedCategoryIds, setCategory] = useState<string[]>([]);
   const { data: categories } = useCategoryQuery(shopId);
   const [collapsed, setCollapsed] = useState<string[]>([]);
+  useEffect(() => {
+    setCollapsed(
+      categories
+        ?.filter((c) => c.categoryId !== '-1')
+        ?.map((c) => c.categoryId) ?? []
+    );
+  }, [categories]);
 
   const { data, isLoading } = useProductsQuery({
     search: '',
@@ -62,7 +68,9 @@ export const Products: FC<{
       .map((item) => item.item)
       .filter(filterByCategory);
   }, [data, search, selectedCategoryIds]);
-  const theme = useTheme() as { breakpoints: { down: (key: string) => string } };
+  const theme = useTheme() as {
+    breakpoints: { down: (key: string) => string };
+  };
 
   if (isLoading) {
     return <CircularProgress />;
@@ -205,7 +213,12 @@ export const Products: FC<{
         ) : (
           categories
             ?.filter((category) =>
-              filteredList.some((i) => i.category.id === category.categoryId)
+              filteredList.some((i) =>
+                search === ''
+                  ? i.category.id === category.categoryId ||
+                    category.categoryId === '-1'
+                  : i.category.id === category.categoryId
+              )
             )
             ?.map((category) => (
               <Box
@@ -273,9 +286,26 @@ export const Products: FC<{
                           component="h2"
                           sx={{
                             fontWeight: 'bold',
-                            color: '#d1ff04'
+                            color: 'aliceblue',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 1
                           }}
+                          className={
+                            category.categoryId === '-1'
+                              ? 'rainbow_text_animated'
+                              : ''
+                          }
                         >
+                          {category.categoryId === '-1' && (
+                            <AutoAwesome
+                              fontSize="small"
+                              sx={{
+                                color: '#53e8b4'
+                              }}
+                            />
+                          )}
                           {category.categoryName}
                         </Typography>
                       </Box>
@@ -300,6 +330,23 @@ export const Products: FC<{
                       )}
                     </Container>
                   </Box>
+                  {category.categoryId === '-1' &&
+                    filteredList
+                      .filter((p) => p.isRecommended)
+                      .filter((p) =>
+                        ['admin', 'vendor'].includes(role)
+                          ? true
+                          : p.cantOrderSeparately
+                          ? false
+                          : p.isAvailable
+                      )
+                      ?.map((product) => (
+                        <ProductItem
+                          product={product}
+                          key={product.itemId}
+                          allowEdit={allowEdit}
+                        />
+                      ))}
                   {filteredList
                     .filter((p) => p.category.id === category.categoryId)
                     .filter(() => !collapsed.includes(category.categoryId))
@@ -327,7 +374,7 @@ export const Products: FC<{
             bottom: 60,
             boxShadow: '2px 2px 10px 0px #0000001f',
             [theme.breakpoints.down('md')]: {
-              left: 10,
+              left: 10
             }
           }}
         >

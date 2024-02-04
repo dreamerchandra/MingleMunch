@@ -5,7 +5,6 @@ import {
   Typography,
   styled
 } from '@mui/material';
-import './index.css';
 import {
   useOnboardReferralProgram,
   useUserConfig

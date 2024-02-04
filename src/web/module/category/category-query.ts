@@ -74,7 +74,7 @@ export const useCategoryMutation = ({
     {
       onSuccess: (_, categoryInput) => {
         queryClient.invalidateQueries(['categories', categoryInput.shopId]);
-        onSuccess()
+        onSuccess();
       }
     }
   );
@@ -83,7 +83,17 @@ export const useCategoryMutation = ({
 export const useCategoryQuery = (shopId: string) => {
   return useQuery<Category[], Error>(
     ['categories', shopId],
-    async () => getCategory(shopId),
+    async () => {
+      const category = await getCategory(shopId);
+      return [
+        {
+          categoryId: '-1',
+          categoryName: 'Suggestion',
+          shopId: category[0].shopId
+        },
+        ...category
+      ];
+    },
     {
       enabled: !!shopId
     }

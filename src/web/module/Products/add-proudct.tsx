@@ -142,7 +142,8 @@ const initialFormData = {
   categoryId: '',
   suggestionIds: [] as string[],
   parcelCharges: '',
-  cantOrderSeparately: false
+  cantOrderSeparately: false,
+  isRecommended: false
 };
 
 const ITEM_HEIGHT = 48;
@@ -194,7 +195,8 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
       categoryId: product.category.id,
       parcelCharges: product.parcelCharges?.toString() ?? '',
       suggestionIds: product.suggestionIds ?? [],
-      cantOrderSeparately: product.cantOrderSeparately ?? false
+      cantOrderSeparately: product.cantOrderSeparately ?? false,
+      isRecommended: product.isRecommended ?? false
     });
   }, [getProductById, navigate, productId, shopId]);
 
@@ -229,7 +231,8 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
             id: category as string
           },
           suggestionIds: formData.suggestionIds,
-          cantOrderSeparately: formData.cantOrderSeparately
+          cantOrderSeparately: formData.cantOrderSeparately,
+          isRecommended: formData.isRecommended
         };
         mutate(
           { ...product, isAvailable: true, shopId, itemId: productId || '' },
@@ -389,6 +392,22 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
               labelPlacement="start"
             />
           </TwoCol>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isRecommended"
+                checked={formData.isRecommended}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    isRecommended: e.target.checked
+                  });
+                }}
+              />
+            }
+            label="Recommended"
+            labelPlacement="start"
+          />
         </CardContent>
         <CardActionsWrapper>
           <Button

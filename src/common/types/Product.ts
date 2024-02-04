@@ -4,6 +4,7 @@ import { Shop } from './shop';
 export interface Product {
   itemId: string;
   isAvailable: boolean;
+  isRecommended?: boolean;
   itemName: string;
   itemDescription: string;
   itemPrice: number;
