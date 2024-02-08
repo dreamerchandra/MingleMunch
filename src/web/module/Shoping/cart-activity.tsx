@@ -100,6 +100,12 @@ const useCartActivity = () => {
       productSku: product.itemId
     });
   }, []);
+
+  const addMultipleToCart = useCallback((products: Product, quality: number) => {
+    for (let i = 0; i < quality; i++) {
+      addToCart(products);
+    }
+  }, [addToCart]);
   const removeFromCart = useCallback((product: Product) => {
     product.suggestionIds?.map((suggestion) => {
       dispatch({
@@ -121,8 +127,8 @@ const useCartActivity = () => {
   }, []);
 
   return useMemo(
-    () => ({ cartDetails, addToCart, removeFromCart, removeAll }),
-    [addToCart, cartDetails, removeFromCart, removeAll]
+    () => ({ cartDetails, addToCart, removeFromCart, removeAll, addMultipleToCart }),
+    [addToCart, cartDetails, removeFromCart, removeAll, addMultipleToCart]
   );
 };
 

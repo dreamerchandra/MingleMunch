@@ -103,7 +103,7 @@ const createOrderInDb = async (
     itemsTotal,
     deliveryFee,
     platformFee,
-    appliedCoupon
+    appliedCoupon,
   }: {
     products: Product[];
     detailsToQuantity: { [key: string]: number };
@@ -141,7 +141,7 @@ const createOrderInDb = async (
       phone: user.phone_number
     },
     orderRefId: user.phone_number + ':: ' + orderRefId,
-    appliedCoupon: appliedCoupon ?? ''
+    appliedCoupon: appliedCoupon ?? '',
   };
   await firebaseDb.collection('orders').doc(id).create(orderDetails);
   return orderDetails;

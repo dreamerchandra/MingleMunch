@@ -4,7 +4,10 @@ import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../firebase/auth';
-import { reuploadToken } from '../../firebase/firebase/fcm';
+import {
+  isNotificationSupported,
+  reuploadToken
+} from '../../firebase/firebase/fcm';
 import { Header } from '../../module/Header/header';
 import { LastOrder } from '../../module/LastOrder/LastOrder';
 import { Shops } from '../../module/Shop/shop-list';
@@ -22,7 +25,7 @@ export const ShopPage = () => {
   const navigate = useNavigate();
   const { data: appConfig } = useAppConfig();
   const [notificationGranted, setNotification] = useState(
-    Notification.permission === 'granted'
+    !isNotificationSupported() ? true : Notification.permission === 'granted'
   );
   const isAdmin = ['admin', 'vendor'].includes(userDetails?.role) || false;
   useEffect(() => {

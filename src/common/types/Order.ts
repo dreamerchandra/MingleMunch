@@ -1,3 +1,4 @@
+import { Timestamp } from 'firebase/firestore';
 import { Product } from './Product';
 import { Shop } from './shop';
 
@@ -27,7 +28,7 @@ export interface Order {
     phone: string;
   };
   orderId: string;
-  createdAt: string;
+  createdAt: Timestamp;
   status: OrderStatus;
   tax: number;
   subTotal: number;

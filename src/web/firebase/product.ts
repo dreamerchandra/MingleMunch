@@ -154,3 +154,8 @@ export const uploadImage = async (file: File) => {
   const uploadRef = await uploadBytes(storageRef, file);
   return getDownloadURL(uploadRef.ref);
 };
+
+export const getProductIds = async (productIds: string[]) => {
+  const productPromises = productIds.map((id) => getProduct(id));
+  return Promise.all(productPromises);
+}

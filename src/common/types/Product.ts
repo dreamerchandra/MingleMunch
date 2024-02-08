@@ -10,7 +10,7 @@ export interface Product {
   itemPrice: number;
   itemImage: string;
   shopId: string;
-  shopDetails: Omit<Shop, 'shopImage' | 'isOpen' | 'description'>;
+  shopDetails: Omit<Shop, 'shopImage' | 'isOpen' | 'description' | 'commission'>;
   updatedAt: Timestamp;
   createdAt: Timestamp;
   updateBy: string;
