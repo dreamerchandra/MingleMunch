@@ -50,21 +50,21 @@ export const IncomingOrder = () => {
         display: 'flex',
         flexDirection: 'column',
         gap: 3,
-        p: 2
+        p: 2,
+        height: 'calc(100dvh - 140px)',
+        overflow: 'auto'
       }}
     >
       History
       {orders
-        // ?.filter((p) =>
-        //   !internalOrder.some((i) => p?.userDetails?.phone?.includes(i))
-        // )
         ?.map((order) => (
           <Card
             sx={{
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-between',
-              gap: 3
+              gap: 3,
+              flexShrink: 0
             }}
             key={order.orderId}
           >

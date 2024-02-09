@@ -1,6 +1,5 @@
 import { Box, Container } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../firebase/auth';
@@ -15,19 +14,20 @@ import {
   CheckoutHeadsUp,
   NotificationInfo
 } from '../../module/Shoping/CheckoutHeadup';
-import { useAppConfig } from '../../module/appconfig';
+import { HomeFoodBanner } from '../../module/home-food-banner';
+import { HomeFoodDrawer } from '../../module/home-food-drawer';
 import { Loading } from '../../module/loading';
 import { OurStories } from '../../module/stories/stories';
+import { FullPageBanner } from '../../module/full-page-banner';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
   const loading = userDetails?.loading;
   const navigate = useNavigate();
-  const { data: appConfig } = useAppConfig();
   const [notificationGranted, setNotification] = useState(
     !isNotificationSupported() ? true : Notification.permission === 'granted'
   );
-  const isAdmin = ['admin', 'vendor'].includes(userDetails?.role) || false;
+  const [drawer, setDrawer] = useState(false);
   useEffect(() => {
     if (loading) {
       localStorage.setItem('splash', window.location.pathname);
@@ -48,6 +48,7 @@ export const ShopPage = () => {
   return (
     <>
       <Header title="Burn Home" />
+      <FullPageBanner />
       <Container
         component="main"
         sx={{
@@ -66,42 +67,17 @@ export const ShopPage = () => {
             height: '10px'
           }}
         ></div>
-        <Carousel
-          showThumbs={false}
-          infiniteLoop
-          interval={4500}
-          autoPlay
-          showStatus={false}
-          showArrows={false}
-        >
-          {appConfig?.carousel
-            .filter((c) => (isAdmin ? true : c.isPublished))
-            .map((c) => (
-              <div
-                key={c.image}
-                style={{
-                  aspectRatio: '16/9'
-                }}
-                onClick={() => {
-                  c.url && navigate(c.url);
-                }}
-              >
-                <img
-                  src={c.image}
-                  style={{
-                    objectFit: 'cover',
-                    height: '100%',
-                    borderRadius: '10px'
-                  }}
-                />
-              </div>
-            ))}
-        </Carousel>
+        <HomeFoodBanner
+          onClick={() => {
+            setDrawer(true);
+          }}
+        />
         <Box marginTop={1}>
           <Shops />
           <CheckoutHeadsUp />
           <LastOrder />
         </Box>
+        <HomeFoodDrawer open={drawer} setOpen={setDrawer} />
       </Container>
     </>
   );

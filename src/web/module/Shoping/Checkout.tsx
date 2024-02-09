@@ -626,6 +626,9 @@ export const Checkout: FC = () => {
       },
       {
         onSuccess: () => {
+          if ('navigator' in window && 'vibrate' in navigator) {
+            navigator.vibrate(200);
+          }
           Analytics.pushEvent('order-placed', {
             productCategory: 'Food',
             productSku: items.map((item) => item.product.itemId),

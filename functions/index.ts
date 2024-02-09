@@ -2,7 +2,7 @@ import cors from 'cors';
 import express, { Express, Request, Response } from 'express';
 import * as functions from 'firebase-functions';
 import { logger } from 'firebase-functions';
-import { fcm, firebaseDb } from './src/firebase.js';
+import { fcm, firebaseAuth, firebaseDb } from './src/firebase.js';
 import { authMiddle, authorizedAsAdmin } from './src/middleware/auth.js';
 import { OrderDb } from './src/router/order-helper.js';
 import { createOrder, onOrderCreate } from './src/router/order.js';
@@ -10,6 +10,7 @@ import { updateUser } from './src/router/update-user.js';
 import { onCreateUser, updateReferralCode } from './src/router/user.js';
 import { updateWhatsapp } from './src/router/twilio.js';
 import { FieldValue } from 'firebase-admin/firestore';
+import { HomeOrderDetails, createHomeOrder } from './src/router/home-order.js';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -102,6 +103,7 @@ expressApp.post('/v1/fcm-register', async (req: Request, res: Response) => {
 });
 
 expressApp.post('/v1/order', authMiddle, createOrder);
+expressApp.post('/v1/home-order', authMiddle, createHomeOrder);
 expressApp.post('/v1/referral', authMiddle, updateReferralCode);
 expressApp.post(
   '/v1/onboard-referral',
@@ -169,6 +171,18 @@ export const onOrderCreated = functions
     const data = snap.data() as OrderDb;
     logger.log(`on order created ${JSON.stringify(data)}`);
     await onOrderCreate(data);
+  });
+
+export const onHomeOrderCreated = functions
+  .region('asia-south1')
+  .firestore.document('home-orders/{orderId}')
+  .onCreate(async (snap) => {
+    const data = snap.data() as HomeOrderDetails;
+    logger.log(`on order created ${JSON.stringify(data)}`);
+    const user = await firebaseAuth.getUser(data.userId);
+    await updateWhatsapp({
+      message: `New order from ${user.displayName} and phone number is ${user.phoneNumber}. \n Item: Chicken Chukka \n Details are quantity: ${data.quantity}gms, \n number: ${data.number}, \n timeSlot: ${data.timeSlot},\n total Rs. ${data.total}`
+    });
   });
 
 export const order = functions

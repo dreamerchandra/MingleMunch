@@ -97,6 +97,7 @@ export function LoginPage() {
                       label="Otp"
                       id="otp"
                       autoComplete="otp"
+                      inputMode='numeric'
                     />
                     <Button
                       type="submit"
