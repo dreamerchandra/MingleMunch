@@ -154,7 +154,7 @@ export const Header: FC<{
               </Typography>
             </>
           ) : (
-            <Typography variant="h6" sx={{pl: 4}} color="text.secondary">
+            <Typography variant="h6" sx={{ pl: 4 }} color="text.secondary">
               {title}
             </Typography>
           )}
@@ -162,8 +162,14 @@ export const Header: FC<{
       )}
 
       <Paper
-        sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
-        elevation={3}
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: 'min(100vw, 1200px)',
+          margin: 'auto'
+        }}
       >
         <BottomNavigation
           showLabels

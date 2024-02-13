@@ -39,6 +39,7 @@ export const useToSignIn = () => {
   const [isOtpRequested, setIsOtpRequested] = useState(false);
   const [isPhoneNumberInvalid, setPhoneNumberInvalid] = useState(false);
   const loginInstance = useRef<ConfirmationResult>();
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     appVerifier.current = new RecaptchaVerifier(
@@ -55,6 +56,7 @@ export const useToSignIn = () => {
     if (!appVerifier.current) {
       return;
     }
+    setIsLoading(true);
     setIsOtpRequested(false);
     setPhoneNumberInvalid(false);
     const number = removeCountryCode(phoneNumber);
@@ -75,13 +77,17 @@ export const useToSignIn = () => {
         LogRocket.captureException(err);
         setError(err.message);
       })
-      .finally(() => setIsOtpRequested(true));
+      .finally(() => {
+        setIsLoading(false)
+        setIsOtpRequested(true)
+      });
   }, []);
 
   const loginWithOtp = useCallback((otp: string) => {
     if (!appVerifier.current) {
       return;
     }
+    setIsLoading(true);
     loginInstance.current
       ?.confirm(otp)
       .then((result) => {
@@ -91,6 +97,9 @@ export const useToSignIn = () => {
         setError('Invalid OTP');
         LogRocket.captureException(err);
         analytics && logEvent(analytics, 'ph_error');
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
   return {
@@ -98,7 +107,8 @@ export const useToSignIn = () => {
     triggerOtp,
     isPhoneNumberInvalid,
     loginWithOtp,
-    error
+    error,
+    isLoading,
   };
 };
 

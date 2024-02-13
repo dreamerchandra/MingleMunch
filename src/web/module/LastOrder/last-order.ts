@@ -1,4 +1,4 @@
-import { getLastOrderPendingOrder } from '../../firebase/order';
+import { getLastOrder } from '../../firebase/order';
 import { useUser } from '../../firebase/auth';
 import { useEffect, useState } from 'react';
 import { Order } from '../../../common/types/Order';
@@ -14,14 +14,10 @@ export const useLastOrder = () => {
     if (!user) return;
     let unsub: Unsubscribe | null = null;
     const handleOrderChange = (order: Order) => {
-      if (order.status === 'delivered') {
-        setLastOrder(null);
-        return;
-      }
       setLastOrder(order);
     };
     const updateLastOrder = async () => {
-      const { order, unsubscribe } = await getLastOrderPendingOrder(
+      const { order, unsubscribe } = await getLastOrder(
         user.uid,
         handleOrderChange,
         handleOrderChange

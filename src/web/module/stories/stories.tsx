@@ -49,6 +49,9 @@ export const OurStories = () => {
       open: true
     });
   };
+  if(!stories?.length) {
+    return null;
+  }
   return (
     <Box
       sx={{

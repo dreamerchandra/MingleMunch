@@ -113,7 +113,7 @@ export const updateOrderStatus = async ({
   return setDoc(docRef, { status: orderStatus }, { merge: true });
 };
 
-export const getLastOrderPendingOrder = async (
+export const getLastOrder = async (
   userId: string,
   onChange: (order: Order) => void,
   onAdded: (order: Order) => void

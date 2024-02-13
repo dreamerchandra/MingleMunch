@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import { FormEvent, createRef, useRef } from 'react';
 import { useToSignIn, useUser } from '../../firebase/auth';
 import { Profile } from './Profile';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 export function LoginPage() {
   const {
@@ -13,7 +14,8 @@ export function LoginPage() {
     triggerOtp,
     isPhoneNumberInvalid,
     loginWithOtp,
-    error
+    error,
+    isLoading
   } = useToSignIn();
   const {
     userDetails: { user }
@@ -75,7 +77,7 @@ export function LoginPage() {
                   disabled={isOtpRequested}
                 />
                 {!isOtpRequested ? (
-                  <Button
+                  <LoadingButton
                     id="sign-in-button"
                     fullWidth
                     variant="contained"
@@ -84,9 +86,11 @@ export function LoginPage() {
                     onClick={() => {
                       triggerOtp(form.current.phoneNumber.current?.value || '');
                     }}
+                    loading={isLoading}
+                    disabled={isLoading}
                   >
                     Request Otp
-                  </Button>
+                  </LoadingButton>
                 ) : (
                   <>
                     <TextField
@@ -97,23 +101,27 @@ export function LoginPage() {
                       label="Otp"
                       id="otp"
                       autoComplete="otp"
-                      inputMode='numeric'
+                      inputMode="numeric"
                     />
-                    <Button
+                    <LoadingButton
                       type="submit"
                       fullWidth
                       variant="contained"
                       color="secondary"
                       sx={{ mt: 3, mb: 2 }}
+                      loading={isLoading}
+                      disabled={isLoading}
                     >
                       Sign In/Sign up
-                    </Button>
+                    </LoadingButton>
                   </>
                 )}
               </Box>
               <Alert severity="error" sx={{ display: error ? 'flex' : 'none' }}>
                 {error}
-                <Button color='info' href="tel:+918754791569">Call Us</Button>
+                <Button color="info" href="tel:+918754791569">
+                  Call Us
+                </Button>
               </Alert>
             </Box>
           </div>

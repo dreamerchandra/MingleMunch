@@ -180,8 +180,14 @@
       href="splash_screens/8.3__iPad_Mini_portrait.png"
     />
     <title>BURN</title>
-    <link rel="prefetch" href="https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/Frame%203%20(6)%20(1).png?alt=media&token=41018dc6-1c57-496a-b554-257c1be7c4e3" />
-    <link rel="prefetch" href="https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/Frame%204%20(2)%20(1).png?alt=media&token=aa76be00-b591-4098-9eb6-2db4f7e47536" />
+    <link
+      rel="prefetch"
+      href="https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/Frame%203%20(6)%20(1).png?alt=media&token=41018dc6-1c57-496a-b554-257c1be7c4e3"
+    />
+    <link
+      rel="prefetch"
+      href="https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/Frame%204%20(2)%20(1).png?alt=media&token=aa76be00-b591-4098-9eb6-2db4f7e47536"
+    />
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -199,20 +205,62 @@
         });
       }
     </script>
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-S2H7D2Z5LC"
-    ></script>
     <script>
-      if (!location.href.includes('localhost')) {
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-          dataLayer.push(arguments);
+      function initGA() {
+        const testUrl = window.location.pathname === '/test';
+        if (testUrl) {
+          localStorage.setItem('internal', 'true');
+          setTimeout(() => {
+            window.location = '/';
+          }, 100);
+          return;
         }
-        gtag('js', new Date());
 
-        gtag('config', 'G-S2H7D2Z5LC');
+        const isInternal = localStorage.getItem('internal') == 'true';
+        if (isInternal) {
+          return;
+        }
+
+        let analyticsId = localStorage.getItem('analyticsId');
+        if (!analyticsId) {
+          analyticsId = `${Math.random()}`;
+          localStorage.setItem('analyticsId', analyticsId);
+        }
+        const internalUsers = [
+          '0.6060251343911214',
+          '0.8070225343219184',
+          '0.11990825524685955',
+          '0.07688289204405852'
+        ];
+        const isInternalUser = internalUsers.includes(analyticsId);
+        if (isInternalUser) {
+          localStorage.setItem('internal', 'true');
+          return;
+        }
+        if (location.href.includes('localhost')) {
+          return;
+        }
+
+        const tag = document.createElement('script');
+        tag.src = 'https://www.googletagmanager.com/gtag/js?id=G-S2H7D2Z5LC';
+        tag.async = true;
+        document.head.append(tag);
+        tag.addEventListener('load', () => {
+          setTimeout(() => {
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            window.gtag = gtag;
+            gtag('js', new Date());
+
+            gtag('config', 'G-S2H7D2Z5LC', {
+              user_id: analyticsId
+            });
+          }, 10);
+        });
       }
+      initGA();
     </script>
   </head>
 

@@ -36,10 +36,12 @@ export const InitProvider: FC<{ children: ReactNode }> = ({ children }) => {
         localStorage.setItem('isLoggedIn', 'true');
         const token = await user?.getIdToken();
         window.token = token;
-        Analytics.init(
-          user,
-          ['admin', 'vendor'].includes(tokenResult.claims.role)
-        );
+        const isInternal = ['admin', 'vendor'].includes(tokenResult.claims.role)
+        if(isInternal) {
+          localStorage.setItem('internal', 'true');
+        } else {
+          Analytics.updateUser(user);
+        }
         setUser({
           user: user,
           loading: false,

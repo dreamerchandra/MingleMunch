@@ -14,6 +14,8 @@ import './index.css';
 import { InitProvider } from './module/Context/InitProvider';
 import { CartProvider } from './module/Shoping/cart-activity';
 import { theme as GlobalTheme } from './theme';
+import { Analytics } from '../common/analytics';
+import { isInternal } from '../common/types/constant';
 
 declare global {
   interface Window {
@@ -21,6 +23,7 @@ declare global {
     u?: User;
   }
 }
+
 
 document.getElementById('errorMsg')?.remove();
 clearTimeout(window.errorTimerId);
@@ -44,6 +47,9 @@ const pushToAnalytics = async () => {
       analyticsId = `${Math.random()}`;
       localStorage.setItem('analyticsId', analyticsId);
     }
+    Analytics.init(
+      analyticsId
+    );
     const baseUrl = window.location.href.includes('localhost')
       ? 'http://localhost:5001/mingle-munch/asia-south1/order'
       : 'https://asia-south1-mingle-munch.cloudfunctions.net/order';
@@ -54,7 +60,8 @@ const pushToAnalytics = async () => {
       },
       body: JSON.stringify({
         analyticsId,
-        userId: window.u?.uid
+        userId: window.u?.uid,
+        isInternal,
       })
     })
       .then(() => {
@@ -67,8 +74,7 @@ const pushToAnalytics = async () => {
 };
 
 pushToAnalytics();
-const internal = localStorage.getItem('internal');
-if (window.location.hostname !== 'localhost' && !internal) {
+if (window.location.hostname !== 'localhost' && !isInternal) {
   console.log(`init logrocket with ${packageJson.version}`);
   LogRocket.init('oedyyk/chandra', {
     release: process.env.REACT_APP_VERSION

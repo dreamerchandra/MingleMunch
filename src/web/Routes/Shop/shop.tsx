@@ -19,6 +19,7 @@ import { HomeFoodDrawer } from '../../module/home-food-drawer';
 import { Loading } from '../../module/loading';
 import { OurStories } from '../../module/stories/stories';
 import { FullPageBanner } from '../../module/full-page-banner';
+import { Feedback } from '../../module/feedback/feedback';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -49,11 +50,13 @@ export const ShopPage = () => {
     <>
       <Header title="Burn Home" />
       <FullPageBanner />
+      <Feedback />
       <Container
         component="main"
         sx={{
           height: '90vh',
-          overflow: 'auto',
+          overflowY: 'auto',
+          overflowX: 'hidden',
           backgroundColor: '#f5f5f5'
         }}
       >

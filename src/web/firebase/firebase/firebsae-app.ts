@@ -1,7 +1,10 @@
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
 import { ReCaptchaV3Provider, initializeAppCheck } from 'firebase/app-check';
+import { isInternal } from '../../../common/types/constant';
+
 const isLocal = window.location.hostname === 'localhost';
+const shouldIgnore = isInternal || isLocal;
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCajB1KkrNGpB9eiM8ph2FFOTX35T7wB60',
@@ -22,4 +25,4 @@ initializeAppCheck(firebaseApp, {
   ),
   isTokenAutoRefreshEnabled: true
 });
-export const analytics = isLocal ? undefined : getAnalytics(firebaseApp);
+export const analytics = shouldIgnore ? undefined : getAnalytics(firebaseApp);

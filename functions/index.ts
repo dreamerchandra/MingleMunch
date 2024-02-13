@@ -121,7 +121,7 @@ expressApp.post('/v1/error', async (req: Request, res: Response) => {
 });
 
 expressApp.post('/v1/analytics', async (req: Request, res: Response) => {
-  const { analyticsId, userId } = req.body;
+  const { analyticsId, userId, isInternal } = req.body;
   const todayDate = new Date().toISOString().split('T')[0];
   await firebaseDb
     .doc(`analytics/${analyticsId}`)
@@ -137,17 +137,28 @@ expressApp.post('/v1/analytics', async (req: Request, res: Response) => {
       }
     );
   await firebaseDb.doc(`byDate/${todayDate}`).set(
-    {
-      [analyticsId]: FieldValue.increment(1)
-    },
+    isInternal
+      ? {
+          [analyticsId]: FieldValue.increment(1),
+          internal: FieldValue.arrayUnion(analyticsId)
+        }
+      : {
+          [analyticsId]: FieldValue.increment(1)
+        },
     {
       merge: true
     }
   );
-  if (!userId) return res.json({});
+  if (!userId) {
+    await firebaseDb.doc(`analytics/${analyticsId}`).set({
+      isInternal: isInternal
+    });
+    return res.json({});
+  }
   await firebaseDb.doc(`analytics/${analyticsId}`).set(
     {
-      userIds: FieldValue.arrayUnion(userId)
+      userIds: FieldValue.arrayUnion(userId),
+      isInternal: isInternal,
     },
     {
       merge: true

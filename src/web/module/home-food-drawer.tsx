@@ -209,6 +209,7 @@ export const HomeFoodDrawer: FC<{
     if (!user?.uid) {
       navigate('/login');
     }
+    Analytics.pushEvent('home-food-drawer-opened');
     setData(initialValue);
     setShowSuccess(false);
     setError('');

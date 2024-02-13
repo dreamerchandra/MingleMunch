@@ -35,16 +35,21 @@ export const AddToHomeScreen = () => {
       sx={{
         position: 'fixed',
         bottom: 58,
-        left: 0,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        width: '100%',
+        // width: '100%',
         backgroundColor: '#ff0404e2',
         pt: 2,
         pb: 2,
         color: 'white',
-        borderRadius: 0
+        borderRadius: 0,
+        width: 'min(100vw, 1200px)',
+        left: {
+          xs: 0,
+          sm: 0,
+          lg: 'calc(50% - 600px)',
+        }
       }}
     >
       Add To Your Home Screen
@@ -84,15 +89,19 @@ export const LastOrder: FC = () => {
       sx={{
         position: 'fixed',
         bottom: 58,
-        left: 0,
+        left: {
+          xs: 0,
+          sm: 0,
+          lg: 'calc(50% - 600px)',
+        },
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        width: '100%',
         backgroundColor: '#d1ff0465',
         pt: 2,
         pb: 2,
-        gap: 2
+        gap: 2,
+        width: 'min(100vw, 1200px)',
       }}
       href="tel:+918220080109"
     >

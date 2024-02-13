@@ -1,6 +1,7 @@
 import { Close } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import { useState } from 'react';
+import { Center, FullScreen } from './full-screen';
 
 const getFullPageBannerShown = (): Record<string, boolean> => {
   const fullPage = window.localStorage.getItem('fullPage');
@@ -33,16 +34,7 @@ export const FullPageBanner = () => {
     );
   };
   return (
-    <div
-      style={{
-        position: 'fixed',
-        zIndex: 1000000,
-        background: 'rgb(0 0 0 / 75%)',
-        height: '100vh',
-        width: '100vw',
-        top: 0
-      }}
-    >
+    <FullScreen>
       <Button
         sx={{
           position: 'fixed',
@@ -60,14 +52,7 @@ export const FullPageBanner = () => {
       >
         <Close />
       </Button>
-      <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
-        }}
-      >
+      <Center>
         <img
           src={banner}
           style={{
@@ -77,7 +62,7 @@ export const FullPageBanner = () => {
           }}
           onClick={setShown}
         />
-      </div>
-    </div>
+      </Center>
+    </FullScreen>
   );
 };
