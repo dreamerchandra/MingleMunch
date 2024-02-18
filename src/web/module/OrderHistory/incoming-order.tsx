@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Drawer } from '@mui/material';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -12,6 +12,8 @@ import { OrderStatus } from '../../../common/types/Order';
 import { Product } from '../../../common/types/Product';
 import { useCart } from '../Shoping/cart-activity';
 import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
+import { useState } from 'react';
+import { updateCongestion } from '../../firebase/order';
 
 // const internalOrder = [
 //   '8754791569',
@@ -36,6 +38,11 @@ export const IncomingOrder = () => {
   const { mutateAsync } = useMutationOrderStatus();
   const { addMultipleToCart, removeAll, updateCartId } = useCart();
   const navigate = useNavigate();
+  const [showCongestion, setShowCongestion] = useState('');
+  const onCongestion = async (congestion: number) => {
+    await updateCongestion({ orderId: showCongestion, congestion });
+    setShowCongestion('');
+  };
   if (loading) {
     return <CircularProgress />;
   }
@@ -126,6 +133,9 @@ export const IncomingOrder = () => {
                     value={order.status}
                     label="Order Status"
                     onChange={(e) => {
+                      if (e.target.value === 'picked_up') {
+                        setShowCongestion(order.orderId);
+                      }
                       mutateAsync({
                         orderId: order.orderId,
                         orderStatus: e.target?.value as OrderStatus
@@ -135,6 +145,7 @@ export const IncomingOrder = () => {
                     <MenuItem value={'pending'}>Pending</MenuItem>
                     <MenuItem value={'ack_from_hotel'}>Order Ack</MenuItem>
                     <MenuItem value={'prepared'}>Prepared</MenuItem>
+                    <MenuItem value={'picked_up'}>Picked Up</MenuItem>
                     <MenuItem value={'delivered'}>Delivered</MenuItem>
                   </Select>
                   <Button
@@ -182,6 +193,69 @@ export const IncomingOrder = () => {
           </CardContent>
         </Card>
       ))}
+      <Drawer open={Boolean(showCongestion)} anchor="bottom">
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            p: 2
+          }}
+        >
+          <Typography variant="h6">How congested was the hotel?</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 2
+            }}
+          >
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => onCongestion(1)}
+            >
+              Not at all
+            </Button>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => onCongestion(2)}
+            >
+              Little
+            </Button>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 2
+            }}
+          >
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={() => onCongestion(3)}
+            >
+              Moderate
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => onCongestion(4)}
+            >
+              High
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => onCongestion(5)}
+            >
+              Very High
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
     </Container>
   );
 };

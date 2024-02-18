@@ -10,6 +10,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
   setDoc,
   where
 } from 'firebase/firestore';
@@ -40,13 +41,11 @@ export const orderConverters = {
   }
 };
 
-export const createHomeOrder = async (
-  params: {
-    quantity: number;
-    number: number;
-    timeSlot: string;
-  }
-): Promise<{success: boolean}> => post('/v1/home-order', params, true);
+export const createHomeOrder = async (params: {
+  quantity: number;
+  number: number;
+  timeSlot: string;
+}): Promise<{ success: boolean }> => post('/v1/home-order', params, true);
 
 export const getOrderHistoryWithRealTimeUpdate = async (
   userId: string,
@@ -111,7 +110,35 @@ export const updateOrderStatus = async ({
   orderStatus: OrderStatus;
 }): Promise<void> => {
   const docRef = doc(firebaseDb, 'orders', orderId);
-  return setDoc(docRef, { status: orderStatus }, { merge: true });
+  return setDoc(
+    docRef,
+    {
+      status: orderStatus,
+      timeStamps: {
+        [orderStatus]: serverTimestamp()
+      }
+    },
+    { merge: true }
+  );
+};
+
+
+export const updateCongestion = async ({
+  orderId,
+  congestion,
+}: {
+  orderId: string;
+  congestion: number;
+}): Promise<void> => {
+  const docRef = doc(firebaseDb, 'orders', orderId);
+  return setDoc(
+    docRef,
+    {
+      congestion: congestion,
+      congestionReportTiming: serverTimestamp()
+    },
+    { merge: true }
+  );
 };
 
 export const getLastOrder = async (

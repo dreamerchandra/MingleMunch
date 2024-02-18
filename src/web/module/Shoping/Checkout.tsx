@@ -698,7 +698,7 @@ export const Checkout: FC = () => {
         <CheckoutCard items={items} error={error} />
         <Button
           onClick={() => {
-            navigate(-1);
+            navigate('/');
           }}
           sx={{
             margin: 'auto'
