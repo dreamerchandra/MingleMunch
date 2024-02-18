@@ -5,7 +5,8 @@ export interface Product {
   isAvailable: boolean;
   itemName: string;
   itemDescription: string;
-  itemPrice: number;
+  displayPrice: number;
+  costPrice: number;
   itemImage?: string;
   keywords: string[];
   shopId: string;
@@ -18,5 +19,6 @@ export interface Product {
   updatedAt: Timestamp;
   createdAt: Timestamp;
   updateBy: string;
-  parcelCharges: number;
+  displayParcelCharges: number;
+  costParcelCharges: number;
 }

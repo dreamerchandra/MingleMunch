@@ -1,34 +1,40 @@
-
-interface Item {
-  itemName: string;
-  itemPrice: number;
-  itemDescription: string;
-  itemImage: string;
-  quantity: number;
-  itemId: string;
-  shopId: string;
-  shopDetails: {
-    shopName: string;
-    shopAddress: string;
-    shopMapLocation: string;
-    shopId: string;
-  };
-}
-
+import { FieldValue } from 'firebase-admin/firestore';
+import { Product } from '../types/Product.js';
+import { Shop } from '../types/Shop.js';
 export interface OrderDb {
   orderId: string;
   userId: string;
-  items: Item[];
-  subTotal: number;
-  deliveryFee: number;
-  grandTotal: number;
+  items: Product[];
+  shops: Shop[];
+  orderRefId: string;
   status: string;
-  createdAt: Date;
-  platformFee: number;
+  appliedCoupon: string;
+  createdAt: FieldValue;
   user: {
     name?: string;
     phone: string;
+    isInternal: boolean;
   };
-  orderRefId: string;
-  appliedCoupon: string;
+  itemToQuantity: {
+    [itemId: string]: number;
+  };
+  shopOrderValue: {
+    [shopId: string]: {
+      deliveryCharges: number;
+      displaySubTotal: number;
+      costPriceSubTotal: number;
+      displayParcelChargesTotal: number;
+      costPriceParcelChargesTotal: number;
+    };
+  };
+  bill: {
+    subTotal: number;
+    platformFee: number;
+    displayParcelChargesTotal: number;
+    discountFee: number;
+    grandTotalBeforeDiscount: number;
+    grandTotal: number;
+    costPriceSubTotal: number;
+    deliveryCharges: number;
+  };
 }

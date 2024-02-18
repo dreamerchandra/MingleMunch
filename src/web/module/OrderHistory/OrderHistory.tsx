@@ -90,7 +90,7 @@ export const OrderHistory = () => {
             >
               {order.items.map((item) => (
                 <Typography variant="h6" key={item.itemId}>
-                  {item.itemName} *{item.quantity} - {item.shopDetails?.shopName}
+                  {item.itemName} * {order.itemToQuantity[item.itemId]} - {item.shopDetails?.shopName}
                 </Typography>
               ))}
             </Container>
@@ -117,9 +117,9 @@ export const OrderHistory = () => {
                 >
                   {getReadableStatus(order.status)}
                 </Typography>
-                <Typography variant="caption">₹{order.grandTotal}</Typography>
+                <Typography variant="caption">₹ {order.bill.grandTotal}</Typography>
                 <Typography variant="caption">
-                  Ref No {order?.orderRefId?.split('::')[1]}
+                  Ref No {order?.orderRefId}
                 </Typography>
               </div>
             </Container>

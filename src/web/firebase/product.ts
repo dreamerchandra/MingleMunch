@@ -23,7 +23,8 @@ import { Shop } from '../../common/types/shop';
 export interface ProductInput {
   itemName: string;
   itemDescription: string;
-  itemPrice: number;
+  displayPrice: number;
+  costPrice: number;
   itemImage: string;
   isAvailable: boolean;
   shopId: string;
@@ -31,7 +32,8 @@ export interface ProductInput {
     id: string;
     name: string;
   };
-  parcelCharges: number;
+  displayParcelCharges: number;
+  costParcelCharges: number;
   itemId?: string;
   suggestionIds?: string[];
   cantOrderSeparately: boolean;
@@ -47,7 +49,7 @@ const constructProduct = (
   productInput: ProductInput,
   shop: Shop
 ): Omit<Product, 'itemId'> => {
-  const { itemName, itemDescription, itemPrice, itemImage } = productInput;
+  const { itemName, itemDescription, displayPrice, itemImage, costPrice } = productInput;
   const shopDetails = {
     shopName: shop.shopName,
     shopAddress: shop.shopAddress,
@@ -58,13 +60,15 @@ const constructProduct = (
   return {
     itemName,
     itemDescription,
-    itemPrice,
+    displayPrice,
+    costPrice,
     itemImage,
     shopId: shop.shopId,
     shopDetails,
     isAvailable: true,
     createdAt: Timestamp.now(),
-    parcelCharges: productInput.parcelCharges || 0,
+    displayParcelCharges: productInput.displayParcelCharges || 0,
+    costParcelCharges: productInput.costParcelCharges || 0,
     category: {
       id: productInput.category.id,
       name: productInput.category.name

@@ -9,16 +9,18 @@ import {
 import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
 
-interface CartState {
+type CartState = {
   cart: Product[];
   total: number;
   totalItems: number;
+  cartId?: string;
 }
 
 const initialState: CartState = {
   cart: [],
   total: 0,
-  totalItems: 0
+  totalItems: 0,
+  cartId: '',
 };
 
 interface AddToCartAction {
@@ -36,7 +38,14 @@ interface RemoveAllFromCartAction {
   type: 'REMOVE_ALL';
 }
 
-type Actions = AddToCartAction | RemoveFromCartAction | RemoveAllFromCartAction;
+interface UpdateCartId {
+  type: 'CART_ID';
+  payload: {
+    cartId: string;
+  }
+}
+
+type Actions = AddToCartAction | RemoveFromCartAction | RemoveAllFromCartAction | UpdateCartId;
 
 const cartActivityReducer = (state: CartState, action: Actions) => {
   switch (action.type) {
@@ -44,7 +53,7 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
       return {
         ...state,
         cart: [...state.cart, action.payload],
-        total: state.total + action.payload.itemPrice,
+        total: state.total + action.payload.displayPrice,
         totalItems: state.totalItems + 1
       };
     case 'REMOVE_FROM_CART': {
@@ -57,12 +66,18 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
       return {
         ...state,
         cart: state.cart.filter((_, index) => index !== itemIndex),
-        total: state.total - product.itemPrice,
+        total: state.total - product.displayPrice,
         totalItems: state.totalItems - 1
       };
     }
     case 'REMOVE_ALL': {
       return initialState;
+    }
+    case 'CART_ID': {
+      return {
+        ...state,
+        cartId: action.payload.cartId
+      }
     }
     default:
       return state;
@@ -125,10 +140,13 @@ const useCartActivity = () => {
     dispatch({ type: 'REMOVE_ALL' });
     Analytics.pushEvent('cart-removed_all');
   }, []);
+  const updateCartId = useCallback((cartId: string) => {
+    dispatch({ type: 'CART_ID', payload: { cartId } });
+  }, []);
 
   return useMemo(
-    () => ({ cartDetails, addToCart, removeFromCart, removeAll, addMultipleToCart }),
-    [addToCart, cartDetails, removeFromCart, removeAll, addMultipleToCart]
+    () => ({ cartDetails, addToCart, removeFromCart, removeAll, addMultipleToCart, updateCartId }),
+    [addToCart, cartDetails, removeFromCart, removeAll, addMultipleToCart, updateCartId]
   );
 };
 

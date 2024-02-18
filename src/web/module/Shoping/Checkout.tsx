@@ -99,7 +99,9 @@ const CheckoutCard: FC<{
           >
             <div>
               <Typography component="h6">{item.product.itemName}</Typography>
-              <Typography component="h6">₹{item.product.itemPrice}</Typography>
+              <Typography component="h6">
+                ₹{item.product.displayPrice}
+              </Typography>
             </div>
             <div>
               <ButtonGroup
@@ -458,6 +460,7 @@ const Footer: FC<{
   setModel: (show: boolean) => void;
   appConfig: AppConfig;
   userConfig: UserConfig;
+  cartId?: string;
 }> = ({
   error,
   setError,
@@ -467,7 +470,8 @@ const Footer: FC<{
   grandTotal,
   coupon,
   userConfig,
-  setModel
+  setModel,
+  cartId
 }) => {
   const { removeAll } = useCart();
   return (
@@ -504,7 +508,11 @@ const Footer: FC<{
             color="secondary"
             disableElevation
           >
-            {appConfig.isOpen ? `Place order ₹ ${grandTotal}` : 'Opens by 7AM'}
+            {cartId
+              ? `Update Order ₹ ${grandTotal}`
+              : appConfig.isOpen
+              ? `Place order ₹ ${grandTotal}`
+              : 'Opens by 7AM'}
           </LoadingButton>
           {coupon ? (
             <Typography
@@ -537,6 +545,7 @@ const Footer: FC<{
 
 export const Checkout: FC = () => {
   const { cartDetails, removeAll } = useCart();
+  const { cartId } = cartDetails;
   const { data: shops } = useShopQuery();
   const { data: appConfig } = useAppConfig();
   const { data: userConfig } = useUserConfig();
@@ -580,11 +589,12 @@ export const Checkout: FC = () => {
   }, [items.length, navigate]);
 
   const itemsTotal = items.reduce(
-    (old, item) => old + item.product.itemPrice * item.quantity,
+    (old, item) => old + item.product.displayPrice * item.quantity,
     0
   );
   const parcelChargesTotal = items.reduce(
-    (old, item) => old + (item.product.parcelCharges ?? 0) * item.quantity,
+    (old, item) =>
+      old + (item.product.displayParcelCharges ?? 0) * item.quantity,
     0
   );
   if (!shops) {
@@ -622,7 +632,8 @@ export const Checkout: FC = () => {
           itemId: item.product.itemId,
           quantity: item.quantity
         })),
-        appliedCoupon: coupon || ''
+        appliedCoupon: coupon || '',
+        orderId: cartId,
       },
       {
         onSuccess: () => {
@@ -667,7 +678,7 @@ export const Checkout: FC = () => {
         flexDirection: 'column',
         width: '100%',
         justifyContent: 'space-between',
-        minHeight: '87dvh',
+        minHeight: '87dvh'
       }}
     >
       <SubSection>
@@ -745,6 +756,7 @@ export const Checkout: FC = () => {
           setError={setError}
           setModel={setModel}
           userConfig={userConfig}
+          cartId={cartId}
         />
       </SubSection>
       {userConfig.availableCoupons && (

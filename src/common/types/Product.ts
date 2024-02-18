@@ -7,7 +7,8 @@ export interface Product {
   isRecommended?: boolean;
   itemName: string;
   itemDescription: string;
-  itemPrice: number;
+  displayPrice: number;
+  costPrice: number;
   itemImage: string;
   shopId: string;
   shopDetails: Omit<Shop, 'shopImage' | 'isOpen' | 'description' | 'commission'>;
@@ -18,7 +19,8 @@ export interface Product {
     id: string;
     name: string;
   };
-  parcelCharges: number;
+  displayParcelCharges: number;
+  costParcelCharges: number;
   suggestionIds?: string[];
   cantOrderSeparately: boolean;
 }

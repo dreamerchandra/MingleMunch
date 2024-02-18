@@ -8,36 +8,40 @@ export type OrderStatus =
   | 'prepared'
   | 'delivered';
 
-type OrderProduct = Pick<
-  Product,
-  | 'itemName'
-  | 'itemId'
-  | 'itemDescription'
-  | 'itemImage'
-  | 'itemPrice'
-  | 'shopId'
-> & {
-  quantity: number;
-  shopDetails?: Shop;
-};
-
 export interface Order {
-  userId: string;
-  userDetails: {
-    name: string;
-    phone: string;
-  };
   orderId: string;
-  createdAt: Timestamp;
-  status: OrderStatus;
-  tax: number;
-  subTotal: number;
-  grandTotal: number;
-  items: OrderProduct[];
-  orderPayment: string;
-  orderPaymentDate: string;
-  orderPaymentRefId: string;
-  orderPaymentMethod: string;
-  orderPaymentAmount: number;
+  userId: string;
+  items: Product[];
+  shops: Shop[];
   orderRefId: string;
+  status: OrderStatus;
+  appliedCoupon: string;
+  createdAt: Timestamp;
+  user: {
+    name?: string;
+    phone: string;
+    isInternal: boolean;
+  };
+  itemToQuantity: {
+    [itemId: string]: number;
+  };
+  shopOrderValue: {
+    [shopId: string]: {
+      deliveryCharges: number;
+      displaySubTotal: number;
+      costPriceSubTotal: number;
+      displayParcelChargesTotal: number;
+      costPriceParcelChargesTotal: number;
+    };
+  };
+  bill: {
+    subTotal: number;
+    platformFee: number;
+    displayParcelChargesTotal: number;
+    discountFee: number;
+    grandTotalBeforeDiscount: number;
+    grandTotal: number;
+    costPriceSubTotal: number;
+    deliveryCharges: number;
+  };
 }

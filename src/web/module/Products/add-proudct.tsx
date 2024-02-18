@@ -21,7 +21,7 @@ import { styled } from '@mui/material/styles';
 import { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useUser } from '../../firebase/auth';
-import { uploadImage } from '../../firebase/product';
+import { ProductInput, uploadImage } from '../../firebase/product';
 import { useCategoryQuery } from '../category/category-query';
 import {
   useStaleProductQuery,
@@ -137,11 +137,13 @@ const initialFormData = {
   file: null as File | null,
   name: '',
   description: '',
-  price: '',
+  displayPrice: '',
+  costPrice: '',
   isTaxIncluded: false,
   categoryId: '',
   suggestionIds: [] as string[],
-  parcelCharges: '',
+  displayParcelCharges: '',
+  costParcelCharges: '',
   cantOrderSeparately: false,
   isRecommended: false
 };
@@ -190,10 +192,12 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
       file: null,
       name: product.itemName,
       description: product.itemDescription,
-      price: product.itemPrice.toString(),
+      displayPrice: product.displayPrice.toString(),
+      costPrice: product.costPrice.toString(),
       isTaxIncluded: false,
       categoryId: product.category.id,
-      parcelCharges: product.parcelCharges?.toString() ?? '',
+      displayParcelCharges: product.displayParcelCharges?.toString() ?? '',
+      costParcelCharges: product.costParcelCharges?.toString() ?? '',
       suggestionIds: product.suggestionIds ?? [],
       cantOrderSeparately: product.cantOrderSeparately ?? false,
       isRecommended: product.isRecommended ?? false
@@ -211,19 +215,22 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
         const data = new FormData(e.currentTarget);
         const name = data.get('title');
         const description = data.get('description');
-        const price = Number(data.get('price'));
+        const displayPrice = Number(data.get('displayPrice'));
+        const costPrice = Number(data.get('costPrice'));
         const image = data.get('image');
         const category = data.get('category');
-        if (!name || !price || !image || !category || !categories) {
+        if (!name || !displayPrice || !image || !category || !categories) {
           return;
         }
         setUpdating(true);
         const itemImage = await uploadImage(image as File);
-        const product = {
+        const product: ProductInput = {
           itemName: name as string,
           itemDescription: description as string,
-          itemPrice: price,
-          parcelCharges: Number(data.get('parcelCharges')) ?? 0,
+          displayPrice,
+          costPrice,
+          displayParcelCharges: Number(data.get('displayParcelCharges')) ?? 0,
+          costParcelCharges: Number(data.get('costParcelCharges')) ?? 0,
           itemImage: itemImage,
           category: {
             name: categories.find((i) => i.categoryId == category)!
@@ -232,23 +239,23 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
           },
           suggestionIds: formData.suggestionIds,
           cantOrderSeparately: formData.cantOrderSeparately,
-          isRecommended: formData.isRecommended
+          isRecommended: formData.isRecommended,
+          shopId,
+          isAvailable: true,
+          itemId: productId || ''
         };
-        mutate(
-          { ...product, isAvailable: true, shopId, itemId: productId || '' },
-          {
-            onSuccess: () => {
-              setFormData(initialFormData);
-              navigate(`/shop/${shopId}`, {
-                replace: true
-              });
-              toast.success('Product updated successfully');
-            },
-            onSettled: () => {
-              setUpdating(false);
-            }
+        mutate(product, {
+          onSuccess: () => {
+            setFormData(initialFormData);
+            navigate(`/shop/${shopId}`, {
+              replace: true
+            });
+            toast.success('Product updated successfully');
+          },
+          onSettled: () => {
+            setUpdating(false);
           }
-        );
+        });
       }}
     >
       <Card sx={{ maxWidth: 345 }}>
@@ -327,71 +334,105 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 ))}
             </Select>
           </FormControl>
-          <TwoCol>
-            <FormControl fullWidth>
-              <InputLabel id="category">Category</InputLabel>
-              <Select
-                labelId="category"
-                name="category"
-                value={formData.categoryId}
+          <FormControl fullWidth>
+            <InputLabel id="category">Category</InputLabel>
+            <Select
+              labelId="category"
+              name="category"
+              value={formData.categoryId}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  categoryId: e.target.value as string
+                });
+              }}
+            >
+              {categories?.map((category) => (
+                <MenuItem value={category.categoryId} key={category.categoryId}>
+                  {category.categoryName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TwoCol
+            sx={{
+              gap: 2
+            }}
+          >
+            <FormControl required fullWidth>
+              <Input
+                placeholder="Display Price"
+                name="displayPrice"
+                type="number"
+                value={formData.displayPrice}
                 onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    categoryId: e.target.value as string
-                  });
+                  setFormData({ ...formData, displayPrice: e.target.value });
                 }}
-              >
-                {categories?.map((category) => (
-                  <MenuItem
-                    value={category.categoryId}
-                    key={category.categoryId}
-                  >
-                    {category.categoryName}
-                  </MenuItem>
-                ))}
-              </Select>
+              />
             </FormControl>
             <FormControl required fullWidth>
               <Input
-                placeholder="Price"
-                name="price"
+                placeholder="Their Price"
+                name="costPrice"
                 type="number"
-                value={formData.price}
+                value={formData.costPrice}
                 onChange={(e) => {
-                  setFormData({ ...formData, price: e.target.value });
+                  setFormData({ ...formData, costPrice: e.target.value });
                 }}
               />
             </FormControl>
           </TwoCol>
-          <TwoCol>
+          <TwoCol
+            sx={{
+              gap: 2
+            }}
+          >
             <FormControl fullWidth>
               <Input
-                placeholder="Packing Charges (Rs. 3)"
-                name="parcelCharges"
+                placeholder="Packing Charges (Rs. 5)"
+                name="displayParcelCharges"
                 type="number"
-                value={formData.parcelCharges}
+                value={formData.displayParcelCharges}
                 onChange={(e) => {
-                  setFormData({ ...formData, parcelCharges: e.target.value });
+                  setFormData({
+                    ...formData,
+                    displayParcelCharges: e.target.value
+                  });
                 }}
               />
             </FormControl>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="cantOrderSeparately"
-                  checked={formData.cantOrderSeparately}
-                  onChange={(e) => {
-                    setFormData({
-                      ...formData,
-                      cantOrderSeparately: e.target.checked
-                    });
-                  }}
-                />
-              }
-              label="Customization"
-              labelPlacement="start"
-            />
+            <FormControl fullWidth>
+              <Input
+                placeholder="Their Packing Charges (Rs. 3)"
+                name="costParcelCharges"
+                type="number"
+                value={formData.costParcelCharges}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    costParcelCharges: e.target.value
+                  });
+                }}
+              />
+            </FormControl>
           </TwoCol>
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="cantOrderSeparately"
+                checked={formData.cantOrderSeparately}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    cantOrderSeparately: e.target.checked
+                  });
+                }}
+              />
+            }
+            label="Customization"
+            labelPlacement="start"
+          />
           <FormControlLabel
             control={
               <Checkbox
