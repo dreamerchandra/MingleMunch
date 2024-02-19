@@ -1,4 +1,4 @@
-import { Box, Drawer } from '@mui/material';
+import { Box, Checkbox, Drawer, ListItemText } from '@mui/material';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -14,6 +14,11 @@ import { useCart } from '../Shoping/cart-activity';
 import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
 import { useState } from 'react';
 import { updateCongestion } from '../../firebase/order';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DateTimePicker } from '@mui/x-date-pickers';
+import dayjs, { Dayjs } from 'dayjs';
 
 // const internalOrder = [
 //   '8754791569',
@@ -33,15 +38,26 @@ const addAllToCart = async (
   return;
 };
 
+const initialCongestion = {
+  orderId: '',
+  congestion: 0,
+  time: null as Dayjs | null,
+  status: null as OrderStatus | null,
+  delayReason: [] as string[]
+};
+
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
   const { addMultipleToCart, removeAll, updateCartId } = useCart();
   const navigate = useNavigate();
-  const [showCongestion, setShowCongestion] = useState('');
+  const [showCongestion, setShowCongestion] = useState(initialCongestion);
   const onCongestion = async (congestion: number) => {
-    await updateCongestion({ orderId: showCongestion, congestion });
-    setShowCongestion('');
+    await updateCongestion({ orderId: showCongestion.orderId, congestion });
+    setShowCongestion({
+      ...showCongestion,
+      congestion: congestion
+    });
   };
   if (loading) {
     return <CircularProgress />;
@@ -133,19 +149,31 @@ export const IncomingOrder = () => {
                     value={order.status}
                     label="Order Status"
                     onChange={(e) => {
-                      if (e.target.value === 'picked_up') {
-                        setShowCongestion(order.orderId);
-                      }
-                      mutateAsync({
+                      const newStatus = e.target.value as OrderStatus;
+                      const oldTime = order.timeStamps?.[newStatus]
+                        ? dayjs(order.timeStamps?.[newStatus].toDate())
+                        : dayjs(new Date());
+                      setShowCongestion({
+                        status: newStatus,
                         orderId: order.orderId,
-                        orderStatus: e.target?.value as OrderStatus
+                        congestion: order.congestion || 0,
+                        time: oldTime,
+                        delayReason: order.delayReason?.[newStatus] ?? []
                       });
+                    }}
+                    sx={{
+                      fontSize: '12px'
                     }}
                   >
                     <MenuItem value={'pending'}>Pending</MenuItem>
-                    <MenuItem value={'ack_from_hotel'}>Order Ack</MenuItem>
+                    <MenuItem value={'ack_from_hotel'}>
+                      Hotel Acknowledged
+                    </MenuItem>
                     <MenuItem value={'prepared'}>Prepared</MenuItem>
-                    <MenuItem value={'picked_up'}>Picked Up</MenuItem>
+                    <MenuItem value={'picked_up'}>Out For Delivery</MenuItem>
+                    <MenuItem value={'reached_location'}>
+                      Reached Customer Place
+                    </MenuItem>
                     <MenuItem value={'delivered'}>Delivered</MenuItem>
                   </Select>
                   <Button
@@ -193,7 +221,7 @@ export const IncomingOrder = () => {
           </CardContent>
         </Card>
       ))}
-      <Drawer open={Boolean(showCongestion)} anchor="bottom">
+      <Drawer open={Boolean(showCongestion.orderId)} anchor="bottom">
         <Box
           sx={{
             display: 'flex',
@@ -202,58 +230,153 @@ export const IncomingOrder = () => {
             p: 2
           }}
         >
-          <Typography variant="h6">How congested was the hotel?</Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 2
+          <Typography variant="h3">
+            Update for {showCongestion.status}
+          </Typography>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DemoContainer components={['DateTimePicker']}>
+              <DateTimePicker
+                label="Select Date and Time"
+                value={dayjs(showCongestion.time)}
+                onChange={async (newValue) => {
+                  setShowCongestion({
+                    ...showCongestion,
+                    time: newValue
+                  });
+                }}
+              />
+            </DemoContainer>
+          </LocalizationProvider>
+          {showCongestion.status === 'picked_up' && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                p: 2
+              }}
+            >
+              <Typography variant="h6">How congested was the hotel?</Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  gap: 2,
+                  flexWrap: 'wrap'
+                }}
+              >
+                {['Not at all', 'Little', 'Moderate', 'High', 'Very High'].map(
+                  (c, i) => (
+                    <Button
+                      variant={
+                        showCongestion.congestion === i + 1
+                          ? 'contained'
+                          : 'outlined'
+                      }
+                      color={i < 2 ? 'error' : i === 2 ? 'warning' : 'success'}
+                      onClick={() => onCongestion(i + 1)}
+                    >
+                      {c}
+                    </Button>
+                  )
+                )}
+              </Box>
+            </Box>
+          )}
+          {showCongestion.status === 'picked_up' && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                p: 2
+              }}
+            >
+              <Typography variant="h6">Why was the delay</Typography>
+              <Select
+                labelId="Order Delay Reason"
+                id="delay_reason"
+                value={showCongestion.delayReason}
+                label="Delay reason"
+                multiple
+                onChange={(e) => {
+                  setShowCongestion({
+                    ...showCongestion,
+                    delayReason: e.target.value as string[]
+                  });
+                }}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                {['Bill Pay', 'Packing Mistake', 'Delivery Guy Late'].map(
+                  (s) => (
+                    <MenuItem value={s}>
+                      <Checkbox
+                        checked={showCongestion.delayReason.includes(s)}
+                      />
+                      <ListItemText primary={s} />
+                    </MenuItem>
+                  )
+                )}
+              </Select>
+            </Box>
+          )}
+          {showCongestion.status === 'delivered' && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                p: 2
+              }}
+            >
+              <Typography variant="h6">Why was the delay</Typography>
+              <Select
+                labelId="Order Delay Reason"
+                id="delay_reason"
+                value={showCongestion.delayReason}
+                label="Delay reason"
+                multiple
+                onChange={(e) => {
+                  setShowCongestion({
+                    ...showCongestion,
+                    delayReason: e.target.value as string[]
+                  });
+                }}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                {['Arrival Delay', 'Payment Delay'].map((s) => (
+                  <MenuItem value={s}>
+                    <Checkbox
+                      checked={showCongestion.delayReason.includes(s)}
+                    />
+                    <ListItemText primary={s} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+          )}
+          <Button
+            onClick={async () => {
+              if (showCongestion.status && showCongestion.time) {
+                await mutateAsync({
+                  orderId: showCongestion.orderId,
+                  orderStatus: showCongestion.status,
+                  time: showCongestion.time,
+                  delayReason: showCongestion.delayReason
+                });
+              }
+              setShowCongestion({
+                orderId: '',
+                congestion: 0,
+                time: null,
+                status: null,
+                delayReason: []
+              });
             }}
+            color="info"
           >
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => onCongestion(1)}
-            >
-              Not at all
-            </Button>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => onCongestion(2)}
-            >
-              Little
-            </Button>
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 2
-            }}
-          >
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={() => onCongestion(3)}
-            >
-              Moderate
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => onCongestion(4)}
-            >
-              High
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => onCongestion(5)}
-            >
-              Very High
-            </Button>
-          </Box>
+            Save
+          </Button>
         </Box>
       </Drawer>
     </Container>

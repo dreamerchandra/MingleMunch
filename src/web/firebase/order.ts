@@ -2,6 +2,7 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   SnapshotOptions,
+  Timestamp,
   Unsubscribe,
   collection,
   doc,
@@ -17,6 +18,7 @@ import {
 import { Order, OrderStatus } from '../../common/types/Order';
 import { post } from './fetch';
 import { firebaseDb } from './firebase/db';
+import { Dayjs } from 'dayjs';
 
 export interface OrderPayload {
   details: { itemId: string; quantity: number }[];
@@ -104,19 +106,29 @@ export const incomingOrderSocketUupdate = async (
 
 export const updateOrderStatus = async ({
   orderId,
-  orderStatus
+  orderStatus,
+  time,
+  delayReason
 }: {
   orderId: string;
   orderStatus: OrderStatus;
+  time: Dayjs;
+  delayReason: string[]
 }): Promise<void> => {
   const docRef = doc(firebaseDb, 'orders', orderId);
+  const delay = delayReason.length > 0 ? {
+    delayReason: {
+      [orderStatus]: delayReason
+    },
+  }: {};
   return setDoc(
     docRef,
     {
       status: orderStatus,
       timeStamps: {
-        [orderStatus]: serverTimestamp()
-      }
+        [orderStatus]: Timestamp.fromDate(time.toDate()),
+      },
+      ...delay,
     },
     { merge: true }
   );

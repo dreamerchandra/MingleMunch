@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { logger } from 'firebase-functions';
 import { HttpError } from '../error.js';
 import { firebaseDb } from '../firebase.js';
-import { AppConfig, getConfig } from '../firestore/app-config.js';
+import { getConfig } from '../firestore/app-config.js';
 import { getProducts } from '../firestore/product.js';
 import {
   ShopInternal,

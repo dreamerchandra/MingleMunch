@@ -8,6 +8,7 @@ import {
 } from '../../firebase/order';
 import { useEffect, useRef, useState } from 'react';
 import { Unsubscribe } from 'firebase/firestore';
+import { Dayjs } from 'dayjs';
 
 const onAddedUtil = (thisOrder: Order, oldOrders: Order[]): Order[] => {
   console.log('added');
@@ -94,14 +95,13 @@ export const useOrderHistoryQuery = () => {
 export const useMutationOrderStatus = () => {
   const queryClient = useQueryClient();
   return useMutation(
-    async ({
-      orderId,
-      orderStatus
-    }: {
+    async (param: {
       orderId: string;
       orderStatus: OrderStatus;
+      time: Dayjs,
+      delayReason: string[]
     }) => {
-      return updateOrderStatus({ orderId, orderStatus });
+      return updateOrderStatus(param);
     },
     {
       onSuccess: () => {

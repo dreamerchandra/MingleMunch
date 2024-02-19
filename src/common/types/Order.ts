@@ -6,6 +6,8 @@ export type OrderStatus =
   | 'pending'
   | 'ack_from_hotel'
   | 'prepared'
+  | 'picked_up'
+  | 'reached_location'
   | 'delivered';
 
 export interface Order {
@@ -44,4 +46,8 @@ export interface Order {
     costPriceSubTotal: number;
     deliveryCharges: number;
   };
+  congestion?: number;
+  congestionReportTiming?: Timestamp;
+  timeStamps?: Record<OrderStatus, Timestamp>;
+  delayReason: Record<OrderStatus, string[]>;
 }
