@@ -10,7 +10,8 @@ import { useUser } from '../firebase/auth';
 import { post } from '../firebase/fetch';
 
 export interface AppConfig {
-  isOpen: true;
+  isOpen: boolean;
+  closeReason: string;
   platformFee: number;
   carousel: { image: string; url?: string; isPublished: boolean }[];
 }

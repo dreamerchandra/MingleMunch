@@ -9,4 +9,5 @@ export interface Shop {
   deliveryFee: number;
   commission: number;
   carousel?: { image: string; url?: string, isPublished: boolean }[];
+  orderRank: number;
 }

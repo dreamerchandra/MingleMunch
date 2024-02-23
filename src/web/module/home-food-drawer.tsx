@@ -444,7 +444,7 @@ export const HomeFoodDrawer: FC<{
               >
                 {appConfig?.isOpen
                   ? `Place order ₹ ${grandTotal}`
-                  : 'Opens by 7AM'}
+                  : appConfig?.closeReason}
               </LoadingButton>
             )}
           </Box>

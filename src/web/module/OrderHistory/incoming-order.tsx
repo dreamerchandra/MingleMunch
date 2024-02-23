@@ -7,18 +7,16 @@ import Container from '@mui/material/Container';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Order, OrderStatus } from '../../../common/types/Order';
 import { Product } from '../../../common/types/Product';
-import { useCart } from '../Shoping/cart-activity';
-import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
-import { useState } from 'react';
 import { updateCongestion } from '../../firebase/order';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DateTimePicker } from '@mui/x-date-pickers';
-import dayjs, { Dayjs } from 'dayjs';
+import { useCart } from '../Shoping/cart-activity';
+import { Time } from '../time';
+import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
 
 // const internalOrder = [
 //   '8754791569',
@@ -41,7 +39,7 @@ const addAllToCart = async (
 const initialCongestion = {
   orderId: '',
   congestion: 0,
-  time: null as Dayjs | null,
+  time: null as Date | null,
   status: null as OrderStatus | null,
   delayReason: [] as string[]
 };
@@ -128,23 +126,20 @@ export const IncomingOrder = () => {
                 <Box
                   sx={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: 1
+                    flexDirection: 'column'
                   }}
                 >
                   <Typography variant="h6">{order?.user?.name}</Typography>
-                  <Typography variant="caption">
+                  <Typography variant="body2">
                     Grand Total ₹. {order.bill.grandTotal}
                   </Typography>
-                  <Typography variant="caption">
-                    {Object.keys(order.shopOrderValue).map(
-                      (s) =>
-                        `${getShopName(s, order)}: ₹${
-                          order.shopOrderValue[s].costPriceSubTotal +
-                          order.shopOrderValue[s].costPriceParcelChargesTotal
-                        }`
-                    )}
-                  </Typography>
+                  {Object.keys(order.shopOrderValue).map((s) => (
+                    <Typography variant="caption">
+                      {getShopName(s, order)}: ₹.
+                      {order.shopOrderValue[s].costPriceSubTotal +
+                        order.shopOrderValue[s].costPriceParcelChargesTotal}
+                    </Typography>
+                  ))}
                 </Box>
                 <div
                   style={{
@@ -160,8 +155,8 @@ export const IncomingOrder = () => {
                     onChange={(e) => {
                       const newStatus = e.target.value as OrderStatus;
                       const oldTime = order.timeStamps?.[newStatus]
-                        ? dayjs(order.timeStamps?.[newStatus].toDate())
-                        : dayjs(new Date());
+                        ? (order.timeStamps?.[newStatus].toDate() as Date)
+                        : new Date();
                       setShowCongestion({
                         status: newStatus,
                         orderId: order.orderId,
@@ -268,18 +263,16 @@ export const IncomingOrder = () => {
             Update for {showCongestion.status}
           </Typography>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DemoContainer components={['DateTimePicker']}>
-              <DateTimePicker
-                label="Select Date and Time"
-                value={dayjs(showCongestion.time)}
-                onChange={async (newValue) => {
-                  setShowCongestion({
-                    ...showCongestion,
-                    time: newValue
-                  });
-                }}
-              />
-            </DemoContainer>
+            <Typography variant="caption">Pick the time</Typography>
+            <Time
+              value={showCongestion.time ?? new Date()}
+              onChange={async (newValue) => {
+                setShowCongestion({
+                  ...showCongestion,
+                  time: newValue
+                });
+              }}
+            />
           </LocalizationProvider>
           {showCongestion.status === 'picked_up' && (
             <Box

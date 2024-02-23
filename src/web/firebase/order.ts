@@ -18,7 +18,6 @@ import {
 import { Order, OrderStatus } from '../../common/types/Order';
 import { post } from './fetch';
 import { firebaseDb } from './firebase/db';
-import { Dayjs } from 'dayjs';
 
 export interface OrderPayload {
   details: { itemId: string; quantity: number }[];
@@ -92,16 +91,21 @@ export const incomingOrderSocketUupdate = async (
     orderBy('createdAt', 'desc'),
     limit(11)
   );
-  
+
   const internalOrderData = await getDocs(internalOrderQuery);
   const internalOrder = internalOrderData.docs.map((doc) => doc.data());
   const orderData = await getDocs(orderQuery);
   const orders = orderData.docs.map((doc) => doc.data());
-  const getResult = (orders: Order[]) => orders.map((o) => ({
-    ...o,
-    bill: internalOrder.find((order) => order.orderId === o.orderId)?.bill ?? o.bill,
-    shopOrderValue: internalOrder.find((order) => order.orderId === o.orderId)?.shopOrderValue ?? o.shopOrderValue,
-  }));
+  const getResult = (orders: Order[]) =>
+    orders.map((o) => ({
+      ...o,
+      bill:
+        internalOrder.find((order) => order.orderId === o.orderId)?.bill ??
+        o.bill,
+      shopOrderValue:
+        internalOrder.find((order) => order.orderId === o.orderId)
+          ?.shopOrderValue ?? o.shopOrderValue
+    }));
   const unsubscribe = onSnapshot(orderQuery, (querySnapshot) => {
     querySnapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
@@ -124,32 +128,34 @@ export const updateOrderStatus = async ({
 }: {
   orderId: string;
   orderStatus: OrderStatus;
-  time: Dayjs;
-  delayReason: string[]
+  time: Date;
+  delayReason: string[];
 }): Promise<void> => {
   const docRef = doc(firebaseDb, 'orders', orderId);
-  const delay = delayReason.length > 0 ? {
-    delayReason: {
-      [orderStatus]: delayReason
-    },
-  }: {};
+  const delay =
+    delayReason.length > 0
+      ? {
+          delayReason: {
+            [orderStatus]: delayReason
+          }
+        }
+      : {};
   return setDoc(
     docRef,
     {
       status: orderStatus,
       timeStamps: {
-        [orderStatus]: Timestamp.fromDate(time.toDate()),
+        [orderStatus]: Timestamp.fromDate(time)
       },
-      ...delay,
+      ...delay
     },
     { merge: true }
   );
 };
 
-
 export const updateCongestion = async ({
   orderId,
-  congestion,
+  congestion
 }: {
   orderId: string;
   congestion: number;

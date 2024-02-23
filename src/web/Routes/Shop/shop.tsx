@@ -14,12 +14,12 @@ import {
   CheckoutHeadsUp,
   NotificationInfo
 } from '../../module/Shoping/CheckoutHeadup';
+import { Feedback } from '../../module/feedback/feedback';
+import { FullPageBanner } from '../../module/full-page-banner';
 import { HomeFoodBanner } from '../../module/home-food-banner';
 import { HomeFoodDrawer } from '../../module/home-food-drawer';
 import { Loading } from '../../module/loading';
 import { OurStories } from '../../module/stories/stories';
-import { FullPageBanner } from '../../module/full-page-banner';
-import { Feedback } from '../../module/feedback/feedback';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();

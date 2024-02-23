@@ -4,6 +4,7 @@ import {
   SnapshotOptions,
   collection,
   getDocs,
+  orderBy,
   query
 } from 'firebase/firestore';
 import { Shop } from '../../common/types/shop';
@@ -24,7 +25,7 @@ export const shopConverter = {
 };
 
 export const getShops = async () => {
-  const q = query(collection(firebaseDb, 'shop').withConverter(shopConverter));
+  const q = query(collection(firebaseDb, 'shop').withConverter(shopConverter), orderBy('orderRank', 'asc'));
   const querySnap = await getDocs(q);
   const data = querySnap.docs.map((doc) => doc.data());
   return data;

@@ -99,9 +99,7 @@ const CheckoutCard: FC<{
           >
             <div>
               <Typography component="h6">{item.product.itemName}</Typography>
-              <Typography component="h6">
-                ₹{item.product.itemPrice}
-              </Typography>
+              <Typography component="h6">₹{item.product.itemPrice}</Typography>
             </div>
             <div>
               <ButtonGroup
@@ -512,7 +510,7 @@ const Footer: FC<{
               ? `Update Order ₹ ${grandTotal}`
               : appConfig.isOpen
               ? `Place order ₹ ${grandTotal}`
-              : 'Opens by 7AM'}
+              : appConfig.closeReason}
           </LoadingButton>
           {coupon ? (
             <Typography
@@ -593,8 +591,7 @@ export const Checkout: FC = () => {
     0
   );
   const parcelChargesTotal = items.reduce(
-    (old, item) =>
-      old + (item.product.parcelCharges ?? 0) * item.quantity,
+    (old, item) => old + (item.product.parcelCharges ?? 0) * item.quantity,
     0
   );
   if (!shops) {
@@ -633,7 +630,7 @@ export const Checkout: FC = () => {
           quantity: item.quantity
         })),
         appliedCoupon: coupon || '',
-        orderId: cartId,
+        orderId: cartId
       },
       {
         onSuccess: () => {

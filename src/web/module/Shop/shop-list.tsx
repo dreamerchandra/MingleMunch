@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shop as IShop } from '../../../common/types/shop';
+import { useAppConfig } from '../appconfig';
 import { useShopQuery } from './shop-query';
 
 export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
@@ -73,6 +74,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
 };
 
 export const Shops = () => {
+  const { data: appConfig } = useAppConfig();
   const { data, isLoading } = useShopQuery();
 
   if (isLoading) {
@@ -89,11 +91,28 @@ export const Shops = () => {
         pb: 16
       }}
     >
-      <Typography variant="h6" sx={{ letterSpacing: 4, mb: 2 }}>
-        ALL RESTAURANTS
-      </Typography>
+      <Box
+        sx={{
+          mb: 2
+        }}
+      >
+        <Typography variant="h6" sx={{ letterSpacing: 4 }}>
+          ALL RESTAURANTS
+        </Typography>
+        {!appConfig?.isOpen && (
+          <Typography variant="h6" color='darkorange' textAlign="center">
+            {appConfig?.closeReason}
+          </Typography>
+        )}
+      </Box>
+
       {data?.map((shop) => (
-        <div key={shop.shopId}>
+        <div
+          key={shop.shopId}
+          style={{
+            filter: appConfig?.isOpen ? 'none' : 'grayscale(1)'
+          }}
+        >
           <Shop shop={shop} />
         </div>
       ))}
