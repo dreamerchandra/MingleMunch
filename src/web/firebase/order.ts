@@ -82,26 +82,38 @@ export const incomingOrderSocketUupdate = async (
   onAdded: (order: Order) => void,
   onChange: (order: Order) => void
 ): Promise<{ orders: Order[]; unsubscribe: Unsubscribe }> => {
-  const q = query(
+  const internalOrderQuery = query(
+    collection(firebaseDb, 'internal-orders').withConverter(orderConverters),
+    orderBy('createdAt', 'desc'),
+    limit(11)
+  );
+  const orderQuery = query(
     collection(firebaseDb, 'orders').withConverter(orderConverters),
     orderBy('createdAt', 'desc'),
     limit(11)
   );
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  
+  const internalOrderData = await getDocs(internalOrderQuery);
+  const internalOrder = internalOrderData.docs.map((doc) => doc.data());
+  const orderData = await getDocs(orderQuery);
+  const orders = orderData.docs.map((doc) => doc.data());
+  const getResult = (orders: Order[]) => orders.map((o) => ({
+    ...o,
+    bill: internalOrder.find((order) => order.orderId === o.orderId)?.bill ?? o.bill,
+    shopOrderValue: internalOrder.find((order) => order.orderId === o.orderId)?.shopOrderValue ?? o.shopOrderValue,
+  }));
+  const unsubscribe = onSnapshot(orderQuery, (querySnapshot) => {
     querySnapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
-        onAdded(change.doc.data());
+        onAdded(getResult([change.doc.data()])[0]);
       }
       if (change.type === 'modified') {
-        onChange(change.doc.data());
+        onChange(getResult([change.doc.data()])[0]);
       }
     });
     return querySnapshot.docs.map((doc) => doc.data());
   });
-
-  const querySnap = await getDocs(q);
-  const orders = querySnap.docs.map((doc) => doc.data());
-  return { orders, unsubscribe };
+  return { orders: getResult(orders), unsubscribe };
 };
 
 export const updateOrderStatus = async ({

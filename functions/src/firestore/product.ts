@@ -20,5 +20,16 @@ export const getProducts = async (productIds: string[]) => {
     firebaseDb.doc('food/' + id).withConverter(productConverter)
   );
   const products = await firebaseDb.getAll(...refs);
-  return products.map((p) => p.data()).filter((p) => p != null) as Product[];
+  const internalRefs = productIds.map((id) =>
+    firebaseDb.doc('food-internal/' + id).withConverter(productConverter)
+  );
+  const snaps = await firebaseDb.getAll(...internalRefs);
+  const internalProducts = snaps.map((s) => s.data());
+  const getInternalProduct = (id: string) =>
+    internalProducts.find((p) => p?.itemId === id);
+  const productData = products.map((p) => p.data()).map((p) => p) as Product[];
+  return productData.map((p) => ({
+    ...p,
+    ...getInternalProduct(p.itemId)
+  }));
 };

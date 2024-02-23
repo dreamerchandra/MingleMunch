@@ -21,13 +21,9 @@ import { styled } from '@mui/material/styles';
 import { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useUser } from '../../firebase/auth';
-import { ProductInput, uploadImage } from '../../firebase/product';
+import { ProductInput, getProduct, uploadImage } from '../../firebase/product';
 import { useCategoryQuery } from '../category/category-query';
-import {
-  useStaleProductQuery,
-  useProductsQuery,
-  useUpdateProductMutation
-} from './product-query';
+import { useProductsQuery, useUpdateProductMutation } from './product-query';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const StyleImg = styled('img')`
@@ -137,12 +133,12 @@ const initialFormData = {
   file: null as File | null,
   name: '',
   description: '',
-  displayPrice: '',
+  itemPrice: '',
   costPrice: '',
   isTaxIncluded: false,
   categoryId: '',
   suggestionIds: [] as string[],
-  displayParcelCharges: '',
+  parcelCharges: '',
   costParcelCharges: '',
   cantOrderSeparately: false,
   isRecommended: false
@@ -174,35 +170,41 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
     shopId: shopId,
     search: ''
   });
-  const getProductById = useStaleProductQuery({ shopId });
   const navigate = useNavigate();
+  const { userDetails } = useUser();
+  const isAdmin = userDetails?.role === 'admin';
 
   useEffect(() => {
     if (!productId) {
       return;
     }
-    const product = getProductById(productId);
-    if (!product) {
-      navigate(`/shop/${shopId}`, {
-        replace: true
+    getProduct(productId, { isAdmin })
+      .then((product) => {
+        if (!product) {
+          navigate(`/shop/${shopId}`, {
+            replace: true
+          });
+          return;
+        }
+        setFormData({
+          file: null,
+          name: product.itemName,
+          description: product.itemDescription,
+          itemPrice: product.itemPrice.toString(),
+          costPrice: product.costPrice.toString(),
+          isTaxIncluded: false,
+          categoryId: product.category.id,
+          parcelCharges: product.parcelCharges?.toString() ?? '',
+          costParcelCharges: product.costParcelCharges?.toString() ?? '',
+          suggestionIds: product.suggestionIds ?? [],
+          cantOrderSeparately: product.cantOrderSeparately ?? false,
+          isRecommended: product.isRecommended ?? false
+        });
+      })
+      .catch(() => {
+        toast.error('Product not found');
       });
-      return;
-    }
-    setFormData({
-      file: null,
-      name: product.itemName,
-      description: product.itemDescription,
-      displayPrice: product.displayPrice.toString(),
-      costPrice: product.costPrice.toString(),
-      isTaxIncluded: false,
-      categoryId: product.category.id,
-      displayParcelCharges: product.displayParcelCharges?.toString() ?? '',
-      costParcelCharges: product.costParcelCharges?.toString() ?? '',
-      suggestionIds: product.suggestionIds ?? [],
-      cantOrderSeparately: product.cantOrderSeparately ?? false,
-      isRecommended: product.isRecommended ?? false
-    });
-  }, [getProductById, navigate, productId, shopId]);
+  }, [navigate, productId, shopId, isAdmin]);
 
   if (loading || role === 'user') {
     return null;
@@ -215,11 +217,11 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
         const data = new FormData(e.currentTarget);
         const name = data.get('title');
         const description = data.get('description');
-        const displayPrice = Number(data.get('displayPrice'));
+        const itemPrice = Number(data.get('itemPrice'));
         const costPrice = Number(data.get('costPrice'));
         const image = data.get('image');
         const category = data.get('category');
-        if (!name || !displayPrice || !image || !category || !categories) {
+        if (!name || !itemPrice || !image || !category || !categories) {
           return;
         }
         setUpdating(true);
@@ -227,9 +229,9 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
         const product: ProductInput = {
           itemName: name as string,
           itemDescription: description as string,
-          displayPrice,
+          itemPrice: itemPrice,
           costPrice,
-          displayParcelCharges: Number(data.get('displayParcelCharges')) ?? 0,
+          parcelCharges: Number(data.get('parcelCharges')) ?? 0,
           costParcelCharges: Number(data.get('costParcelCharges')) ?? 0,
           itemImage: itemImage,
           category: {
@@ -362,11 +364,11 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
             <FormControl required fullWidth>
               <Input
                 placeholder="Display Price"
-                name="displayPrice"
+                name="itemPrice"
                 type="number"
-                value={formData.displayPrice}
+                value={formData.itemPrice}
                 onChange={(e) => {
-                  setFormData({ ...formData, displayPrice: e.target.value });
+                  setFormData({ ...formData, itemPrice: e.target.value });
                 }}
               />
             </FormControl>
@@ -390,13 +392,13 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
             <FormControl fullWidth>
               <Input
                 placeholder="Packing Charges (Rs. 5)"
-                name="displayParcelCharges"
+                name="parcelCharges"
                 type="number"
-                value={formData.displayParcelCharges}
+                value={formData.parcelCharges}
                 onChange={(e) => {
                   setFormData({
                     ...formData,
-                    displayParcelCharges: e.target.value
+                    parcelCharges: e.target.value
                   });
                 }}
               />

@@ -3,12 +3,9 @@ import type { Timestamp } from 'firebase/firestore';
 export interface Product {
   itemId: string;
   isAvailable: boolean;
+  itemImage?: string;
   itemName: string;
   itemDescription: string;
-  displayPrice: number;
-  costPrice: number;
-  itemImage?: string;
-  keywords: string[];
   shopId: string;
   shopDetails: {
     shopName: string;
@@ -19,6 +16,15 @@ export interface Product {
   updatedAt: Timestamp;
   createdAt: Timestamp;
   updateBy: string;
-  displayParcelCharges: number;
+  itemPrice: number;
+  costPrice: number;
+  parcelCharges: number;
   costParcelCharges: number;
+  suggestionIds?: string[];
+  cantOrderSeparately: boolean;
+  isRecommended?: boolean;
+  category: {
+    id: string;
+    name: string;
+  };
 }

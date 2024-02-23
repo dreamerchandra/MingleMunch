@@ -100,7 +100,7 @@ const CheckoutCard: FC<{
             <div>
               <Typography component="h6">{item.product.itemName}</Typography>
               <Typography component="h6">
-                ₹{item.product.displayPrice}
+                ₹{item.product.itemPrice}
               </Typography>
             </div>
             <div>
@@ -589,12 +589,12 @@ export const Checkout: FC = () => {
   }, [items.length, navigate]);
 
   const itemsTotal = items.reduce(
-    (old, item) => old + item.product.displayPrice * item.quantity,
+    (old, item) => old + item.product.itemPrice * item.quantity,
     0
   );
   const parcelChargesTotal = items.reduce(
     (old, item) =>
-      old + (item.product.displayParcelCharges ?? 0) * item.quantity,
+      old + (item.product.parcelCharges ?? 0) * item.quantity,
     0
   );
   if (!shops) {

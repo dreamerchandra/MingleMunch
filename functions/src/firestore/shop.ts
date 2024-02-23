@@ -20,7 +20,7 @@ export interface ShopInternal {
 } 
 
 const shopInternalConverter = {
-  toFirestore(product: { commission: number }): DocumentData {
+  toFirestore(product: ShopInternal): DocumentData {
     return { ...product };
   },
 

@@ -8,7 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
-import { OrderStatus } from '../../../common/types/Order';
+import { Order, OrderStatus } from '../../../common/types/Order';
 import { Product } from '../../../common/types/Product';
 import { useCart } from '../Shoping/cart-activity';
 import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
@@ -62,6 +62,9 @@ export const IncomingOrder = () => {
   if (loading) {
     return <CircularProgress />;
   }
+  const getShopName = (shopId: string, order: Order) => {
+    return order.shops?.find((s) => s.shopId === shopId)?.shopName ?? 'Their';
+  };
   return (
     <Container
       component="main"
@@ -134,7 +137,13 @@ export const IncomingOrder = () => {
                     Grand Total ₹. {order.bill.grandTotal}
                   </Typography>
                   <Typography variant="caption">
-                    Their Bill ₹. {order.bill.costPriceSubTotal}
+                    {Object.keys(order.shopOrderValue).map(
+                      (s) =>
+                        `${getShopName(s, order)}: ₹${
+                          order.shopOrderValue[s].costPriceSubTotal +
+                          order.shopOrderValue[s].costPriceParcelChargesTotal
+                        }`
+                    )}
                   </Typography>
                 </Box>
                 <div
@@ -179,6 +188,7 @@ export const IncomingOrder = () => {
                   <Button
                     variant="contained"
                     color="warning"
+                    size="small"
                     onClick={async () => {
                       removeAll();
                       updateCartId(order.orderId);
@@ -199,6 +209,16 @@ export const IncomingOrder = () => {
                     }}
                   >
                     Cart
+                  </Button>
+                  <Button
+                    sx={{
+                      mt: 1
+                    }}
+                    variant="text"
+                    size="small"
+                    href={`tel:${order.user.phone}`}
+                  >
+                    Call
                   </Button>
                 </div>
               </Container>
@@ -221,7 +241,21 @@ export const IncomingOrder = () => {
           </CardContent>
         </Card>
       ))}
-      <Drawer open={Boolean(showCongestion.orderId)} anchor="bottom">
+      <Drawer
+        open={Boolean(showCongestion.orderId)}
+        anchor="bottom"
+        ModalProps={{
+          onBackdropClick: () => {
+            setShowCongestion({
+              orderId: '',
+              congestion: 0,
+              time: null,
+              status: null,
+              delayReason: []
+            });
+          }
+        }}
+      >
         <Box
           sx={{
             display: 'flex',

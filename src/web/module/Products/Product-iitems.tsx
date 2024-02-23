@@ -200,7 +200,7 @@ export const ProductItem: FC<{
   isSuggestion?: boolean;
   allowEdit: boolean;
 }> = ({ product, isSuggestion = false, allowEdit }) => {
-  const { itemDescription, itemName, displayPrice: itemPrice } = product;
+  const { itemDescription, itemName, itemPrice: itemPrice } = product;
   const [open, setOpen] = useState(false);
 
   return (

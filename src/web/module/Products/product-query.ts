@@ -1,15 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUser } from '../../firebase/auth';
 import {
   ProductInput,
   ProductsQuery,
   getProduct,
   getProducts,
   insertProduct,
-  updateProduct
+  updateAvailability,
 } from '../../firebase/product';
 import { getShops } from '../../firebase/shop';
-import { Product } from '../../../common/types/Product';
-import { useCallback } from 'react';
 
 export const useProductsQuery = (
   params: ProductsQuery & { isEnabled: boolean; shopId: string }
@@ -39,7 +38,7 @@ export const useUpdateProductMutation = () => {
 export const useMutationProductEdit = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: updateProduct,
+    mutationFn: updateAvailability,
     onSuccess: () => {
       queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes('products')
@@ -48,27 +47,13 @@ export const useMutationProductEdit = () => {
   });
 };
 
-export const useStaleProductQuery = (query: { shopId: string }) => {
-  const queryClient = useQueryClient();
-  return useCallback(
-    (productId: string) => {
-      const data = queryClient.getQueryData([
-        'shop',
-        query.shopId,
-        'products',
-        ''
-      ]) as Product[];
-      return data?.find((product: Product) => product.itemId === productId);
-    },
-    [query.shopId, queryClient]
-  );
-};
-
 export const useProductQuery = (productId: string) => {
+  const { userDetails } = useUser();
+  const isAdmin = userDetails?.role === 'admin';
   return useQuery({
     queryKey: ['product', productId],
     queryFn: () => {
-      return getProduct(productId);
+      return getProduct(productId, { isAdmin });
     }
   });
 };

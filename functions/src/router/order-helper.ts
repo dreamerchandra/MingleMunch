@@ -23,14 +23,14 @@ export interface OrderDb {
       deliveryCharges: number;
       displaySubTotal: number;
       costPriceSubTotal: number;
-      displayParcelChargesTotal: number;
+      parcelChargesTotal: number;
       costPriceParcelChargesTotal: number;
     };
   };
   bill: {
     subTotal: number;
     platformFee: number;
-    displayParcelChargesTotal: number;
+    parcelChargesTotal: number;
     discountFee: number;
     grandTotalBeforeDiscount: number;
     grandTotal: number;

@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { logger } from 'firebase-functions';
 import { HttpError } from '../error.js';
-import { firebaseDb } from '../firebase.js';
 import { getConfig } from '../firestore/app-config.js';
 import { getProducts } from '../firestore/product.js';
 import {
@@ -18,8 +17,7 @@ import {
   removeCoupon,
   updateFreeDeliveryForInvitedUser
 } from './user.js';
-import { FieldValue } from 'firebase-admin/firestore';
-import { Role } from '../types/roles.js';
+import { createOrderInDb } from './create-order.js';
 
 interface OrderBody {
   details: [{ itemId: string; quantity: number }];
@@ -71,7 +69,7 @@ const getTotalByShop = (
   shops: Shop[],
   ShopInternal: ShopInternal[]
 ) => {
-  return products.reduce((acc, p) => {
+  const shopOrderValue = products.reduce((acc, p) => {
     const shop = shops.find((s) => s.shopId === p.shopDetails.shopId);
     const shopInternal = ShopInternal.find(
       (s) => s.shopId === p.shopDetails.shopId
@@ -86,19 +84,34 @@ const getTotalByShop = (
         costPriceParcelChargesTotal: 0,
         costPriceSubTotal: 0,
         deliveryCharges: shop.deliveryFee,
-        displayParcelChargesTotal: 0,
+        parcelChargesTotal: 0,
         displaySubTotal: 0
       };
     }
-    acc[shopId].displaySubTotal += p.displayPrice * quantity;
+    acc[shopId].displaySubTotal += p.itemPrice * quantity;
     acc[shopId].costPriceSubTotal += p.costPrice * quantity;
-    acc[shopId].displayParcelChargesTotal += p.displayParcelCharges * quantity;
+    acc[shopId].parcelChargesTotal += p.parcelCharges * quantity;
     acc[shopId].costPriceParcelChargesTotal += p.costParcelCharges * quantity;
     return acc;
   }, {} as OrderDb['shopOrderValue']);
+  for (const shopId in shopOrderValue) {
+    shopOrderValue[shopId].costPriceSubTotal = Math.round(
+      shopOrderValue[shopId].costPriceSubTotal
+    );
+    shopOrderValue[shopId].costPriceParcelChargesTotal = Math.round(
+      shopOrderValue[shopId].costPriceParcelChargesTotal
+    );
+    shopOrderValue[shopId].displaySubTotal = Math.round(
+      shopOrderValue[shopId].displaySubTotal
+    );
+    shopOrderValue[shopId].parcelChargesTotal = Math.round(
+      shopOrderValue[shopId].parcelChargesTotal
+    );
+  }
+  return shopOrderValue;
 };
 
-const getTotal = (details: OrderBody['details']) => {
+const getDetailsToQuantity = (details: OrderBody['details']) => {
   const detailsToQuantity = details.reduce((acc, d) => {
     acc[d.itemId] = Number(d.quantity);
     return acc;
@@ -106,68 +119,6 @@ const getTotal = (details: OrderBody['details']) => {
   return {
     detailsToQuantity
   };
-};
-
-const createOrderInDb = async (
-  user: {
-    uid: string;
-    name?: string;
-    phone_number: string;
-    role: Role;
-  },
-  {
-    products,
-    appliedCoupon,
-    itemToQuantity,
-    shops,
-    bill,
-    shopOrderValue,
-    orderId
-  }: {
-    products: Product[];
-    itemToQuantity: { [key: string]: number };
-    appliedCoupon?: string;
-    platformFee: number;
-    shops: Shop[];
-    bill: OrderDb['bill'];
-    shopOrderValue: OrderDb['shopOrderValue'];
-    orderId?: string;
-  }
-) => {
-  const ref = firebaseDb.collection('orders');
-  const id = orderId || ref.doc().id;
-  const orderRefId = Math.floor(Math.random() * 1000);
-  const orderDetails: Omit<OrderDb, 'user' | 'userId'> = {
-    orderId: id,
-    orderRefId: orderRefId.toString(),
-    items: products,
-    status: 'pending',
-    createdAt: FieldValue.serverTimestamp(),
-    appliedCoupon: appliedCoupon ?? '',
-    bill,
-    itemToQuantity,
-    shops,
-    shopOrderValue: shopOrderValue
-  };
-  if (!orderId) {
-    await firebaseDb
-      .collection('orders')
-      .doc(id)
-      .create({
-        ...orderDetails,
-        user: {
-          name: user.name ?? '',
-          phone: user.phone_number,
-          isInternal: user.role === 'admin' || user.role === 'vendor'
-        },
-        userId: user.uid
-      });
-  } else {
-    await firebaseDb.collection('orders').doc(id).set(orderDetails, {
-      merge: true
-    });
-  }
-  return orderDetails;
 };
 
 const getBill = ({
@@ -181,11 +132,11 @@ const getBill = ({
 }): OrderDb['bill'] => {
   const allShopOrderValue = Object.values(shopOrderValue);
   const displaySubTotal = allShopOrderValue.reduce(
-    (acc, s) => acc + s.displaySubTotal + s.displayParcelChargesTotal,
+    (acc, s) => acc + s.displaySubTotal + s.parcelChargesTotal,
     0
   );
-  const displayParcelChargesTotal = allShopOrderValue.reduce(
-    (acc, s) => acc + s.displayParcelChargesTotal,
+  const parcelChargesTotal = allShopOrderValue.reduce(
+    (acc, s) => acc + s.parcelChargesTotal,
     0
   );
   const totalDeliveryCharges = allShopOrderValue.reduce(
@@ -203,10 +154,10 @@ const getBill = ({
   return {
     subTotal: displaySubTotal,
     platformFee,
-    displayParcelChargesTotal,
+    parcelChargesTotal,
     discountFee,
-    grandTotalBeforeDiscount,
-    grandTotal,
+    grandTotalBeforeDiscount: Math.round(grandTotalBeforeDiscount),
+    grandTotal: Math.round(grandTotal),
     costPriceSubTotal,
     deliveryCharges: totalDeliveryCharges
   };
@@ -223,7 +174,7 @@ export const createOrder = async (req: Request, res: Response) => {
       productIds
     );
     const { platformFee } = appConfig;
-    const { detailsToQuantity } = getTotal(details);
+    const { detailsToQuantity } = getDetailsToQuantity(details);
     const shopOrderValue = getTotalByShop(
       products,
       details,

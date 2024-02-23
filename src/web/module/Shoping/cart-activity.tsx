@@ -53,7 +53,7 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
       return {
         ...state,
         cart: [...state.cart, action.payload],
-        total: state.total + action.payload.displayPrice,
+        total: state.total + action.payload.itemPrice,
         totalItems: state.totalItems + 1
       };
     case 'REMOVE_FROM_CART': {
@@ -66,7 +66,7 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
       return {
         ...state,
         cart: state.cart.filter((_, index) => index !== itemIndex),
-        total: state.total - product.displayPrice,
+        total: state.total - product.itemPrice,
         totalItems: state.totalItems - 1
       };
     }

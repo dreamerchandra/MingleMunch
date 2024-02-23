@@ -3,6 +3,7 @@ import {
   QueryDocumentSnapshot,
   SnapshotOptions,
   Timestamp,
+  addDoc,
   collection,
   doc,
   getDoc,
@@ -13,17 +14,17 @@ import {
   updateDoc,
   where
 } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { Product } from '../../common/types/Product';
+import { Shop } from '../../common/types/shop';
+import { firebaseAuth } from './firebase/auth';
 import { firebaseDb } from './firebase/db';
 import { firebaseStorage } from './firebase/storage';
-import { firebaseAuth } from './firebase/auth';
-import { Product } from '../../common/types/Product';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { Shop } from '../../common/types/shop';
 
 export interface ProductInput {
   itemName: string;
   itemDescription: string;
-  displayPrice: number;
+  itemPrice: number;
   costPrice: number;
   itemImage: string;
   isAvailable: boolean;
@@ -32,7 +33,7 @@ export interface ProductInput {
     id: string;
     name: string;
   };
-  displayParcelCharges: number;
+  parcelCharges: number;
   costParcelCharges: number;
   itemId?: string;
   suggestionIds?: string[];
@@ -48,27 +49,24 @@ const constructMandatoryMetaFields = () => ({
 const constructProduct = (
   productInput: ProductInput,
   shop: Shop
-): Omit<Product, 'itemId'> => {
-  const { itemName, itemDescription, displayPrice, itemImage, costPrice } = productInput;
+): Omit<Product, 'itemId' | 'costParcelCharges' | 'costPrice'> => {
+  const { itemName, itemDescription, itemPrice, itemImage } = productInput;
   const shopDetails = {
     shopName: shop.shopName,
     shopAddress: shop.shopAddress,
     shopMapLocation: shop.shopMapLocation,
     shopId: shop.shopId,
-    deliveryFee: shop.deliveryFee,
   };
   return {
     itemName,
     itemDescription,
-    displayPrice,
-    costPrice,
+    itemPrice,
     itemImage,
     shopId: shop.shopId,
     shopDetails,
     isAvailable: true,
     createdAt: Timestamp.now(),
-    displayParcelCharges: productInput.displayParcelCharges || 0,
-    costParcelCharges: productInput.costParcelCharges || 0,
+    parcelCharges: productInput.parcelCharges || 0,
     category: {
       id: productInput.category.id,
       name: productInput.category.name
@@ -122,32 +120,76 @@ export const getProducts = async ({
   return querySnap.docs.map((doc) => doc.data());
 };
 
-export const getProduct = async (productId: string) => {
+export const getProduct = async (
+  productId: string,
+  { isAdmin }: { isAdmin: boolean }
+): Promise<Product> => {
   const q = doc(collection(firebaseDb, 'food'), productId).withConverter(
     productConverter
   );
-  const querySnap = await getDoc(q);
-  return querySnap.data();
+  const internalQuery = doc(
+    collection(firebaseDb, 'food-internal'),
+    productId
+  ).withConverter(productConverter);
+  const [querySnap, internalSnap] = await Promise.all([
+    getDoc(q),
+    isAdmin ? getDoc(internalQuery) : { data: () => ({}) }
+  ]);
+  const data = querySnap.data();
+  const internalData = internalSnap.data();
+  if (!data) throw new Error('Product not found');
+  return {
+    ...data,
+    ...internalData
+  };
 };
 
 export const insertProduct = async (product: ProductInput, shop: Shop) => {
-  const docRef = doc(
-    collection(firebaseDb, 'food').withConverter(productConverter)
-  );
+  const docRef = collection(firebaseDb, 'food').withConverter(productConverter);
   if (product.itemId) {
-    return updateProduct({ ...product, productId: product.itemId });
+    return updateProduct({ ...product, productId: product.itemId }, shop);
   }
-  return setDoc(docRef, constructProduct(product, shop));
+  const data = await addDoc(docRef, constructProduct(product, shop));
+  const internalDocRef = doc(collection(firebaseDb, 'food-internal'), data.id);
+  return setDoc(internalDocRef, {
+    costPrice: product.costPrice,
+    costParcelCharges: product.costParcelCharges
+  });
 };
 
 export const updateProduct = async (
-  product: Partial<ProductInput> & { productId: string }
+  product: ProductInput & { productId: string },
+  shop: Shop
 ) => {
   const docRef = doc(
     collection(firebaseDb, 'food').withConverter(productConverter),
     product.productId
   );
-  return updateDoc(docRef, { ...product, ...constructMandatoryMetaFields() });
+  const internalDocRef = doc(
+    collection(firebaseDb, 'food-internal'),
+    product.productId
+  );
+  await updateDoc(docRef, constructProduct(product, shop));
+  return setDoc(internalDocRef, {
+    costPrice: product.costPrice,
+    costParcelCharges: product.costParcelCharges
+  });
+};
+
+export const updateAvailability = ({
+  productId,
+  isAvailable
+}: {
+  productId: string;
+  isAvailable: boolean;
+}) => {
+  const docRef = doc(
+    collection(firebaseDb, 'food').withConverter(productConverter),
+    productId
+  );
+  return updateDoc(docRef, {
+    isAvailable
+  });
 };
 
 export const uploadImage = async (file: File) => {
@@ -158,8 +200,3 @@ export const uploadImage = async (file: File) => {
   const uploadRef = await uploadBytes(storageRef, file);
   return getDownloadURL(uploadRef.ref);
 };
-
-export const getProductIds = async (productIds: string[]) => {
-  const productPromises = productIds.map((id) => getProduct(id));
-  return Promise.all(productPromises);
-}
