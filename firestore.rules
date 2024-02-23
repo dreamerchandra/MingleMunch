@@ -4,6 +4,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth.token.role in ['vendor', 'admin'];
     }
+    match /food-internal/{foodId} {
+      allow read: if request.auth.token.role in ['admin'];
+      allow write: if request.auth.token.role in ['admin'];
+    }
     match /shop/{shopId} {
       allow read: if true;
       allow write: if request.auth.token.role in ['admin'];
@@ -11,6 +15,10 @@ service cloud.firestore {
     match /orders/{orderId} {
       allow read: if request.auth != null;
       allow write: if request.auth.token.role in ['vendor', 'admin'];
+    }
+    match /internal-orders/{orderId} {
+      allow read: if request.auth.token.role in ['admin'];
+      allow write: if false;
     }
     match /stories/{storyId} {
       allow read: if true;
