@@ -1,4 +1,4 @@
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { firebaseDb } from '../firebase.js';
 import { Product } from '../types/Product.js';
 import { Shop } from '../types/Shop.js';
@@ -17,7 +17,7 @@ type PublicOrder = Omit<OrderDb, 'items' | 'shopOrderValue' | 'bill'> & {
   };
 };
 
-const publicOrderConverter = {
+export const publicOrderConverter = {
   toFirestore: (order: OrderDb) => {
     const result: PublicOrder = JSON.parse(JSON.stringify(order));
     result.items.forEach((item) => {
@@ -28,7 +28,7 @@ const publicOrderConverter = {
     delete result.bill.costPriceSubTotal;
     return { ...result, createdAt: FieldValue.serverTimestamp() };
   },
-  fromFirestore: (snapshot: FirebaseFirestore.QueryDocumentSnapshot) => {
+  fromFirestore: (snapshot: FirebaseFirestore.QueryDocumentSnapshot<OrderDb>): OrderDb => {
     const data = snapshot.data();
     return data;
   }
@@ -73,7 +73,7 @@ export const createOrderInDb = async (
     itemToQuantity,
     shops,
     shopOrderValue: shopOrderValue,
-    createdAt: FieldValue.serverTimestamp(),
+    createdAt: Timestamp.now(),
   };
   if (!orderId) {
     await firebaseDb

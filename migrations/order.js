@@ -1,11 +1,7 @@
 const { applicationDefault, initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
-const {
-  costPrie: costPcie,
-  parcelCharges,
-  deliveryCharges
-} = require('./price');
+const { getStorage } = require('firebase-admin/storage');
 const fs = require('fs');
 
 const app = initializeApp({
@@ -14,6 +10,7 @@ const app = initializeApp({
 });
 const firebaseAuth = getAuth(app);
 const firebaseDb = getFirestore(app);
+const storage = getStorage(app);
 
 const getShopOrderValue = (oldOrder) => {
   return oldOrder.items.reduce((acc, item) => {
@@ -117,23 +114,18 @@ const getUniqueShop = (order) => {
 
 const migrateProduct = async () => {
   console.log('started');
-  const orders = await firebaseDb.collection('orders').get();
+  const items = await firebaseDb.collection('food').where('shopId', '==', 'MZWXNkOyexhAvNlBG9l2').get();
 
-  for (const order of orders.docs) {
-    if (order.id === 'NWHXpIn3SCP2Abmju35M') {
-      continue;
-    }
-    const oldOrder = order.data();
-    // const newOrder = getNewOrder(oldOrder);
+  for (const item of items.docs) {
+    const oldOrder = item.data();
     await firebaseDb
-      .collection('orders')
-      .doc(order.id)
-      .set({
-        ...oldOrder,
-        shops: getUniqueShop(oldOrder)
+      .collection('food-internal')
+      .doc(item.id)
+      .update({
+        costParcelCharges: oldOrder.parcelCharges,
+        costPrice: oldOrder.itemPrice,
       });
-    // console.log(getUniqueShop(oldOrder).length);
-    // break;
+      console.log(item.id)
   }
   // const products = data.docs[0].data() as OldProduct;
   // const costPrice = getCostPrice(products);

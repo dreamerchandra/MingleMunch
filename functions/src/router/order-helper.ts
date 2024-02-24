@@ -1,4 +1,4 @@
-import { FieldValue } from 'firebase-admin/firestore';
+import {  Timestamp } from 'firebase-admin/firestore';
 import { Product } from '../types/Product.js';
 import { Shop } from '../types/Shop.js';
 export interface OrderDb {
@@ -9,7 +9,7 @@ export interface OrderDb {
   orderRefId: string;
   status: string;
   appliedCoupon: string;
-  createdAt: FieldValue;
+  createdAt: Timestamp;
   user: {
     name?: string;
     phone: string;
