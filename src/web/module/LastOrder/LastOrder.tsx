@@ -84,6 +84,7 @@ export const LastOrder: FC = () => {
   const lastOrder = useLastOrder();
   if (!lastOrder) return <AddToHomeScreen />;
   if (lastOrder?.status == 'delivered') return <AddToHomeScreen />;
+  if (lastOrder?.status == 'rejected') return <AddToHomeScreen />;
   return (
     <Button
       sx={{

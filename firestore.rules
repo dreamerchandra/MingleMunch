@@ -18,7 +18,7 @@ service cloud.firestore {
     }
     match /internal-orders/{orderId} {
       allow read: if request.auth.token.role in ['admin'];
-      allow write: if false;
+      allow write: if request.auth.token.role in ['admin'];
     }
     match /stories/{storyId} {
       allow read: if true;

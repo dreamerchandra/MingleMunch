@@ -94,7 +94,7 @@ export const IncomingOrder = () => {
               gap: 2,
               width: '100%',
               backgroundColor:
-                order.status !== 'delivered' ? 'rgb(255 0 0 / 50%)' : ''
+                !['delivered', 'rejected'].includes(order.status) ? 'rgb(255 0 0 / 50%)' : ''
             }}
           >
             <Container
@@ -153,6 +153,15 @@ export const IncomingOrder = () => {
                     value={order.status}
                     label="Order Status"
                     onChange={(e) => {
+                      if (e.target.value === 'rejected') {
+                        mutateAsync({
+                          orderId: order.orderId,
+                          orderStatus: 'rejected',
+                          time: new Date(),
+                          delayReason: []
+                        });
+                        return;
+                      }
                       const newStatus = e.target.value as OrderStatus;
                       const oldTime = order.timeStamps?.[newStatus]
                         ? (order.timeStamps?.[newStatus].toDate() as Date)
@@ -170,6 +179,14 @@ export const IncomingOrder = () => {
                     }}
                   >
                     <MenuItem value={'pending'}>Pending</MenuItem>
+                    <MenuItem
+                      value={'rejected'}
+                      sx={{
+                        color: 'red'
+                      }}
+                    >
+                      Rejected
+                    </MenuItem>
                     <MenuItem value={'ack_from_hotel'}>
                       Hotel Acknowledged
                     </MenuItem>

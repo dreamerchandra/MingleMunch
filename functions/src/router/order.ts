@@ -90,8 +90,8 @@ const getTotalByShop = (
     }
     acc[shopId].displaySubTotal += p.itemPrice * quantity;
     acc[shopId].costPriceSubTotal += p.costPrice * quantity;
-    acc[shopId].parcelChargesTotal += p.parcelCharges * quantity;
-    acc[shopId].costPriceParcelChargesTotal += p.costParcelCharges * quantity;
+    acc[shopId].parcelChargesTotal += (p?.parcelCharges ?? 0) * quantity;
+    acc[shopId].costPriceParcelChargesTotal += (p?.costParcelCharges ?? 0) * quantity;
     return acc;
   }, {} as OrderDb['shopOrderValue']);
   for (const shopId in shopOrderValue) {

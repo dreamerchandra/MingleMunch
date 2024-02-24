@@ -1,10 +1,9 @@
+import { Request } from 'express';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { firebaseDb } from '../firebase.js';
 import { Product } from '../types/Product.js';
 import { Shop } from '../types/Shop.js';
-import { Role } from '../types/roles.js';
 import { OrderDb } from './order-helper.js';
-
 type PublicOrder = Omit<OrderDb, 'items' | 'shopOrderValue' | 'bill'> & {
   shopOrderValue?: never;
   items: Omit<Product, 'costPrice' | 'costParcelCharges'> &
@@ -28,19 +27,16 @@ export const publicOrderConverter = {
     delete result.bill.costPriceSubTotal;
     return { ...result, createdAt: FieldValue.serverTimestamp() };
   },
-  fromFirestore: (snapshot: FirebaseFirestore.QueryDocumentSnapshot<OrderDb>): OrderDb => {
+  fromFirestore: (
+    snapshot: FirebaseFirestore.QueryDocumentSnapshot<OrderDb>
+  ): OrderDb => {
     const data = snapshot.data();
     return data;
   }
 };
 
 export const createOrderInDb = async (
-  user: {
-    uid: string;
-    name?: string;
-    phone_number: string;
-    role: Role;
-  },
+  user: Request['user'],
   {
     products,
     appliedCoupon,
@@ -73,7 +69,7 @@ export const createOrderInDb = async (
     itemToQuantity,
     shops,
     shopOrderValue: shopOrderValue,
-    createdAt: Timestamp.now(),
+    createdAt: Timestamp.now()
   };
   if (!orderId) {
     await firebaseDb
@@ -85,7 +81,10 @@ export const createOrderInDb = async (
         user: {
           name: user.name ?? '',
           phone: user.phone_number,
-          isInternal: user.role === 'admin' || user.role === 'vendor'
+          isInternal:
+            user.role === 'admin' ||
+            user.role === 'vendor' ||
+            user.internal === true
         },
         userId: user.uid
       });
@@ -97,7 +96,8 @@ export const createOrderInDb = async (
         user: {
           name: user.name ?? '',
           phone: user.phone_number,
-          isInternal: user.role === 'admin' || user.role === 'vendor'
+          isInternal:
+            user.role === 'admin' || user.role === 'vendor' || user.role
         },
         userId: user.uid
       });

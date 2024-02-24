@@ -140,6 +140,16 @@ export const updateOrderStatus = async ({
           }
         }
       : {};
+  const internalDocRef = doc(firebaseDb, 'internal-orders', orderId);
+  await setDoc(
+    internalDocRef,
+    {
+      status: orderStatus,
+    },
+    {
+      merge: true
+    }
+  )
   return setDoc(
     docRef,
     {

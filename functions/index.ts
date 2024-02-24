@@ -216,7 +216,7 @@ export const report = functions.region('asia-south1').pubsub.schedule('0 8 * * *
   endDate.setDate(endDate.getDate() - 1);
   endDate.setHours(23, 59, 59, 999);
   const snap = await firebaseDb.collection('internal-orders').where('createdAt', '>=', startDate).where('createdAt', '<=', endDate).withConverter(publicOrderConverter).get();
-  const orders = snap.docs.map((doc) => doc.data()).filter(o => !o.user.isInternal);
+  const orders = snap.docs.map((doc) => doc.data()).filter(o => !o.user.isInternal).filter(o => o.status !== 'rejected');
   const totalSellPrice = Math.round(orders.reduce((acc, order) => acc + order.bill.grandTotal, 0));
   const totalCostPrice = Math.round(orders.reduce((acc, order) => acc + order.bill.costPriceSubTotal, 0));
   const totalDeliveryCharges = Math.round(orders.reduce((acc, order) => acc + order.bill.deliveryCharges, 0));

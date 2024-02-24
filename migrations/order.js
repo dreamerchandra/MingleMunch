@@ -111,19 +111,21 @@ const getUniqueShop = (order) => {
     }, {})
   );
 };
+const toDecimal = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
 
 const migrateProduct = async () => {
-  console.log('started');
-  const items = await firebaseDb.collection('food').where('shopId', '==', 'MZWXNkOyexhAvNlBG9l2').get();
+  const items = await firebaseDb.collection('food').where('shopId', '==', 'RArRz6eRJsag5ADwzyIV').get();
 
   for (const item of items.docs) {
     const oldOrder = item.data();
     await firebaseDb
       .collection('food-internal')
       .doc(item.id)
-      .update({
-        costParcelCharges: oldOrder.parcelCharges,
-        costPrice: oldOrder.itemPrice,
+      .set({
+        costPrice: toDecimal(oldOrder.itemPrice * 0.95),
+        costParcelCharges: 5,
+      }, {
+        merge: true,
       });
       console.log(item.id)
   }

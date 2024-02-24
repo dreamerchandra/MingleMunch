@@ -8,6 +8,7 @@ export type OrderStatus =
   | 'prepared'
   | 'picked_up'
   | 'reached_location'
+  | 'rejected'
   | 'delivered';
 
 export interface Order {

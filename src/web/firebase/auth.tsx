@@ -61,6 +61,7 @@ export const useToSignIn = () => {
     setPhoneNumberInvalid(false);
     const number = removeCountryCode(phoneNumber);
     if (!isPhoneNumberValid(number)) {
+      setIsLoading(false);
       return setPhoneNumberInvalid(true);
     }
     return signInWithPhoneNumber(

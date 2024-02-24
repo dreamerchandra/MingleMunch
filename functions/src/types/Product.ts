@@ -18,8 +18,8 @@ export interface Product {
   updateBy: string;
   itemPrice: number;
   costPrice: number;
-  parcelCharges: number;
-  costParcelCharges: number;
+  parcelCharges?: number;
+  costParcelCharges?: number;
   suggestionIds?: string[];
   cantOrderSeparately: boolean;
   isRecommended?: boolean;
