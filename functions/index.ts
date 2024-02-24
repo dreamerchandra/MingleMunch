@@ -159,7 +159,7 @@ expressApp.post('/v1/analytics', async (req: Request, res: Response) => {
   await firebaseDb.doc(`analytics/${analyticsId}`).set(
     {
       userIds: FieldValue.arrayUnion(userId),
-      isInternal: isInternal,
+      isInternal: isInternal
     },
     {
       merge: true
@@ -193,7 +193,15 @@ export const onHomeOrderCreated = functions
     logger.log(`on order created ${JSON.stringify(data)}`);
     const user = await firebaseAuth.getUser(data.userId);
     await updateWhatsapp({
-      message: `New order from ${user.displayName} and phone number is ${user.phoneNumber}. \n Item: Chicken Chukka \n Details are quantity: ${data.quantity}gms, \n number: ${data.number}, \n timeSlot: ${data.timeSlot},\n total Rs. ${data.total}`
+      message: `New order from ${user.displayName} and phone number is ${
+        user.phoneNumber
+      }. \n Date ${data.orderDate.toDate().toLocaleDateString('en-US', {
+        timeZone: 'Asia/Kolkata'
+      })}\n Item: Chicken Chukka \n Details are quantity: ${
+        data.quantity
+      }gms, \n number: ${data.number}, \n timeSlot: ${
+        data.timeSlot
+      },\n total Rs. ${data.total}`
     });
   });
 
@@ -207,39 +215,85 @@ export const order = functions
   .region('asia-south1')
   .https.onRequest(expressApp);
 
-
-export const report = functions.region('asia-south1').pubsub.schedule('0 8 * * *').timeZone('Asia/Kolkata').onRun(async (context) => {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 1);
-  startDate.setHours(0, 0, 0, 0);
-  const endDate = new Date();
-  endDate.setDate(endDate.getDate() - 1);
-  endDate.setHours(23, 59, 59, 999);
-  const snap = await firebaseDb.collection('internal-orders').where('createdAt', '>=', startDate).where('createdAt', '<=', endDate).withConverter(publicOrderConverter).get();
-  const orders = snap.docs.map((doc) => doc.data()).filter(o => !o.user.isInternal).filter(o => o.status !== 'rejected');
-  const totalSellPrice = Math.round(orders.reduce((acc, order) => acc + order.bill.grandTotal, 0));
-  const totalCostPrice = Math.round(orders.reduce((acc, order) => acc + order.bill.costPriceSubTotal, 0));
-  const totalDeliveryCharges = Math.round(orders.reduce((acc, order) => acc + order.bill.deliveryCharges, 0));
-  const data = orders.map(order => {
-    return {
-      name: order.user.name,
-      orderId: order.orderId,
-      date: order.createdAt.toDate().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }),
-      shop: order.shops?.map(s => s.shopName).join('| ') ?? '',
-      grandTotal: order.bill.grandTotal,
-      costPrice: order.bill.costPriceSubTotal,
-      deliveryFee: order.bill.deliveryCharges,
-    }
-  })
-  const timeNow = new Date();
-  const reportLocation = `reports/${timeNow.toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' }).split('/').join('-')}/` + timeNow.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }) + '.csv';
-  const csv = `name,orderId,time,shop,grandTotal,costPrice,deliveryFee\n${data.map(o => Object.values(o).join(',')).join('\n')}\n,,,,${totalSellPrice},${totalCostPrice},${totalDeliveryCharges}`;
-  logger.log('Report for ', startDate.toDateString(), ' is going to upload. [CSV]', csv);
-  await storage.bucket('gs://mingle-munch.appspot.com').file(reportLocation).save(csv);
-  const file = storage.bucket('gs://mingle-munch.appspot.com').file(reportLocation);
-  await file.makePublic();
-  const url = file.publicUrl();
-  logger.log('Report for ', startDate.toDateString(), ' is ready. [Download]', url);
-  await updateWhatsapp({ message: `Report for ${startDate.toDateString()} is ready. [Download](${url})` });
-  logger.log(`All done for ${startDate.toDateString()}`);
-})
+export const report = functions
+  .region('asia-south1')
+  .pubsub.schedule('0 8 * * *')
+  .timeZone('Asia/Kolkata')
+  .onRun(async (context) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 1);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() - 1);
+    endDate.setHours(23, 59, 59, 999);
+    const snap = await firebaseDb
+      .collection('internal-orders')
+      .where('createdAt', '>=', startDate)
+      .where('createdAt', '<=', endDate)
+      .withConverter(publicOrderConverter)
+      .get();
+    const orders = snap.docs
+      .map((doc) => doc.data())
+      .filter((o) => !o.user.isInternal)
+      .filter((o) => o.status !== 'rejected');
+    const totalSellPrice = Math.round(
+      orders.reduce((acc, order) => acc + order.bill.grandTotal, 0)
+    );
+    const totalCostPrice = Math.round(
+      orders.reduce((acc, order) => acc + order.bill.costPriceSubTotal, 0)
+    );
+    const totalDeliveryCharges = Math.round(
+      orders.reduce((acc, order) => acc + order.bill.deliveryCharges, 0)
+    );
+    const data = orders.map((order) => {
+      return {
+        name: order.user.name,
+        orderId: order.orderId,
+        date: order.createdAt
+          .toDate()
+          .toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }),
+        shop: order.shops?.map((s) => s.shopName).join('| ') ?? '',
+        grandTotal: order.bill.grandTotal,
+        costPrice: order.bill.costPriceSubTotal,
+        deliveryFee: order.bill.deliveryCharges
+      };
+    });
+    const timeNow = new Date();
+    const reportLocation =
+      `reports/${timeNow
+        .toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })
+        .split('/')
+        .join('-')}/` +
+      timeNow.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }) +
+      '.csv';
+    const csv = `name,orderId,time,shop,grandTotal,costPrice,deliveryFee\n${data
+      .map((o) => Object.values(o).join(','))
+      .join(
+        '\n'
+      )}\n,,,,${totalSellPrice},${totalCostPrice},${totalDeliveryCharges}`;
+    logger.log(
+      'Report for ',
+      startDate.toDateString(),
+      ' is going to upload. [CSV]',
+      csv
+    );
+    await storage
+      .bucket('gs://mingle-munch.appspot.com')
+      .file(reportLocation)
+      .save(csv);
+    const file = storage
+      .bucket('gs://mingle-munch.appspot.com')
+      .file(reportLocation);
+    await file.makePublic();
+    const url = file.publicUrl();
+    logger.log(
+      'Report for ',
+      startDate.toDateString(),
+      ' is ready. [Download]',
+      url
+    );
+    await updateWhatsapp({
+      message: `Report for ${startDate.toDateString()} is ready. [Download](${url})`
+    });
+    logger.log(`All done for ${startDate.toDateString()}`);
+  });

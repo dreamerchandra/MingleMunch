@@ -23,7 +23,8 @@ import { useUser } from '../firebase/auth';
 const initialValue = {
   number: 0,
   quantity: 250,
-  time: 0
+  time: 0,
+  date: new Date()
 };
 
 const PickOne: FC<{
@@ -157,6 +158,60 @@ const isMorning = () => {
     return false;
   }
 };
+
+const Week: FC<{
+  value: Date;
+  onChange: (date: Date) => void;
+}> = ({ value, onChange }) => {
+  const week: Date[] = [];
+  for (let i = 0; i <= 7; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+    date.setHours(0, 0, 0, 0);
+    week.push(date);
+  }
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        mb: 2,
+        overflow: 'auto',
+        p: 2
+      }}
+    >
+      {week.map((d) => (
+        <Button
+          key={d.valueOf()}
+          color={d.valueOf() === value.valueOf() ? 'secondary' : 'primary'}
+          variant={d.valueOf() === value.valueOf() ? 'contained' : 'text'}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: 1,
+            gap: d.valueOf() === value.valueOf() ? 2 : 1,
+            borderRadius: '10px',
+            boxShadow: '0px 0px 10px 0px #0000001f'
+          }}
+          onClick={() => onChange(d)}
+        >
+          <Typography variant="h6" fontWeight={700}>
+            {d.toLocaleDateString('default', {
+              month: '2-digit',
+              day: '2-digit'
+            })}
+          </Typography>
+          <Typography variant="caption" fontWeight={700}>
+            {d.getDate() === new Date().getDate() ? 'Today': d.toLocaleString('default', { weekday: 'short' })}
+          </Typography>
+        </Button>
+      ))}
+    </Box>
+  );
+};
 export const HomeFoodDrawer: FC<{
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -177,7 +232,8 @@ export const HomeFoodDrawer: FC<{
       {
         number: data.number,
         quantity: data.quantity,
-        timeSlot: data.time.toString()
+        timeSlot: data.time.toString(),
+        date: data.date
       },
       {
         onSuccess: () => {
@@ -299,6 +355,12 @@ export const HomeFoodDrawer: FC<{
               </Typography>
             </Box>
           </Alert>
+          <Week
+            value={data.date}
+            onChange={(d) => {
+              setData({ ...data, date: d });
+            }}
+          />
           <Box
             sx={{
               display: 'flex',
@@ -388,13 +450,8 @@ export const HomeFoodDrawer: FC<{
                     setData({ ...data, time: Number(time) });
                   }}
                   options={
-                    isMorning()
+                    !isMorning() && data.date.getDate() === new Date().getDate()
                       ? [
-                          {
-                            description: 'Delivered By 1: 30PM',
-                            id: '0',
-                            label: 'Lunch'
-                          },
                           {
                             description: 'Delivered By 8: 30PM',
                             id: '1',
@@ -402,6 +459,11 @@ export const HomeFoodDrawer: FC<{
                           }
                         ]
                       : [
+                          {
+                            description: 'Delivered By 1: 30PM',
+                            id: '0',
+                            label: 'Lunch'
+                          },
                           {
                             description: 'Delivered By 8: 30PM',
                             id: '1',

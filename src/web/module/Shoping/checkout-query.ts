@@ -37,6 +37,7 @@ export const useMutationHomeOrder = (): UseMutationResult<
     quantity: number;
     number: number;
     timeSlot: string;
+    date: Date;
   }
 > => {
   const queryClient = useQueryClient();

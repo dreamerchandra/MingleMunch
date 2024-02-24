@@ -46,6 +46,7 @@ export const createHomeOrder = async (params: {
   quantity: number;
   number: number;
   timeSlot: string;
+  date: Date;
 }): Promise<{ success: boolean }> => post('/v1/home-order', params, true);
 
 export const getOrderHistoryWithRealTimeUpdate = async (
