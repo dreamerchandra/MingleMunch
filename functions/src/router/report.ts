@@ -1,5 +1,4 @@
 import { logger } from 'firebase-functions';
-import { google } from 'googleapis';
 import { firebaseDb, storage } from '../firebase.js';
 import { publicOrderConverter } from './create-order.js';
 import { updateWhatsapp } from './twilio.js';
@@ -109,28 +108,33 @@ export const generateReport = async (
 export const updateLTAReport = async (
   param: Awaited<ReturnType<typeof getLastDayReport>>
 ) => {
-  const {
-    data,
-  } = param;
-  const loadJSON = (path: string) => JSON.parse(fs.readFileSync(new URL(path, import.meta.url), 'utf-8'));
-  const credentials = loadJSON(process.env.GOOGLE_CREDENTIALS as string)
+  const { google } = await import('googleapis');
+  const { data } = param;
+  const loadJSON = (path: string) =>
+    JSON.parse(fs.readFileSync(new URL(path, import.meta.url), 'utf-8'));
+  const credentials = loadJSON(process.env.GOOGLE_CREDENTIALS as string);
   const auth = new google.auth.GoogleAuth({
     credentials: credentials,
     scopes: ['https://www.googleapis.com/auth/spreadsheets']
   });
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
   const range = 'Sheet1';
-  const csv = data.map((o) => Object.values(o)).sort((a,b) => new Date(a[2] as string).valueOf() - new Date(b[2] as string).valueOf());
+  const csv = data
+    .map((o) => Object.values(o))
+    .sort(
+      (a, b) =>
+        new Date(a[2] as string).valueOf() - new Date(b[2] as string).valueOf()
+    );
   const sheets = google.sheets({ version: 'v4', auth });
   await sheets.spreadsheets.values.append({
     spreadsheetId,
     range,
     valueInputOption: 'RAW',
     requestBody: {
-      values: csv,
-    },
+      values: csv
+    }
   });
   await updateWhatsapp({
     message: `FUll report updated. Access at https://docs.google.com/spreadsheets/d/1AZ_Vc5vEVSj6gWenJCwYKeMIugQGf1gT2j5YiBPNDxQ/edit?usp=sharing`
-  })
+  });
 };

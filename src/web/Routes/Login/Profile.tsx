@@ -14,7 +14,7 @@ export const Profile = () => {
     userDetails: { user },
     updateInviteCode
   } = useUser();
-  const [error, setError] = useState<string | null>(null);
+  const [_, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -75,7 +75,7 @@ export const Profile = () => {
           name="name"
           autoComplete="name"
         />
-        <TextField
+        {/* <TextField
           margin="normal"
           required
           fullWidth
@@ -87,7 +87,7 @@ export const Profile = () => {
           onFocus={() => setError(null)}
           error={!!error}
           helperText={error}
-        />
+        /> */}
         <Button
           type="submit"
           fullWidth

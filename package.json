@@ -26,6 +26,7 @@
     "dayjs": "^1.11.10",
     "firebase": "^9.20.0",
     "fuse.js": "^7.0.0",
+    "googleapis": "^133.0.0",
     "keen-slider": "^6.8.6",
     "localforage": "^1.10.0",
     "logrocket": "^7.0.0",
