@@ -31,6 +31,10 @@ const baseUrl = isLocalhost()
   ? 'http://localhost:5001/mingle-munch/asia-south1/order'
   : 'https://asia-south1-mingle-munch.cloudfunctions.net/order';
 
+const reportUrl = isLocalhost()
+  ? 'http://localhost:5001/mingle-munch/asia-south1/triggerReport'
+  : 'https://asia-south1-mingle-munch.cloudfunctions.net/triggerReport';
+
 export const get = async (
   urlString: string,
   params: any,
@@ -75,6 +79,26 @@ export const post = async (
       },
       body: JSON.stringify(params),
       signal
+    });
+    await handleError(res);
+    const data = await res.json();
+    return data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+
+export const generateReport = async () => {
+  const url = new URL(reportUrl);
+  const token = await firebaseAuth.currentUser?.getIdToken();
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
     });
     await handleError(res);
     const data = await res.json();

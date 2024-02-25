@@ -38,7 +38,7 @@ service cloud.firestore {
     }
     match /appConfig/public {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth.token.role in ['admin'];
     }
     match /analytics/{userId} {
       allow read: if false;

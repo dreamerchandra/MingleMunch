@@ -3,7 +3,8 @@ import {
   QueryDocumentSnapshot,
   collection,
   doc,
-  getDoc
+  getDoc,
+  setDoc
 } from 'firebase/firestore';
 import { firebaseDb } from '../firebase/firebase/db';
 import { useUser } from '../firebase/auth';
@@ -58,12 +59,34 @@ export const getAppConfig = async () => {
     )
   );
   return snap.data();
-}
+};
+
+export const setAppOpenForBusiness = async ({
+  isOpen
+}: {
+  isOpen: boolean;
+}) => {
+  const ref = doc(
+    collection(firebaseDb, 'appConfig').withConverter(appConfigConverter),
+    'public'
+  );
+  return setDoc(ref, { isOpen }, { merge: true });
+};
 
 export const useAppConfig = () => {
   return useQuery({
     queryKey: ['appConfig'],
-    queryFn: getAppConfig,
+    queryFn: getAppConfig
+  });
+};
+
+export const useMutateAppConfig = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: setAppOpenForBusiness,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['appConfig']);
+    }
   });
 };
 

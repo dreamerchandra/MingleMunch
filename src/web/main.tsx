@@ -69,7 +69,7 @@ const pushToAnalytics = async () => {
       })
       .catch((err) => {
         console.log(err);
-      });
+      }); 
   }, 5000);
 };
 

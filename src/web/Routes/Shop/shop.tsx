@@ -20,6 +20,7 @@ import { HomeFoodBanner } from '../../module/home-food-banner';
 import { HomeFoodDrawer } from '../../module/home-food-drawer';
 import { Loading } from '../../module/loading';
 import { OurStories } from '../../module/stories/stories';
+import { MasterControl } from '../../module/master-control';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -76,6 +77,7 @@ export const ShopPage = () => {
           }}
         />
         <Box marginTop={1}>
+          <MasterControl />
           <Shops />
           <CheckoutHeadsUp />
           <LastOrder />

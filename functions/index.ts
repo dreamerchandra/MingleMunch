@@ -12,6 +12,8 @@ import { createOrder, onOrderCreate } from './src/router/order.js';
 import { updateWhatsapp } from './src/router/twilio.js';
 import { updateUser } from './src/router/update-user.js';
 import { onCreateUser, updateReferralCode } from './src/router/user.js';
+import { generateReport } from './src/router/report.js';
+import exp from 'constants';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -219,81 +221,32 @@ export const report = functions
   .region('asia-south1')
   .pubsub.schedule('0 8 * * *')
   .timeZone('Asia/Kolkata')
-  .onRun(async (context) => {
+  .onRun(async () => {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 1);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date();
     endDate.setDate(endDate.getDate() - 1);
     endDate.setHours(23, 59, 59, 999);
-    const snap = await firebaseDb
-      .collection('internal-orders')
-      .where('createdAt', '>=', startDate)
-      .where('createdAt', '<=', endDate)
-      .withConverter(publicOrderConverter)
-      .get();
-    const orders = snap.docs
-      .map((doc) => doc.data())
-      .filter((o) => !o.user.isInternal)
-      .filter((o) => o.status !== 'rejected');
-    const totalSellPrice = Math.round(
-      orders.reduce((acc, order) => acc + order.bill.grandTotal, 0)
-    );
-    const totalCostPrice = Math.round(
-      orders.reduce((acc, order) => acc + order.bill.costPriceSubTotal, 0)
-    );
-    const totalDeliveryCharges = Math.round(
-      orders.reduce((acc, order) => acc + order.bill.deliveryCharges, 0)
-    );
-    const data = orders.map((order) => {
-      return {
-        name: order.user.name,
-        orderId: order.orderId,
-        date: order.createdAt
-          .toDate()
-          .toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }),
-        shop: order.shops?.map((s) => s.shopName).join('| ') ?? '',
-        grandTotal: order.bill.grandTotal,
-        costPrice: order.bill.costPriceSubTotal,
-        deliveryFee: order.bill.deliveryCharges
-      };
+    await generateReport({
+      endDate,
+      startDate
     });
-    const timeNow = new Date();
-    const reportLocation =
-      `reports/${timeNow
-        .toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })
-        .split('/')
-        .join('-')}/` +
-      timeNow.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }) +
-      '.csv';
-    const csv = `name,orderId,time,shop,grandTotal,costPrice,deliveryFee\n${data
-      .map((o) => Object.values(o).join(','))
-      .join(
-        '\n'
-      )}\n,,,,${totalSellPrice},${totalCostPrice},${totalDeliveryCharges}`;
-    logger.log(
-      'Report for ',
-      startDate.toDateString(),
-      ' is going to upload. [CSV]',
-      csv
-    );
-    await storage
-      .bucket('gs://mingle-munch.appspot.com')
-      .file(reportLocation)
-      .save(csv);
-    const file = storage
-      .bucket('gs://mingle-munch.appspot.com')
-      .file(reportLocation);
-    await file.makePublic();
-    const url = file.publicUrl();
-    logger.log(
-      'Report for ',
-      startDate.toDateString(),
-      ' is ready. [Download]',
-      url
-    );
-    await updateWhatsapp({
-      message: `Report for ${startDate.toDateString()} is ready. [Download](${url})`
+  });
+
+export const triggerReport = functions
+  .region('asia-south1')
+  .https.onRequest(async (req, res) => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 1);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() - 1);
+    endDate.setHours(23, 59, 59, 999);
+    await generateReport({
+      endDate,
+      startDate
     });
-    logger.log(`All done for ${startDate.toDateString()}`);
+    res.json({});
+    return;
   });
