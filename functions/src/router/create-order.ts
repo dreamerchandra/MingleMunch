@@ -71,6 +71,7 @@ export const createOrderInDb = async (
     shopOrderValue: shopOrderValue,
     createdAt: Timestamp.now()
   };
+  const isInternal = user.role === 'admin' || user.role === 'vendor' || user.internal === true;
   if (!orderId) {
     await firebaseDb
       .collection('orders')
@@ -81,10 +82,7 @@ export const createOrderInDb = async (
         user: {
           name: user.name ?? '',
           phone: user.phone_number,
-          isInternal:
-            user.role === 'admin' ||
-            user.role === 'vendor' ||
-            user.internal === true
+          isInternal,
         },
         userId: user.uid
       });
@@ -96,8 +94,7 @@ export const createOrderInDb = async (
         user: {
           name: user.name ?? '',
           phone: user.phone_number,
-          isInternal:
-            user.role === 'admin' || user.role === 'vendor' || user.role
+          isInternal,
         },
         userId: user.uid
       });

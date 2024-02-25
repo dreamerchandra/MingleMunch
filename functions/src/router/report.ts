@@ -1,15 +1,17 @@
 import { logger } from 'firebase-functions';
+import { google } from 'googleapis';
 import { firebaseDb, storage } from '../firebase.js';
 import { publicOrderConverter } from './create-order.js';
 import { updateWhatsapp } from './twilio.js';
+import fs from 'fs';
 
-export const generateReport = async ({
-  startDate,
-  endDate
-}: {
-  startDate: Date;
-  endDate: Date;
-}) => {
+export const getLastDayReport = async () => {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 1);
+  startDate.setHours(0, 0, 0, 0);
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() - 1);
+  endDate.setHours(23, 59, 59, 999);
   const snap = await firebaseDb
     .collection('internal-orders')
     .where('createdAt', '>=', startDate)
@@ -35,13 +37,35 @@ export const generateReport = async ({
       orderId: order.orderId,
       date: order.createdAt
         .toDate()
-        .toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }),
+        .toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
+        .split(',')
+        .join(' '),
       shop: order.shops?.map((s) => s.shopName).join('| ') ?? '',
       grandTotal: order.bill.grandTotal,
       costPrice: order.bill.costPriceSubTotal,
       deliveryFee: order.bill.deliveryCharges
     };
   });
+  return {
+    data,
+    totalSellPrice,
+    totalCostPrice,
+    totalDeliveryCharges,
+    startDate,
+    endDate
+  };
+};
+
+export const generateReport = async (
+  param: Awaited<ReturnType<typeof getLastDayReport>>
+) => {
+  const {
+    startDate,
+    data,
+    totalCostPrice,
+    totalDeliveryCharges,
+    totalSellPrice
+  } = param;
   const timeNow = new Date();
   const reportLocation =
     `reports/${timeNow
@@ -80,4 +104,33 @@ export const generateReport = async ({
     message: `Report for ${startDate.toDateString()} is ready. [Download](${url})`
   });
   logger.log(`All done for ${startDate.toDateString()}`);
+};
+
+export const updateLTAReport = async (
+  param: Awaited<ReturnType<typeof getLastDayReport>>
+) => {
+  const {
+    data,
+  } = param;
+  const loadJSON = (path: string) => JSON.parse(fs.readFileSync(new URL(path, import.meta.url), 'utf-8'));
+  const credentials = loadJSON(process.env.GOOGLE_CREDENTIALS as string)
+  const auth = new google.auth.GoogleAuth({
+    credentials: credentials,
+    scopes: ['https://www.googleapis.com/auth/spreadsheets']
+  });
+  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+  const range = 'Sheet1';
+  const csv = data.map((o) => Object.values(o)).sort((a,b) => new Date(a[2] as string).valueOf() - new Date(b[2] as string).valueOf());
+  const sheets = google.sheets({ version: 'v4', auth });
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range,
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: csv,
+    },
+  });
+  await updateWhatsapp({
+    message: `FUll report updated. Access at https://docs.google.com/spreadsheets/d/1AZ_Vc5vEVSj6gWenJCwYKeMIugQGf1gT2j5YiBPNDxQ/edit?usp=sharing`
+  })
 };

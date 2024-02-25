@@ -3,17 +3,19 @@ import express, { Express, Request, Response } from 'express';
 import { FieldValue } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
 import { logger } from 'firebase-functions';
-import { fcm, firebaseAuth, firebaseDb, storage } from './src/firebase.js';
+import { fcm, firebaseAuth, firebaseDb } from './src/firebase.js';
 import { authMiddle, authorizedAsAdmin } from './src/middleware/auth.js';
-import { publicOrderConverter } from './src/router/create-order.js';
 import { HomeOrderDetails, createHomeOrder } from './src/router/home-order.js';
 import { OrderDb } from './src/router/order-helper.js';
 import { createOrder, onOrderCreate } from './src/router/order.js';
+import {
+  generateReport,
+  getLastDayReport,
+  updateLTAReport
+} from './src/router/report.js';
 import { updateWhatsapp } from './src/router/twilio.js';
 import { updateUser } from './src/router/update-user.js';
 import { onCreateUser, updateReferralCode } from './src/router/user.js';
-import { generateReport } from './src/router/report.js';
-import exp from 'constants';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -228,10 +230,10 @@ export const report = functions
     const endDate = new Date();
     endDate.setDate(endDate.getDate() - 1);
     endDate.setHours(23, 59, 59, 999);
-    await generateReport({
-      endDate,
-      startDate
-    });
+    const report = await getLastDayReport();
+    await generateReport(report);
+    await updateLTAReport(report);
+    return;
   });
 
 export const triggerReport = functions
@@ -243,10 +245,7 @@ export const triggerReport = functions
     const endDate = new Date();
     endDate.setDate(endDate.getDate() - 1);
     endDate.setHours(23, 59, 59, 999);
-    await generateReport({
-      endDate,
-      startDate
-    });
-    res.json({});
-    return;
+    const report = await getLastDayReport();
+    await generateReport(report);
+    res.json({ ok: true });
   });
