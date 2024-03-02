@@ -1,7 +1,7 @@
 const { applicationDefault, initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
-const { getStorage } = require('firebase-admin/storage');
+const { getStorage, getDownloadURL } = require('firebase-admin/storage');
 const fs = require('fs');
 
 const app = initializeApp({

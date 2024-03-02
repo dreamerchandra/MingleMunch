@@ -2,7 +2,7 @@ import { logger } from 'firebase-functions';
 import { firebaseDb, storage } from '../firebase.js';
 import { publicOrderConverter } from './create-order.js';
 import { updateWhatsapp } from './twilio.js';
-import fs from 'fs';
+import { applicationDefault } from 'firebase-admin/app';
 
 export const getLastDayReport = async () => {
   const startDate = new Date();
@@ -110,22 +110,23 @@ export const updateLTAReport = async (
 ) => {
   const { google } = await import('googleapis');
   const { data } = param;
-  const loadJSON = (path: string) =>
-    JSON.parse(fs.readFileSync(new URL(path, import.meta.url), 'utf-8'));
-  const credentials = loadJSON(process.env.GOOGLE_CREDENTIALS as string);
+  const jwtAccess = new google.auth.JWT();
+  console.log(applicationDefault())
+  const credential = await google.auth.getApplicationDefault();
   const auth = new google.auth.GoogleAuth({
-    credentials: credentials,
+    credentials: JSON.parse(JSON.stringify(credential.credential.credentials)),
     scopes: ['https://www.googleapis.com/auth/spreadsheets']
   });
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
   const range = 'Sheet1';
+  const sheets = google.sheets({ version: 'v4', auth: auth  });
   const csv = data
-    .map((o) => Object.values(o))
-    .sort(
-      (a, b) =>
-        new Date(a[2] as string).valueOf() - new Date(b[2] as string).valueOf()
-    );
-  const sheets = google.sheets({ version: 'v4', auth });
+  .map((o) => Object.values(o))
+  .sort(
+    (a, b) =>
+      new Date(a[2] as string).valueOf() - new Date(b[2] as string).valueOf()
+  );
+
   await sheets.spreadsheets.values.append({
     spreadsheetId,
     range,

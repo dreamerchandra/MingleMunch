@@ -225,7 +225,7 @@ export const report = functions
   .timeZone('Asia/Kolkata')
   .onRun(async () => {
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 1);
+    startDate.setDate(startDate.getDate() - 2);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date();
     endDate.setDate(endDate.getDate() - 1);
