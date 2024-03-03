@@ -1,0 +1,1 @@
+{"name":"BURN","short_name":"Burn","description":"The best price food app.","start_url":"/?standalone=true","display":"standalone","background_color":"#000000","theme_color":"#Cfff04","icons":[{"src":"/logo.png","sizes":"512x512","type":"image/png"}],"orientation":"portrait","categories":["food"],"scope":"/"}

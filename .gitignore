@@ -26,3 +26,12 @@ service-account.json
 prod-service-account.json
 .env
 mingle-munch.json
+
+# Android specific files
+.gradle/
+app/build/
+build/
+gradle/
+gradlew
+gradlew.bat
+local.properties

@@ -55,13 +55,13 @@ export const ShopPage = () => {
       <Container
         component="main"
         sx={{
-          height: '90vh',
+          height: 'calc(100vh - 150px)',
           overflowY: 'auto',
           overflowX: 'hidden',
           backgroundColor: '#f5f5f5'
         }}
       >
-        {notificationGranted ? (
+        {!notificationGranted ? (
           <OurStories />
         ) : (
           <NotificationInfo onClick={() => setNotification(true)} />
