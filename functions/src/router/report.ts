@@ -6,7 +6,7 @@ import { applicationDefault } from 'firebase-admin/app';
 
 export const getLastDayReport = async () => {
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 1);
+  startDate.setDate(startDate.getDate() - 4);
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date();
   endDate.setDate(endDate.getDate() - 1);
@@ -15,7 +15,6 @@ export const getLastDayReport = async () => {
     .collection('internal-orders')
     .where('createdAt', '>=', startDate)
     .where('createdAt', '<=', endDate)
-    .withConverter(publicOrderConverter)
     .get();
   const orders = snap.docs
     .map((doc) => doc.data())

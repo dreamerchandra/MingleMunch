@@ -25,6 +25,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
         width: 'min(90vw, 1000px)',
         borderRadius: '10px',
         pt: 1,
+        position: 'relative',
         boxShadow: '0px 0px 5px 0px #0000001f'
       }}
       elevation={0}
@@ -32,9 +33,40 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
         navigation(`/shop/${shop.shopId}`);
       }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', pl: 2 }}>
+      {shop.tag && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            background: shop.isOpen ? 'black' : 'red',
+            boxShadow: '0px 0px 5px 0px #0000001f',
+            p: 0.5
+          }}
+        >
+          <Typography
+            variant="caption"
+            fontWeight={900}
+            className="rainbow_text_animated"
+          >
+            # {shop.tag}
+          </Typography>
+        </Box>
+      )}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          pl: 2
+        }}
+      >
         <CardContent
-          sx={{ flex: '1 0 auto', justifyContent: 'space-between', p: 0 }}
+          sx={{
+            flex: '1 0 auto',
+            justifyContent: 'space-between',
+            p: 0,
+            pt: shop.tag ? 3 : 0
+          }}
         >
           <Typography component="h3" variant="h3">
             {shop.shopName}
@@ -100,7 +132,7 @@ export const Shops = () => {
           ALL RESTAURANTS
         </Typography>
         {!appConfig?.isOpen && (
-          <Typography variant="h6" color='darkorange' textAlign="center">
+          <Typography variant="h6" color="darkorange" textAlign="center">
             {appConfig?.closeReason}
           </Typography>
         )}

@@ -368,7 +368,17 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 type="number"
                 value={formData.itemPrice}
                 onChange={(e) => {
-                  setFormData({ ...formData, itemPrice: e.target.value });
+                  const itemPrice = Number(e.target.value);
+                  const displayParcelCharges = itemPrice * 0.05;
+                  const costParcelCharges = 0;
+                  const costPrice = itemPrice * 0.95;
+                  setFormData({
+                    ...formData,
+                    parcelCharges: displayParcelCharges.toString(),
+                    costParcelCharges: costParcelCharges.toString(),
+                    costPrice: costPrice.toString(),
+                    itemPrice: e.target.value
+                  })
                 }}
               />
             </FormControl>

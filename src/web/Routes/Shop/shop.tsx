@@ -27,7 +27,7 @@ export const ShopPage = () => {
   const loading = userDetails?.loading;
   const navigate = useNavigate();
   const [notificationGranted, setNotification] = useState(
-    !isNotificationSupported() ? true : Notification.permission === 'granted'
+    () => !isNotificationSupported() ? true : Notification.permission === 'granted'
   );
   // const [drawer, setDrawer] = useState(false);
   useEffect(() => {
@@ -61,7 +61,7 @@ export const ShopPage = () => {
           backgroundColor: '#f5f5f5'
         }}
       >
-        {!notificationGranted ? (
+        {notificationGranted ? (
           <OurStories />
         ) : (
           <NotificationInfo onClick={() => setNotification(true)} />
