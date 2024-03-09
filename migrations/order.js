@@ -12,6 +12,55 @@ const firebaseAuth = getAuth(app);
 const firebaseDb = getFirestore(app);
 const storage = getStorage(app);
 
+
+
+report = async () => {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 4);
+  startDate.setHours(0, 0, 0, 0);
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() - 1);
+  endDate.setHours(23, 59, 59, 999);
+  const snap = await firebaseDb.collection('internal-orders').where('createdAt', '>=', startDate).where('createdAt', '<=', endDate).get();
+  const orders = snap.docs.map((doc) => doc.data()).filter((o) => !o.user.isInternal).filter((o) => o.status !== 'rejected');
+  const data = orders.map((order) => {
+    return {
+      name: order.user.name,
+      orderId: order.orderId,
+      date: order.createdAt
+        .toDate()
+        .toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
+        .split(',')
+        .join(' '),
+      shop: order.shops?.map((s) => s.shopName).join('| ') ?? '',
+      grandTotal: order.bill.grandTotal,
+      costPrice: order.bill.costPriceSubTotal,
+      deliveryFee: order.bill.deliveryCharges
+    };
+  });
+  return data;
+}
+
+updateToSheet = async (data) => {
+  const spreadsheetId = '1AZ_Vc5vEVSj6gWenJCwYKeMIugQGf1gT2j5YiBPNDxQ'
+  const range = 'Sheet1';
+  const { google } = await import('googleapis');
+  const credential = require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+  const auth = new google.auth.GoogleAuth({
+    credentials: credential,
+    scopes: ['https://www.googleapis.com/auth/spreadsheets']
+  });
+  const sheets = google.sheets({ version: 'v4', auth: auth  });
+  const csv = data.map((o) => Object.values(o)).sort((a, b) => new Date(a[2]).valueOf() - new Date(b[2]).valueOf());
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range,
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: csv
+    }
+  });
+}
 const getShopOrderValue = (oldOrder) => {
   return oldOrder.items.reduce((acc, item) => {
     if (!acc[item.shopId]) {

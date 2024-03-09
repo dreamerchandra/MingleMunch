@@ -11,15 +11,8 @@ export const getLastDayReport = async () => {
   const endDate = new Date();
   endDate.setDate(endDate.getDate() - 1);
   endDate.setHours(23, 59, 59, 999);
-  const snap = await firebaseDb
-    .collection('internal-orders')
-    .where('createdAt', '>=', startDate)
-    .where('createdAt', '<=', endDate)
-    .get();
-  const orders = snap.docs
-    .map((doc) => doc.data())
-    .filter((o) => !o.user.isInternal)
-    .filter((o) => o.status !== 'rejected');
+  const snap = await firebaseDb.collection('internal-orders').where('createdAt', '>=', startDate).where('createdAt', '<=', endDate).get();
+  const orders = snap.docs.map((doc) => doc.data()).filter((o) => !o.user.isInternal).filter((o) => o.status !== 'rejected');
   const totalSellPrice = Math.round(
     orders.reduce((acc, order) => acc + order.bill.grandTotal, 0)
   );

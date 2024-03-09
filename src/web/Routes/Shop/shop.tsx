@@ -21,6 +21,7 @@ import { Feedback } from '../../module/feedback/feedback';
 import { Loading } from '../../module/loading';
 import { OurStories } from '../../module/stories/stories';
 import { MasterControl } from '../../module/master-control';
+import { FullPageBanner } from '../../module/full-page-banner';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -50,7 +51,7 @@ export const ShopPage = () => {
   return (
     <>
       <Header title="Burn Home" />
-      {/* <FullPageBanner /> */}
+      <FullPageBanner />
       <Feedback />
       <Container
         component="main"

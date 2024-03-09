@@ -2,6 +2,7 @@ import { Close } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import { useState } from 'react';
 import { Center, FullScreen } from './full-screen';
+import { useNavigate } from 'react-router-dom';
 
 const getFullPageBannerShown = (): Record<string, boolean> => {
   const fullPage = window.localStorage.getItem('fullPage');
@@ -12,18 +13,20 @@ const getFullPageBannerShown = (): Record<string, boolean> => {
   return {};
 };
 const banner =
-  'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/Frame%204%20(2)%20(1).png?alt=media&token=aa76be00-b591-4098-9eb6-2db4f7e47536';
+  'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/burger-bytes.png?alt=media&token=1fab0f55-d9ce-4b76-b1ed-9ce076f74de5';
 
 export const FullPageBanner = () => {
   const [hasShown, _setHasShown] = useState(() => {
     const details = getFullPageBannerShown();
     return details[banner];
   });
+  const navigate = useNavigate();
   if (hasShown) {
     return null;
   }
   const setShown = () => {
     _setHasShown(true);
+
     const details = getFullPageBannerShown();
     window.localStorage.setItem(
       'fullPage',
@@ -38,19 +41,18 @@ export const FullPageBanner = () => {
       <Button
         sx={{
           position: 'fixed',
-          top: '7vh',
+          top: '14vh',
           right: '20px',
           zIndex: 10000000,
           borderRadius: '50%',
           height: '56px',
-          width: '50px',
-          boxShadow: '0px 0px 20px 0px #0000001f'
+          width: '50px'
         }}
         color="error"
         variant="text"
         onClick={setShown}
       >
-        <Close />
+        <Close fontSize="large" />
       </Button>
       <Center>
         <img
@@ -60,7 +62,10 @@ export const FullPageBanner = () => {
             width: '95vw',
             objectFit: 'contain'
           }}
-          onClick={setShown}
+          onClick={() => {
+            setShown();
+            navigate('/shop/Dv0rsZoBRc2lu5vg3h0P');
+          }}
         />
       </Center>
     </FullScreen>
