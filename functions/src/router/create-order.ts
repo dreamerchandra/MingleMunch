@@ -71,7 +71,8 @@ export const createOrderInDb = async (
     shopOrderValue: shopOrderValue,
     createdAt: Timestamp.now()
   };
-  const isInternal = user.role === 'admin' || user.role === 'vendor' || user.internal === true;
+  const isInternal =
+    user.role === 'admin' || user.role === 'vendor' || user.internal === true;
   if (!orderId) {
     await firebaseDb
       .collection('orders')
@@ -82,7 +83,7 @@ export const createOrderInDb = async (
         user: {
           name: user.name ?? '',
           phone: user.phone_number,
-          isInternal,
+          isInternal
         },
         userId: user.uid
       });
@@ -94,21 +95,34 @@ export const createOrderInDb = async (
         user: {
           name: user.name ?? '',
           phone: user.phone_number,
-          isInternal,
+          isInternal
         },
         userId: user.uid
       });
   } else {
+    const oldOrderSnap = await firebaseDb
+      .collection('orders')
+      .doc(id)
+      .withConverter(publicOrderConverter)
+      .get();
+    const oldOrderDetails = oldOrderSnap.data()!;
     await firebaseDb
       .collection('orders')
       .doc(id)
       .withConverter(publicOrderConverter)
-      .set(orderDetails, {
-        merge: true
+      .set({
+        ...orderDetails,
+        user: oldOrderDetails?.user,
+        userId: oldOrderDetails?.userId
       });
-    await firebaseDb.collection('internal-orders').doc(id).set(orderDetails, {
-      merge: true
-    });
+    await firebaseDb
+      .collection('internal-orders')
+      .doc(id)
+      .set({
+        ...orderDetails,
+        user: oldOrderDetails?.user,
+        userId: oldOrderDetails?.userId
+      });
   }
   return orderDetails;
 };

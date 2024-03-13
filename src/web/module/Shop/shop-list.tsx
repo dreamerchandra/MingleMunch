@@ -128,7 +128,7 @@ export const Shops = () => {
           mb: 2
         }}
       >
-        <Typography variant="h6" sx={{ letterSpacing: 4 }}>
+        <Typography variant="h2" color="text.secondary" sx={{ letterSpacing: 4 }}>
           ALL RESTAURANTS
         </Typography>
         {!appConfig?.isOpen && (

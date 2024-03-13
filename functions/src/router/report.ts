@@ -6,12 +6,12 @@ import { applicationDefault } from 'firebase-admin/app';
 
 export const getLastDayReport = async () => {
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 4);
+  startDate.setDate(startDate.getDate() - 1);
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date();
   endDate.setDate(endDate.getDate() - 1);
   endDate.setHours(23, 59, 59, 999);
-  const snap = await firebaseDb.collection('internal-orders').where('createdAt', '>=', startDate).where('createdAt', '<=', endDate).get();
+  const snap = await firebaseDb.collection('internal-orders').where('createdAt', '>=', startDate).where('createdAt', '<=', endDate).withConverter(publicOrderConverter).get();
   const orders = snap.docs.map((doc) => doc.data()).filter((o) => !o.user.isInternal).filter((o) => o.status !== 'rejected');
   const totalSellPrice = Math.round(
     orders.reduce((acc, order) => acc + order.bill.grandTotal, 0)
@@ -103,7 +103,7 @@ export const updateLTAReport = async (
   const { google } = await import('googleapis');
   const { data } = param;
   const jwtAccess = new google.auth.JWT();
-  console.log(applicationDefault())
+  console.log(applicationDefault());
   const credential = await google.auth.getApplicationDefault();
   const auth = new google.auth.GoogleAuth({
     credentials: JSON.parse(JSON.stringify(credential.credential.credentials)),
@@ -111,13 +111,13 @@ export const updateLTAReport = async (
   });
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
   const range = 'Sheet1';
-  const sheets = google.sheets({ version: 'v4', auth: auth  });
+  const sheets = google.sheets({ version: 'v4', auth: auth });
   const csv = data
-  .map((o) => Object.values(o))
-  .sort(
-    (a, b) =>
-      new Date(a[2] as string).valueOf() - new Date(b[2] as string).valueOf()
-  );
+    .map((o) => Object.values(o))
+    .sort(
+      (a, b) =>
+        new Date(a[2] as string).valueOf() - new Date(b[2] as string).valueOf()
+    );
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,

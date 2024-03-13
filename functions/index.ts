@@ -13,7 +13,7 @@ import {
   getLastDayReport,
   updateLTAReport
 } from './src/router/report.js';
-import { updateWhatsapp } from './src/router/twilio.js';
+import { createZendutyIncident, updateWhatsapp } from './src/router/twilio.js';
 import { updateUser } from './src/router/update-user.js';
 import { onCreateUser, updateReferralCode } from './src/router/user.js';
 
@@ -233,6 +233,42 @@ export const report = functions
     const report = await getLastDayReport();
     await generateReport(report);
     await updateLTAReport(report);
+    return;
+  });
+
+export const checkShopClosedStatusMorning = functions
+  .region('asia-south1')
+  .pubsub.schedule('35 11 * * *')
+  .timeZone('Asia/Kolkata')
+  .onRun(async () => {
+    const appConfig = await firebaseDb.doc('appConfig/public').get();
+    const isOpen = appConfig.data()?.isOpen;
+    if (isOpen) {
+      return;
+    }
+    await createZendutyIncident();
+    await updateWhatsapp({
+      message: `Open the Shop immediately.`
+    });
+
+    return;
+  });
+
+export const checkShopClosedStatusEvening = functions
+  .region('asia-south1')
+  .pubsub.schedule('35 6 * * *')
+  .timeZone('Asia/Kolkata')
+  .onRun(async () => {
+    const appConfig = await firebaseDb.doc('appConfig/public').get();
+    const isOpen = appConfig.data()?.isOpen;
+    if (isOpen) {
+      return;
+    }
+    await createZendutyIncident();
+    await updateWhatsapp({
+      message: `Open the Shop immediately.`
+    });
+
     return;
   });
 

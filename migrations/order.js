@@ -41,7 +41,7 @@ report = async () => {
   return data;
 }
 
-updateToSheet = async (data) => {
+const updateToSheet = async (data) => {
   const spreadsheetId = '1AZ_Vc5vEVSj6gWenJCwYKeMIugQGf1gT2j5YiBPNDxQ'
   const range = 'Sheet1';
   const { google } = await import('googleapis');
@@ -61,6 +61,7 @@ updateToSheet = async (data) => {
     }
   });
 }
+
 const getShopOrderValue = (oldOrder) => {
   return oldOrder.items.reduce((acc, item) => {
     if (!acc[item.shopId]) {
@@ -163,16 +164,21 @@ const getUniqueShop = (order) => {
 const toDecimal = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
 
 const migrateProduct = async () => {
-  const items = await firebaseDb.collection('food').where('shopId', '==', 'RArRz6eRJsag5ADwzyIV').get();
+  const items = await firebaseDb.collection('food').where('shopId', '==', 'ZbxNQlf03EquM9VEuyHA').get();
+  // console.log(items.docs.map(d => d.id))
 
   for (const item of items.docs) {
     const oldOrder = item.data();
+    console.log({
+      costPrice: toDecimal(oldOrder.itemPrice * 0.95),
+      costParcelCharges: oldOrder.parcelCharges || 0,
+    })
     await firebaseDb
       .collection('food-internal')
       .doc(item.id)
       .set({
-        costPrice: toDecimal(oldOrder.itemPrice * 0.95),
-        costParcelCharges: 5,
+        costPrice: toDecimal(oldOrder.itemPrice * 0.92),
+        costParcelCharges: oldOrder.parcelCharges || 0,
       }, {
         merge: true,
       });

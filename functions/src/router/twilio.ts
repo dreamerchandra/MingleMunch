@@ -28,3 +28,21 @@ export const updateWhatsapp = async ({
       logger.error(`twilio whatsapp message error ${err.message}`)
     );
 };
+
+
+export const createZendutyIncident = async () => {
+  await fetch('https://www.zenduty.com/api/integration/v1/incidents', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Token ${process.env.ZENDUTY_API_KEY}`
+    },
+    body: JSON.stringify({
+      title: 'Shop is Closed',
+      service: '80dd8252-a155-4a7a-bb36-eb35bd7b3328',
+      escalation_policy: '80eb1d0a-dd2c-40c9-ad9f-936f00bec855',
+      summary: 'Shop is Closed',
+    })
+  });
+
+}
