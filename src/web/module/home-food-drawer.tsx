@@ -159,12 +159,37 @@ const isMorning = () => {
   }
 };
 
+const isEvening = () => {
+  const now = new Date();
+
+  // Extract hours and minutes
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+
+  // Define evening cutoff time (6:30 PM)
+  const eveningCutoffHour = 18;
+  const eveningCutoffMinute = 30;
+
+  // Check if it's evening
+  if (
+    hours < eveningCutoffHour ||
+    (hours === eveningCutoffHour && minutes <= eveningCutoffMinute)
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+const isEOD = () => !(isEvening() || isMorning());
+
 const Week: FC<{
   value: Date;
   onChange: (date: Date) => void;
 }> = ({ value, onChange }) => {
   const week: Date[] = [];
-  for (let i = 0; i <= 7; i++) {
+  for (let i = isEOD() ? 1: 0; i <= 7; i++) {
     const date = new Date();
     date.setDate(date.getDate() + i);
     date.setHours(0, 0, 0, 0);
