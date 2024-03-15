@@ -21,7 +21,7 @@ import { styled } from '@mui/material/styles';
 import { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useUser } from '../../firebase/auth';
-import { ProductInput, getProduct, uploadImage } from '../../firebase/product';
+import { ProductInput, getProduct } from '../../firebase/product';
 import { useCategoryQuery } from '../category/category-query';
 import { useProductsQuery, useUpdateProductMutation } from './product-query';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -219,13 +219,13 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
         const description = data.get('description');
         const itemPrice = Number(data.get('itemPrice'));
         const costPrice = Number(data.get('costPrice'));
-        const image = data.get('image');
+        // const image = data.get('image');
         const category = data.get('category');
-        if (!name || !itemPrice || !image || !category || !categories) {
+        if (!name || !itemPrice || !category || !categories) {
           return;
         }
         setUpdating(true);
-        const itemImage = await uploadImage(image as File);
+        // const itemImage = await uploadImage(image as File);
         const product: ProductInput = {
           itemName: name as string,
           itemDescription: description as string,
@@ -233,7 +233,7 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
           costPrice,
           parcelCharges: Number(data.get('parcelCharges')) ?? 0,
           costParcelCharges: Number(data.get('costParcelCharges')) ?? 0,
-          itemImage: itemImage,
+          itemImage: '',
           category: {
             name: categories.find((i) => i.categoryId == category)!
               .categoryName as string,
@@ -369,9 +369,9 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 value={formData.itemPrice}
                 onChange={(e) => {
                   const itemPrice = Number(e.target.value);
-                  const displayParcelCharges = itemPrice * 0.05;
+                  const displayParcelCharges = 0;
                   const costParcelCharges = 0;
-                  const costPrice = itemPrice * 0.95;
+                  const costPrice = itemPrice * 0.90;
                   setFormData({
                     ...formData,
                     parcelCharges: displayParcelCharges.toString(),

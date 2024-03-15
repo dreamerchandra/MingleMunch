@@ -149,7 +149,9 @@ export const insertProduct = async (product: ProductInput, shop: Shop) => {
   if (product.itemId) {
     return updateProduct({ ...product, productId: product.itemId }, shop);
   }
+  console.log('starting to upload')
   const data = await addDoc(docRef, constructProduct(product, shop));
+  console.log('data', data.id, product.costPrice, product.costParcelCharges);
   const internalDocRef = doc(collection(firebaseDb, 'food-internal'), data.id);
   return setDoc(internalDocRef, {
     costPrice: product.costPrice,
