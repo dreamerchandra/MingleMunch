@@ -15,12 +15,15 @@
  */
 package com.burn.delivery;
 
+import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-
+import android.widget.Toast;
 
 public class LauncherActivity
         extends com.google.androidbrowserhelper.trusted.LauncherActivity {
@@ -37,6 +40,19 @@ public class LauncherActivity
         // See https://github.com/GoogleChromeLabs/bubblewrap/issues/496 for details.
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            String channelId  = "default_notification_channel_id";
+            String channelName = "Default";
+            NotificationManager notificationManager =
+                    getSystemService(NotificationManager.class);
+            // override the default channel importance to make notifications show as popup with sound
+            notificationManager.createNotificationChannel(new NotificationChannel(channelId,
+                    channelName, NotificationManager.IMPORTANCE_HIGH));
+            Toast.makeText(this, "Getting notification", Toast.LENGTH_SHORT).show();
+            notificationManager.notify(1, new Notification.Builder(this, channelId)
+                    .setContentTitle("Notification")
+                    .setContentText("This is a notification")
+                    .setSmallIcon(R.drawable.splash)
+                    .build());
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
@@ -51,4 +67,5 @@ public class LauncherActivity
 
         return uri;
     }
+
 }
