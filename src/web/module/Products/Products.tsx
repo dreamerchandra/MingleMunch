@@ -169,7 +169,7 @@ export const Products: FC<{
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              height: 'calc(100vh - 400px)',
+              height: 'calc(100svh - 400px)',
               p: 0
             }}
           >

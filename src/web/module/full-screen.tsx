@@ -7,7 +7,7 @@ export const FullScreen: FC<{ children: React.ReactNode }> = ({ children }) => {
         position: 'fixed',
         zIndex: 1000000,
         background: 'rgb(0 0 0 / 75%)',
-        height: '100vh',
+        height: '100svh',
         width: '100vw',
         top: 0
       }}

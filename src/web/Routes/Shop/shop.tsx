@@ -56,7 +56,7 @@ export const ShopPage = () => {
       <Container
         component="main"
         sx={{
-          height: 'calc(100vh - 150px)',
+          height: 'calc(100svh - 150px)',
           overflowY: 'auto',
           overflowX: 'hidden',
           backgroundColor: '#f5f5f5',

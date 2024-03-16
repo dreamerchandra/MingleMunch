@@ -166,9 +166,9 @@ const isEvening = () => {
   const hours = now.getHours();
   const minutes = now.getMinutes();
 
-  // Define evening cutoff time (6:30 PM)
+  // Define evening cutoff time (6:00 PM)
   const eveningCutoffHour = 18;
-  const eveningCutoffMinute = 30;
+  const eveningCutoffMinute = 0;
 
   // Check if it's evening
   if (
@@ -193,6 +193,9 @@ const Week: FC<{
     const date = new Date();
     date.setDate(date.getDate() + i);
     date.setHours(0, 0, 0, 0);
+    if(date.getDate() === 16) {
+      continue;
+    }
     week.push(date);
   }
   return (

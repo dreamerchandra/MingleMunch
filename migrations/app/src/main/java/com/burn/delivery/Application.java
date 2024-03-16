@@ -17,7 +17,7 @@ package com.burn.delivery;
 
 
 
-public class  Application extends android.app.Application {
+public class Application extends android.app.Application {
 
   
 

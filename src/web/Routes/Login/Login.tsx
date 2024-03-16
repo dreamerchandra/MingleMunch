@@ -39,7 +39,7 @@ export function LoginPage() {
           component="main"
           maxWidth="xs"
           sx={{
-            height: '100dvh'
+            height: '100svh'
           }}
         >
           <div

@@ -62,7 +62,7 @@ const Text: FC<{ label: string }> = ({ label }) => {
   useEffect(() => {
     const timerId = setInterval(() => {
       setIdx((i) => (i + 1) % 2);
-    }, 2000);
+    }, 5000);
     return () => clearInterval(timerId);
   }, []);
   if (idx == 0)
@@ -98,11 +98,13 @@ export const LastOrder: FC = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#d1ff0465',
+        backgroundColor: '#000000',
         pt: 2,
         pb: 2,
         gap: 2,
         width: 'min(100vw, 1200px)',
+        color: '#fff',
+        borderRadius: 0,
       }}
       href="tel:+918220080109"
     >

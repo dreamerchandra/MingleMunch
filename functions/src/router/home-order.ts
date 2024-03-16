@@ -17,11 +17,72 @@ const createHomeOrderInDb = (orderDetails: HomeOrderDetails) => {
     .add({ ...orderDetails, createdAt: FieldValue.serverTimestamp() });
 };
 
+const isMorning = (date: Date) => {
+  const isToday = date.toDateString() === new Date().toDateString();
+  if (!isToday) return true;
+
+  // Extract hours and minutes
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  // Define morning cutoff time (11:30 AM)
+  const morningCutoffHour = 11;
+  const morningCutoffMinute = 30;
+
+  // Check if it's morning
+  if (
+    hours < morningCutoffHour ||
+    (hours === morningCutoffHour && minutes <= morningCutoffMinute)
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const isEvening = (date: Date) => {
+  const isToday = date.toDateString() === new Date().toDateString();
+  if (!isToday) return true
+  // Extract hours and minutes
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  // Define evening cutoff time (6:30 PM)
+  const eveningCutoffHour = 18;
+  const eveningCutoffMinute = 30;
+
+  // Check if it's evening
+  if (
+    hours < eveningCutoffHour ||
+    (hours === eveningCutoffHour && minutes <= eveningCutoffMinute)
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+const isValidDate = (date: Date) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return date >= today && date <= new Date(today.setDate(today.getDate() + 7))
+} 
+
 export const createHomeOrder = async (req: Request, res: Response) => {
   const { quantity, number, timeSlot, date } = req.body as Omit<
     HomeOrderDetails,
     'userId' | 'total' | 'timeSlot' | 'orderDate'
   > & { timeSlot: string, date: string };
+  const orderDate = new Date(date);
+  if(!isValidDate(orderDate)) {
+    return res.status(400).json({ message: 'Invalid date' });
+  } 
+  if(timeSlot === '0' && !isMorning(orderDate)) {
+    return res.status(400).json({ message: 'Invalid time slot' });
+  }
+  if(timeSlot === '1' && !isEvening(orderDate)) {
+    return res.status(400).json({ message: 'Invalid time slot' });
+  }
   const user = req.user;
   const costPerQuantity = quantity === 500 ? 298 : 148;
   const total = costPerQuantity * number;
@@ -31,7 +92,7 @@ export const createHomeOrder = async (req: Request, res: Response) => {
     timeSlot: timeSlot === '0' ? 'Morning' : 'Evening',
     userId: user.uid,
     total,
-    orderDate: Timestamp.fromDate(new Date(date)),
+    orderDate: Timestamp.fromDate(orderDate),
   });
   return res.json(order);
 };
