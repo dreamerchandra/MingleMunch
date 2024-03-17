@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.burn.delivery",
+      "sha256_cert_fingerprints":
+        ["EE:90:89:E6:B1:B3:88:43:7B:21:4E:1E:47:D6:AA:3E:A8:F9:F2:7D:01:A1:A1:D7:46:50:83:94:08:9A:05:78"]
+    }
+  }
+]

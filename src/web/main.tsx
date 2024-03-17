@@ -34,7 +34,7 @@ window.addEventListener('focus', () => {
     const diff = new Date().getTime() - date.getTime();
     const fortyFiveMin = 1000 * 60 * 45;
     if (diff > fortyFiveMin) {
-      localStorage.clear();
+      localStorage.removeItem('date');
       window.location.reload();
     }
   }

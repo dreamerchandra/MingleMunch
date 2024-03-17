@@ -1,4 +1,4 @@
-import { Paper } from '@mui/material';
+import { Avatar, Paper, Skeleton } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -104,13 +104,54 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
     </Card>
   );
 };
-
+function SkeletonChildrenDemo() {
+  return (
+    <div
+      style={{
+        width: '80%'
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ margin: 1 }}>
+          <Skeleton variant="circular">
+            <Avatar />
+          </Skeleton>
+        </Box>
+        <Box sx={{ width: '100%' }}>
+          <Skeleton width="100%">
+            <Typography>.</Typography>
+          </Skeleton>
+        </Box>
+      </Box>
+      <Skeleton variant="rectangular" width="100%">
+        <div style={{ paddingTop: '57%' }} />
+      </Skeleton>
+    </div>
+  );
+}
 export const Shops = () => {
   const { data: appConfig } = useAppConfig();
   const { data, isLoading } = useShopQuery();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          pt: 2,
+          alignItems: 'center',
+          gap: 1,
+          pb: 16
+        }}
+      >
+        <SkeletonChildrenDemo />
+        <SkeletonChildrenDemo />
+        <SkeletonChildrenDemo />
+        <SkeletonChildrenDemo />
+        <SkeletonChildrenDemo />
+      </Box>
+    );
   }
   return (
     <Box
@@ -128,7 +169,11 @@ export const Shops = () => {
           mb: 2
         }}
       >
-        <Typography variant="h2" color="text.secondary" sx={{ letterSpacing: 4 }}>
+        <Typography
+          variant="h2"
+          color="text.secondary"
+          sx={{ letterSpacing: 4 }}
+        >
           ALL RESTAURANTS
         </Typography>
         {!appConfig?.isOpen && (

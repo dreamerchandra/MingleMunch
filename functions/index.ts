@@ -24,7 +24,10 @@ expressApp.use(express.json());
 expressApp.get('/health', (req: Request, res: Response) => {
   res.send('Ok 👍');
 });
-
+expressApp.post('/v1/today', (req: Request, res: Response) => {
+  const date = new Date();
+  return res.json({ date: date.toISOString() });
+});
 expressApp.get('/migrate', (req: Request, res: Response) => {
   res.send('Ok 👍');
 });

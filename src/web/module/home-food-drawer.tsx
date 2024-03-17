@@ -19,6 +19,7 @@ import { useMutationHomeOrder } from './Shoping/checkout-query';
 import { useAppConfig } from './appconfig';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../firebase/auth';
+import { post } from '../firebase/fetch';
 
 const initialValue = {
   number: 0,
@@ -137,8 +138,7 @@ const Add: FC<{ number: number; setNumber: (number: number) => void }> = ({
   );
 };
 
-const isMorning = () => {
-  const now = new Date();
+const isMorning = (now: Date) => {
 
   // Extract hours and minutes
   const hours = now.getHours();
@@ -159,9 +159,7 @@ const isMorning = () => {
   }
 };
 
-const isEvening = () => {
-  const now = new Date();
-
+const isEvening = (now: Date) => {
   // Extract hours and minutes
   const hours = now.getHours();
   const minutes = now.getMinutes();
@@ -182,15 +180,16 @@ const isEvening = () => {
 }
 
 
-const isEOD = () => !(isEvening() || isMorning());
+const isEOD = (date: Date) => !(isEvening(date) || isMorning(date));
 
 const Week: FC<{
   value: Date;
   onChange: (date: Date) => void;
-}> = ({ value, onChange }) => {
+  today: Date,
+}> = ({ value, onChange, today }) => {
   const week: Date[] = [];
-  for (let i = isEOD() ? 1: 0; i <= 7; i++) {
-    const date = new Date();
+  for (let i = isEOD(today) ? 1: 0; i <= 7; i++) {
+    const date = new Date(today);
     date.setDate(date.getDate() + i);
     date.setHours(0, 0, 0, 0);
     if(date.getDate() === 16) {
@@ -233,7 +232,7 @@ const Week: FC<{
             })}
           </Typography>
           <Typography variant="caption" fontWeight={700}>
-            {d.getDate() === new Date().getDate() ? 'Today': d.toLocaleString('default', { weekday: 'short' })}
+            {d.getDate() === today.getDate() ? 'Today': d.toLocaleString('default', { weekday: 'short' })}
           </Typography>
         </Button>
       ))}
@@ -244,6 +243,13 @@ export const HomeFoodDrawer: FC<{
   open: boolean;
   setOpen: (open: boolean) => void;
 }> = ({ open, setOpen }) => {
+  const [today, setToday] = useState(new Date())
+  useEffect(() => {
+    post('/v1/today', {}, false).then((res) => {
+      console.log(res.date, 'today')
+      setToday(new Date(res.date));
+    })
+  }, [])
   const [data, setData] = useState(initialValue);
   const grandTotal =
     data.quantity === 500 ? 298 * data.number : 148 * data.number;
@@ -388,6 +394,7 @@ export const HomeFoodDrawer: FC<{
             onChange={(d) => {
               setData({ ...data, date: d });
             }}
+            today={today}
           />
           <Box
             sx={{
@@ -478,7 +485,7 @@ export const HomeFoodDrawer: FC<{
                     setData({ ...data, time: Number(time) });
                   }}
                   options={
-                    !isMorning() && data.date.getDate() === new Date().getDate()
+                    !isMorning(today) && data.date.getDate() === today.getDate()
                       ? [
                           {
                             description: 'Delivered By 8: 30PM',

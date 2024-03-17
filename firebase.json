@@ -15,6 +15,26 @@
         "destination": "/assets/**"
       },
       {
+        "source": "privacy-policy*",
+        "destination": "/privacy-policy.html"
+      },
+      {
+        "source": "terms-conditions",
+        "destination": "/tc.html"
+      },
+      {
+        "source": "contact-us",
+        "destination": "/contact-us.html"
+      },
+      {
+        "source": "refund-policy",
+        "destination": "/refund-policy.html"
+      },
+      {
+        "source": "shipping-policy",
+        "destination": "/shipping-policy.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

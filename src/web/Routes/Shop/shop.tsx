@@ -22,13 +22,14 @@ import { Loading } from '../../module/loading';
 import { OurStories } from '../../module/stories/stories';
 import { MasterControl } from '../../module/master-control';
 import { FullPageBanner } from '../../module/full-page-banner';
+import { Footer } from '../../../common/footer';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
   const loading = userDetails?.loading;
   const navigate = useNavigate();
-  const [notificationGranted, setNotification] = useState(
-    () => !isNotificationSupported() ? true : Notification.permission === 'granted'
+  const [notificationGranted, setNotification] = useState(() =>
+    !isNotificationSupported() ? true : Notification.permission === 'granted'
   );
   const [drawer, setDrawer] = useState(false);
   useEffect(() => {
@@ -60,7 +61,7 @@ export const ShopPage = () => {
           overflowY: 'auto',
           overflowX: 'hidden',
           backgroundColor: '#f5f5f5',
-          p: 0,
+          p: 0
         }}
       >
         {notificationGranted ? (
@@ -85,6 +86,7 @@ export const ShopPage = () => {
           <LastOrder />
         </Box>
         <HomeFoodDrawer open={drawer} setOpen={setDrawer} />
+        <Footer />
       </Container>
     </>
   );
