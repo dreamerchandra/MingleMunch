@@ -83,7 +83,7 @@ export const ShopPage = () => {
             setDrawer(true);
           }}
         /> */}
-        <Box marginTop={-7}>
+        <Box marginTop={2}>
           <MasterControl />
           <Shops />
           {!notificationGranted ? <NotificationInfo onClick={() => setNotification(true)} />: <div style={{
