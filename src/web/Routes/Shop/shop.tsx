@@ -16,8 +16,6 @@ import {
 } from '../../module/Shoping/CheckoutHeadup';
 import { Feedback } from '../../module/feedback/feedback';
 // import { FullPageBanner } from '../../module/full-page-banner';
-import { HomeFoodBanner } from '../../module/home-food-banner';
-import { HomeFoodDrawer } from '../../module/home-food-drawer';
 import { Loading } from '../../module/loading';
 import { OurStories } from '../../module/stories/stories';
 import { MasterControl } from '../../module/master-control';
@@ -31,7 +29,7 @@ export const ShopPage = () => {
   const [notificationGranted, setNotification] = useState(() =>
     !isNotificationSupported() ? true : Notification.permission === 'granted'
   );
-  const [drawer, setDrawer] = useState(false);
+  // const [drawer, setDrawer] = useState(false);
   useEffect(() => {
     if (loading) {
       localStorage.setItem('splash', window.location.pathname);
@@ -51,7 +49,17 @@ export const ShopPage = () => {
   }
   return (
     <>
-      <Header title="Burn Home" />
+      <Header
+        title="Burn Home"
+        logo={
+          <img
+            src="/dark_v1.svg"
+            style={{
+              width: '76px'
+            }}
+          />
+        }
+      />
       <FullPageBanner />
       <Feedback />
       <Container
@@ -64,28 +72,27 @@ export const ShopPage = () => {
           p: 0
         }}
       >
-        {notificationGranted ? (
-          <OurStories />
-        ) : (
-          <NotificationInfo onClick={() => setNotification(true)} />
-        )}
+        <OurStories />
         <div
           style={{
             height: '10px'
           }}
         ></div>
-        <HomeFoodBanner
+        {/* <HomeFoodBanner
           onClick={() => {
             setDrawer(true);
           }}
-        />
+        /> */}
         <Box marginTop={-7}>
           <MasterControl />
           <Shops />
+          {!notificationGranted ? <NotificationInfo onClick={() => setNotification(true)} />: <div style={{
+            height: '96px'
+          }}></div>}
           <CheckoutHeadsUp />
           <LastOrder />
         </Box>
-        <HomeFoodDrawer open={drawer} setOpen={setDrawer} />
+        {/* <HomeFoodDrawer open={drawer} setOpen={setDrawer} /> */}
         <Footer />
       </Container>
     </>

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../firebase/auth';
 import { initFCM } from '../../firebase/firebase/fcm';
 import { useCart } from './cart-activity';
+import { Notifications } from '@mui/icons-material';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   position: 'fixed',
@@ -55,7 +56,8 @@ export function NotificationInfo({ onClick }: { onClick: () => void }) {
         flexDirection: 'column',
         alignItems: 'start',
         mt: 2,
-        mb: 2
+        mb: 2,
+        p: 3,
       }}
     >
       <Typography variant="h2" color="text.secondary">
@@ -66,11 +68,12 @@ export function NotificationInfo({ onClick }: { onClick: () => void }) {
         notification
       </Typography>
       <Button
-        color="error"
+        color="secondary"
         variant="contained"
         sx={{
           alignSelf: 'end',
-          fontSize: '0.70rem'
+          fontSize: '0.70rem',
+          gap: 1,
         }}
         onClick={async () => {
           setTimeout(() => {
@@ -79,6 +82,7 @@ export function NotificationInfo({ onClick }: { onClick: () => void }) {
           await initFCM(userDetails.user?.uid);
         }}
       >
+        <Notifications />
         Allow Notification
       </Button>
     </Box>

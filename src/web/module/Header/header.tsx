@@ -9,7 +9,7 @@ import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { styled, useTheme } from '@mui/material/styles';
-import { FC, useEffect, useState } from 'react';
+import { FC, ReactNode, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 
@@ -23,7 +23,8 @@ export const Header: FC<{
   onSearch?: (search: string) => void;
   search?: string;
   title: string;
-}> = ({ onSearch, search, title }) => {
+  logo?: ReactNode;
+}> = ({ onSearch, search, title, logo }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchPlaceHolder, setSearchPlaceholder] = useState('');
@@ -153,6 +154,18 @@ export const Header: FC<{
                 {title}
               </Typography>
             </>
+          ) :logo ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px 16px',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              {logo}
+            </div>
           ) : (
             <Typography variant="h6" sx={{ pl: 4 }} color="text.secondary">
               {title}
