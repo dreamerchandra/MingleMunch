@@ -208,3 +208,12 @@ export const getLastOrder = async (
   });
   return { order: orders[0] ?? null, unsubscribe: unsubscribe };
 };
+
+interface DeliveryFeePayload {
+  details: { itemId: string; quantity: number }[];
+}
+
+export const getDeliveryFee = async (order: DeliveryFeePayload): Promise<number> => {
+  const data = await post('/v1/delivery-fee', order);
+  return data.deliveryFee;
+}

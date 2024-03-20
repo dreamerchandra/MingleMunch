@@ -7,4 +7,7 @@ export interface Shop {
   description: string;
   isOpen: boolean;
   deliveryFee: number;
+  minOrderDeliveryFee: number;
+  minOrderValue: number;
+  platformFee: number;
 }

@@ -30,7 +30,7 @@ import {
   useUserConfig
 } from '../appconfig';
 import { useCart } from './cart-activity';
-import { useMutationCreateOrder } from './checkout-query';
+import { useDeliveryFee, useMutationCreateOrder } from './checkout-query';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -580,6 +580,7 @@ export const Checkout: FC = () => {
   const [success, setShowSuccess] = useState(false);
   const [error, setError] = useState(initialErrorState);
   const [model, setModel] = useState(false);
+  const { data: deliveryFee } = useDeliveryFee();
   useEffect(() => {
     if (items.length === 0) {
       navigate('/');
@@ -604,22 +605,18 @@ export const Checkout: FC = () => {
     return null;
   }
   const shopIds = [...new Set(items.map((i) => i.product.shopId))];
-  const originalDeliveryFee = shopIds.reduce((old, shopId) => {
-    const s = shops?.find((s) => s.shopId === shopId);
-    if (!s) return old;
-    return old + s.deliveryFee;
-  }, 0);
-  const deliveryFee = !coupon
-    ? shopIds.reduce((old, shopId) => {
-        const s = shops?.find((s) => s.shopId === shopId);
-        if (!s) return old;
-        return old + s.deliveryFee;
-      }, 0)
-    : 0;
-
-  const { platformFee } = appConfig;
+  const platformFee = Math.min(
+    ...shopIds.map(
+      (s) => shops.find((shop) => shop.shopId === s)?.platformFee ?? 0
+    )
+  );
   const grandTotal = Number(
-    (itemsTotal + deliveryFee + platformFee + parcelChargesTotal).toFixed(2)
+    (
+      itemsTotal +
+      (deliveryFee ?? 0) +
+      platformFee +
+      parcelChargesTotal
+    ).toFixed(2)
   );
 
   const onPlaceOrder = () => {
@@ -689,7 +686,7 @@ export const Checkout: FC = () => {
               borderRadius: '5px'
             }}
           >
-            You have saved Rs.{originalDeliveryFee} on this order.
+            You have saved Rs.{deliveryFee} on this order.
           </Alert>
         )}
         <CheckoutCard items={items} error={error} />
@@ -731,8 +728,8 @@ export const Checkout: FC = () => {
         <TotalCard
           itemsTotal={itemsTotal}
           coupon={coupon}
-          originalDeliveryFee={originalDeliveryFee}
-          deliveryFee={deliveryFee}
+          originalDeliveryFee={deliveryFee??0}
+          deliveryFee={deliveryFee??0}
           platformFee={platformFee}
           parcelChargesTotal={parcelChargesTotal}
           grandTotal={grandTotal}

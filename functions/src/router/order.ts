@@ -25,7 +25,7 @@ interface OrderBody {
   orderId?: string;
 }
 
-const getAllData = async (productIds: string[]) => {
+export const getAllData = async (productIds: string[]) => {
   const products = await getProducts(productIds);
   const isAllAvailable = products.every((p) => p.isAvailable);
   if (!isAllAvailable) {

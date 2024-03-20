@@ -1,11 +1,18 @@
 import {
   UseMutationResult,
   useMutation,
+  useQuery,
   useQueryClient
 } from '@tanstack/react-query';
-import { createHomeOrder, createOrder, OrderPayload } from '../../firebase/order';
+import {
+  createHomeOrder,
+  createOrder,
+  getDeliveryFee,
+  OrderPayload
+} from '../../firebase/order';
 import { Order } from '../../../common/types/Order';
 import { Product } from '../../../common/types/Product';
+import { useCart } from './cart-activity';
 
 interface OrderError {
   error: string;
@@ -27,11 +34,10 @@ export const useMutationCreateOrder = (): UseMutationResult<
   });
 };
 
-
 export const useMutationHomeOrder = (): UseMutationResult<
-{
-  success: boolean;
-},
+  {
+    success: boolean;
+  },
   { cause: OrderError },
   {
     quantity: number;
@@ -45,6 +51,28 @@ export const useMutationHomeOrder = (): UseMutationResult<
     mutationFn: createHomeOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+    }
+  });
+};
+
+export const useDeliveryFee = () => {
+  const { cartDetails } = useCart();
+  const details = cartDetails.cart.reduce((acc, item) => {
+    const existing = acc.find((i) => i.itemId === item.itemId);
+    if (existing) {
+      existing.quantity += 1;
+      return acc;
+    }
+    acc.push({ itemId: item.itemId, quantity: 1 });
+    return acc;
+  }, [] as { itemId: string; quantity: number }[]);
+
+  return useQuery({
+    queryKey: ['deliveryFee'],
+    queryFn: () => {
+      return getDeliveryFee({
+        details
+      });
     }
   });
 };

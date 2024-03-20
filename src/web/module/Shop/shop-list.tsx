@@ -161,7 +161,6 @@ export const Shops = () => {
         pt: 2,
         alignItems: 'center',
         gap: 1,
-        pb: 16
       }}
     >
       <Box
