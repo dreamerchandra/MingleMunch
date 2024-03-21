@@ -1,6 +1,6 @@
+import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@emotion/react';
 import { createTheme } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { User } from 'firebase/auth';
 import LogRocket from 'logrocket';
