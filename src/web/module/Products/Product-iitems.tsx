@@ -52,7 +52,8 @@ const FooterActions: FC<{
             <Button
               size="small"
               sx={{
-                px: 2,
+                paddingLeft: '16px',
+                paddingRight: '16px',
                 minWidth: '0px'
               }}
               onClick={() => removeFromCart(product)}
@@ -65,7 +66,8 @@ const FooterActions: FC<{
             <Button
               size="small"
               sx={{
-                px: 2,
+                paddingLeft: '16px',
+                paddingRight: '16px',
                 minWidth: '0px'
               }}
               onClick={() => {

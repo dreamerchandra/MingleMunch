@@ -20,7 +20,11 @@ export const CategoryList: FC<{
   categories?: Category[];
 }> = ({ selected, onChange, search, categories }) => {
   const [fuse, setFuse] = useState<Fuse<Category>>();
-  const [animationParent] = useAutoAnimate();
+  const [animationParent] = useAutoAnimate({
+    duration: 450,
+    easing: 'ease-in-out',
+    disrespectUserMotionPreference: true
+  });
 
   useEffect(() => {
     if (categories == null) return;
