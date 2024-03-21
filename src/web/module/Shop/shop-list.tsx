@@ -68,7 +68,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
             pt: shop.tag ? 3 : 0
           }}
         >
-          <Typography component="h3" variant="h3">
+          <Typography component="h4" variant="h4">
             {shop.shopName}
           </Typography>
           <Typography component="h6" variant="h6" color="GrayText">
@@ -82,7 +82,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
                 py: 1,
                 color: '#fff',
                 borderRadius: '5px',
-                fontSize: '13px',
+                fontSize: '0.6rem',
                 width: 'fit-content',
                 fontWeight: '900'
               }}
@@ -104,7 +104,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
     </Card>
   );
 };
-function SkeletonChildrenDemo() {
+export function SkeletonLoading() {
   return (
     <div
       style={{
@@ -145,11 +145,11 @@ export const Shops = () => {
           pb: 16
         }}
       >
-        <SkeletonChildrenDemo />
-        <SkeletonChildrenDemo />
-        <SkeletonChildrenDemo />
-        <SkeletonChildrenDemo />
-        <SkeletonChildrenDemo />
+        <SkeletonLoading />
+        <SkeletonLoading />
+        <SkeletonLoading />
+        <SkeletonLoading />
+        <SkeletonLoading />
       </Box>
     );
   }
@@ -170,7 +170,7 @@ export const Shops = () => {
         }}
       >
         <Typography
-          variant="h2"
+          variant="h4"
           color="text.secondary"
           sx={{ letterSpacing: 4 }}
         >

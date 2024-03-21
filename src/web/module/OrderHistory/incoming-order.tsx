@@ -71,7 +71,7 @@ export const IncomingOrder = () => {
         flexDirection: 'column',
         gap: 3,
         p: 2,
-        height: 'calc(100svh - 140px)',
+        height: 'calc(100svh - 120px)',
         overflow: 'auto'
       }}
     >

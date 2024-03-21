@@ -79,20 +79,20 @@ export const theme: ThemeOptions = {
     fontFamily: "'Nunito', sans-serif ",
     h1: {
       fontFamily: "'Nunito', sans-serif ",
-      fontSize: '65px',
+      fontSize: '4.0625rem',
       fontWeight: 900,
       lineHeight: 1.1142857142857143
     },
     h2: {
       fontFamily: "'Nunito', sans-serif ",
-      fontSize: '28px',
+      fontSize: '1.75rem',
       fontWeight: 900,
       lineHeight: 1.2222222222222223,
       color: '#000000'
     },
     h3: {
       fontFamily: "'Nunito', sans-serif ",
-      fontSize: '22px',
+      fontSize: '1.375rem',
       fontWeight: 600,
       lineHeight: 1.2222222222222223,
       color: '#000000'
@@ -102,7 +102,7 @@ export const theme: ThemeOptions = {
       fontSize: '1.125rem',
       lineHeight: 1.2222222222222223,
       letterSpacing: 0.2,
-      fontWeight: 200
+      fontWeight: 700
     },
     h5: {
       fontSize: '1.125rem',

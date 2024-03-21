@@ -59,7 +59,7 @@ export const Header: FC<{
         <Box
           sx={{
             position: 'sticky',
-            height: '70px',
+            height: '50px',
             top: 6,
             width: 'min(93vw, 1200px)',
             display: 'flex',
@@ -81,6 +81,7 @@ export const Header: FC<{
             <ArrowBackRounded />
           </Button>
           <TextField
+            size="small"
             id="search"
             variant="outlined"
             fullWidth
@@ -94,7 +95,10 @@ export const Header: FC<{
             }}
             sx={{
               position: 'relative',
-              boxShadow: '0px 0px 1px 0px #00000050'
+              boxShadow: '0px 0px 1px 0px #00000050',
+              div: {
+                py: '4px'
+              }
             }}
             placeholder={searchPlaceHolder}
             InputProps={{
@@ -154,7 +158,7 @@ export const Header: FC<{
                 {title}
               </Typography>
             </>
-          ) :logo ? (
+          ) : logo ? (
             <div
               style={{
                 display: 'flex',

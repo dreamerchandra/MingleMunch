@@ -65,7 +65,7 @@ export const OurStories = () => {
         mb: 2
       }}
     >
-      <Typography variant="h6" sx={{ letterSpacing: 4 }}>
+      <Typography variant="h4" color="text.secondary" sx={{ letterSpacing: 4 }}>
         OUR STORIES
       </Typography>
       <Container

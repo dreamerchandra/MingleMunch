@@ -53,9 +53,9 @@ export const ShopPage = () => {
         title="Burn Home"
         logo={
           <img
-            src="/favicon.png"
+            src="/dark_v1.svg"
             style={{
-              width: '25px'
+              width: '75px'
             }}
           />
         }

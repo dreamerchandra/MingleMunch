@@ -57,9 +57,9 @@ const FooterActions: FC<{
               }}
               onClick={() => removeFromCart(product)}
             >
-              <Remove color="info" fontSize="small" />
+              <Remove fontSize="small" />
             </Button>
-            <Typography variant="h6" color="green">
+            <Typography variant="h4" color="green">
               {inCart.length}
             </Typography>
             <Button
@@ -73,7 +73,7 @@ const FooterActions: FC<{
                 addToCart(product);
               }}
             >
-              <Add color="info" fontSize="small" />
+              <Add fontSize="small" />
             </Button>
           </Container>
         ) : (
@@ -142,15 +142,21 @@ const FooterActions: FC<{
                   boxShadow:
                     '1px 1px 0px 0px, 1px 1px 0px 0px, 1px 1px 0px 0px, 2px 2px 0px 0px, 2px 2px 0px 0px',
                   position: 'relative',
+                  fontSize: '0.6rem',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
                   ':active': {
                     boxShadow: '0px 0px 0px 0px',
                     top: '5px',
-                    left: '5px'
+                    left: '5px',
                   }
                 }}
                 disableRipple
               >
-                <Add />
+                <Add fontSize='small'/>
                 ADD
               </Button>
             )}
@@ -176,7 +182,7 @@ const ItemDescription: FC<{ description: string }> = ({ description }) => {
   return (
     <div>
       <Typography
-        variant="body1"
+        variant="body2"
         color="text.secondary"
         sx={{
           display: '-webkit-box',
@@ -221,12 +227,12 @@ export const ProductItem: FC<{
         }}
       >
         <div style={{ padding: '8px' }}>
-          <Typography variant="h3" component="h2">
+          <Typography variant="h4" component="h2">
             {itemName}
           </Typography>
           <ItemDescription description={itemDescription} />
 
-          <Typography variant="h3" color="text.secondary">
+          <Typography variant="body1" color="text.secondary">
             ₹{itemPrice}
           </Typography>
         </div>
@@ -237,7 +243,6 @@ export const ProductItem: FC<{
             alignItems: 'center'
           }}
         >
-          <div style={{ height: '25px' }}></div>
           <FooterActions
             product={product}
             isSuggestion={isSuggestion}

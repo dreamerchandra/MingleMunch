@@ -91,6 +91,7 @@ export const LastOrder: FC = () => {
       sx={{
         position: 'fixed',
         bottom: 58,
+        zIndex: 1,
         left: {
           xs: 0,
           sm: 0,

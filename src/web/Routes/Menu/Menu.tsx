@@ -26,7 +26,7 @@ export const MenuPage = () => {
       <Container
         component="main"
         sx={{
-          height: 'calc(100svh - 250px)',
+          height: 'calc(100svh - 210px)',
           overflow: 'auto',
           backgroundColor: '#f5f5f5',
           backgroundSize: '100vw',

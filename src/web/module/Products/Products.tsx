@@ -1,8 +1,8 @@
 import { useTheme } from '@emotion/react';
 import {
-  ArrowDropDown,
-  ArrowDropUp,
   AutoAwesome,
+  ExpandLessOutlined,
+  ExpandMoreOutlined,
   UnfoldLess,
   UnfoldMore
 } from '@mui/icons-material';
@@ -21,6 +21,7 @@ import { CategoryList } from '../category/category-list';
 import { useCategoryQuery } from '../category/category-query';
 import { ProductItem } from './Product-iitems';
 import { useProductsQuery } from './product-query';
+import { SkeletonLoading } from '../Shop/shop-list';
 
 const fuseOptions = {
   shouldSort: true,
@@ -77,7 +78,24 @@ export const Products: FC<{
   };
 
   if (isLoading) {
-    return <CircularProgress />;
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          pt: 2,
+          alignItems: 'center',
+          gap: 1,
+          pb: 16
+        }}
+      >
+        <SkeletonLoading />
+        <SkeletonLoading />
+        <SkeletonLoading />
+        <SkeletonLoading />
+        <SkeletonLoading />
+      </Box>
+    )
   }
   const shop = shops?.find((shop) => shop.shopId === shopId);
   const shopName = shop?.shopName ?? 'Loading...';
@@ -94,7 +112,7 @@ export const Products: FC<{
         }}
       >
         <Typography
-          variant="h2"
+          variant="h4"
           component="h1"
           color="text.secondary"
           sx={{ margin: 'auto' }}
@@ -118,15 +136,17 @@ export const Products: FC<{
           >
             {shop?.deliveryFee === 0 ? (
               <Paper
+              elevation={0}
                 sx={{
                   background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
                   px: 1,
                   py: 1,
                   color: '#fff',
                   borderRadius: '5px',
-                  fontSize: '13px',
+                  fontSize: '0.6rem',
                   width: 'fit-content',
-                  fontWeight: '900'
+                  fontWeight: '900',
+                  height: 'fit-content'
                 }}
               >
                 # FREE DELIVERY
@@ -137,10 +157,13 @@ export const Products: FC<{
             <button
               color="info"
               onClick={() => {
-                if (collapsed.length) {
+                if ((collapsed.length - 1) === categories?.length) {
                   setCollapsed([]);
                 } else {
-                  setCollapsed(categories?.map((c) => c.categoryId) ?? []);
+                  setCollapsed([
+                    '-1',
+                    ...(categories?.map((c) => c.categoryId) ?? [])
+                  ]);
                 }
               }}
               style={{
@@ -152,7 +175,7 @@ export const Products: FC<{
                 alignItems: 'center'
               }}
             >
-              {categories?.length === collapsed.length ? (
+              {categories?.length === collapsed.length - 1 ? (
                 <UnfoldMore />
               ) : (
                 <UnfoldLess />
@@ -221,7 +244,7 @@ export const Products: FC<{
               if (['admin', 'vendor'].includes(role)) {
                 return true;
               }
-              if(search !== '' && category.categoryId === '-1') {
+              if (search !== '' && category.categoryId === '-1') {
                 return false;
               }
               if (category.categoryId === '-1') {
@@ -263,8 +286,9 @@ export const Products: FC<{
                       justifyContent: 'start',
                       width: '100%',
                       position: 'sticky',
-                      top: '5px',
-                      zIndex: 100
+                      top: '0px',
+                      zIndex: 100,
+                      background: '#fff'
                     }}
                     onClick={() => {
                       if (collapsed.includes(category.categoryId)) {
@@ -293,7 +317,7 @@ export const Products: FC<{
                         }}
                       >
                         <Typography
-                          variant="h5"
+                          variant="body1"
                           component="h2"
                           sx={{
                             fontWeight: 'bold',
@@ -311,9 +335,9 @@ export const Products: FC<{
                         >
                           {category.categoryId === '-1' && (
                             <AutoAwesome
-                              fontSize="small"
                               sx={{
-                                color: '#53e8b4'
+                                color: '#53e8b4',
+                                fontSize: '16px'
                               }}
                             />
                           )}
@@ -321,20 +345,16 @@ export const Products: FC<{
                         </Typography>
                       </Box>
                       {collapsed.includes(category.categoryId) ? (
-                        <ArrowDropDown
+                        <ExpandMoreOutlined
                           sx={{
                             fontSize: '25px',
-                            color: '#ff0000',
-                            backgroundColor: '#c3c0c0a2',
                             borderRadius: '50%'
                           }}
                         />
                       ) : (
-                        <ArrowDropUp
+                        <ExpandLessOutlined
                           sx={{
                             fontSize: '25px',
-                            color: '#ff0000',
-                            backgroundColor: '#c3c0c0a2',
                             borderRadius: '50%'
                           }}
                         />
@@ -342,6 +362,7 @@ export const Products: FC<{
                     </Container>
                   </Box>
                   {category.categoryId === '-1' &&
+                    !collapsed.includes('-1') &&
                     filteredList
                       .filter((p) => p.isRecommended)
                       .filter((p) =>
