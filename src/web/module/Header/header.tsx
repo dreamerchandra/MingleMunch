@@ -181,7 +181,8 @@ export const Header: FC<{
           left: 0,
           right: 0,
           width: 'min(100vw, 1200px)',
-          margin: 'auto'
+          margin: 'auto',
+          height: 'fit-content',
         }}
       >
         <BottomNavigation

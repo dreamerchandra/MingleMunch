@@ -21,6 +21,7 @@ import { OurStories } from '../../module/stories/stories';
 import { MasterControl } from '../../module/master-control';
 import { FullPageBanner } from '../../module/full-page-banner';
 import { Footer } from '../../../common/footer';
+import { HerCoupon } from '../../module/her-coupon/her-coupon';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -65,7 +66,7 @@ export const ShopPage = () => {
       <Container
         component="main"
         sx={{
-          height: 'calc(100svh - 150px)',
+          height: 'calc(100svh - 120px)',
           overflowY: 'auto',
           overflowX: 'hidden',
           backgroundColor: '#f5f5f5',
@@ -83,6 +84,7 @@ export const ShopPage = () => {
             setDrawer(true);
           }}
         /> */}
+        <HerCoupon />
         <Box marginTop={2}>
           <MasterControl />
           <Shops />

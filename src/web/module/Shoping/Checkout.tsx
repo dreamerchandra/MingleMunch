@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { SwipeableDrawer } from '@mui/material';
+import { SwipeableDrawer, TextField } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -23,14 +23,10 @@ import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
 import { LastOrder } from '../LastOrder/LastOrder';
 import { useShopQuery } from '../Shop/shop-query';
-import {
-  AppConfig,
-  UserConfig,
-  useAppConfig,
-  useUserConfig
-} from '../appconfig';
+import { AppConfig, useAppConfig, useUserConfig } from '../appconfig';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
+import { post } from '../../firebase/fetch';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -318,9 +314,14 @@ const initialErrorState = { message: '', products: [] as string[] };
 const ApplyCouponDrawer: FC<{
   model: boolean;
   setModel: (open: boolean) => void;
-  userConfig: UserConfig;
   setCoupon: (c: string) => void;
-}> = ({ model, setModel, userConfig, setCoupon }) => {
+  coupon: string;
+}> = ({ model, setModel, setCoupon, coupon }) => {
+  const [_coupon, _setCoupon] = useState({
+    coupon: '',
+    error: '',
+    isLoading: false
+  });
   return (
     <SwipeableDrawer
       open={model}
@@ -338,111 +339,85 @@ const ApplyCouponDrawer: FC<{
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          margin: 'auto',
-          background: '#000 url(/abstract_emoji.png)'
+          margin: 'auto'
+          // background: '#000 url(/abstract_emoji.png)'
         }}
       >
-        {userConfig?.availableCoupons?.length === 0 ? (
-          <SubSection
-            sx={{
-              gap: 2
-            }}
-          >
-            <Typography variant="h6" color="secondary">
-              No coupons available for you
-            </Typography>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            >
-              <Typography variant="caption" color="secondary">
-                Pro Tip: You could
-                <Typography
-                  variant="caption"
-                  color="secondary"
-                  sx={{ m: 1, textDecoration: 'underline' }}
-                >
-                  refer and earn
-                </Typography>
-                coupons.
-              </Typography>
-              <Typography variant="caption" color="secondary">
-                Your referral code is
-                <Button variant="text" color="info" sx={{ p: 0, ml: 2 }}>
-                  {userConfig?.myReferralCodes}
-                </Button>
-              </Typography>
-            </div>
-            <div
-              style={{
-                height: '12px'
-              }}
-            />
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-evenly',
-                gap: 2
-              }}
-            >
-              <ReferButton myReferralCodes={userConfig.myReferralCodes ?? ''} />
-              <Button
-                variant="contained"
-                onClick={() => setModel(false)}
-                color="secondary"
-              >
-                Close
-              </Button>
-            </Box>
-          </SubSection>
-        ) : (
-          <Typography variant="h6" color="secondary">
-            Available coupons
-          </Typography>
-        )}
-        {userConfig.availableCoupons?.map((coupon) => (
-          <Card
-            key={coupon}
-            elevation={4}
-            sx={{
+        <Card
+          elevation={4}
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 2,
+            borderRadius: '10px',
+            backgroundColor: '#f1f1f1',
+            gap: 4
+          }}
+        >
+          <div
+            style={{
               display: 'flex',
+              flexDirection: 'column',
               justifyContent: 'space-between',
               alignItems: 'center',
-              padding: 2,
-              borderRadius: '10px',
-              backgroundColor: '#c0eade2c'
+              gap: 2,
+              width: '100%'
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 2
+            <TextField
+              variant="filled"
+              label="Coupon"
+              fullWidth
+              placeholder="GET FROM YOUR FRIEND"
+              value={_coupon.coupon}
+              onChange={(e) => {
+                _setCoupon({
+                  ..._coupon,
+                  coupon: e.target.value.toUpperCase(),
+                  error: ''
+                });
               }}
-            >
-              <Typography variant="h6" color="secondary">
-                {coupon}
+            />
+            {_coupon.error && (
+              <Typography variant="caption" color="error">
+                {_coupon.error}
               </Typography>
-              <Typography variant="caption" color="secondary">
-                Free delivery
-              </Typography>
-            </div>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => {
-                setCoupon(coupon);
+            )}
+          </div>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={async () => {
+              _setCoupon({
+                ..._coupon,
+                error: '',
+                isLoading: true
+              });
+              const { data } = await post('/v1/canUseHerCoupon', {
+                couponCode: _coupon.coupon
+              });
+              const { canProceed, error } = data;
+              if (canProceed) {
+                setCoupon(_coupon.coupon);
                 setModel(false);
-              }}
-            >
-              Apply
-            </Button>
-          </Card>
-        ))}
+                _setCoupon({
+                  ..._coupon,
+                  error: '',
+                  isLoading: false
+                });
+              } else {
+                _setCoupon({
+                  ..._coupon,
+                  error: error,
+                  isLoading: false
+                });
+              }
+            }}
+          >
+            Apply
+          </Button>
+        </Card>
       </Box>
     </SwipeableDrawer>
   );
@@ -457,7 +432,6 @@ const Footer: FC<{
   coupon: string;
   setModel: (show: boolean) => void;
   appConfig: AppConfig;
-  userConfig: UserConfig;
   cartId?: string;
 }> = ({
   error,
@@ -467,7 +441,6 @@ const Footer: FC<{
   onPlaceOrder,
   grandTotal,
   coupon,
-  userConfig,
   setModel,
   cartId
 }) => {
@@ -523,18 +496,17 @@ const Footer: FC<{
             >
               Coupon applied: {coupon}
             </Typography>
-          ) : userConfig.availableCoupons?.length ? (
-            <Button
-              variant="text"
-              color="success"
-              onClick={() => setModel(true)}
-              sx={{
-                fontWeight: 800
-              }}
-            >
-              {userConfig.availableCoupons.length} COUPON AVAILABLE
-            </Button>
           ) : null}
+          <Button
+            variant="text"
+            color="success"
+            onClick={() => setModel(true)}
+            sx={{
+              fontWeight: 800
+            }}
+          >
+            Apply Coupon
+          </Button>
         </SubSection>
       )}
     </>
@@ -542,12 +514,11 @@ const Footer: FC<{
 };
 
 export const Checkout: FC = () => {
-  const { cartDetails, removeAll } = useCart();
-  const { cartId } = cartDetails;
+  const { cartDetails, removeAll, updateCoupon } = useCart();
+  const { cartId, coupon = ''} = cartDetails;
   const { data: shops } = useShopQuery();
   const { data: appConfig } = useAppConfig();
   const { data: userConfig } = useUserConfig();
-  const [coupon, _setCoupon] = useState('');
   const [confetti, setConfetti] = useState({
     show: false,
     opacity: 0.5
@@ -563,7 +534,7 @@ export const Checkout: FC = () => {
         return { ...c, opacity: c.opacity - 0.01 };
       });
     }, 100);
-    _setCoupon(coupon);
+    updateCoupon(coupon);
     Analytics.pushEvent('coupon-applied', { coupon });
   };
   const items = cartDetails.cart.reduce((old, cartItem) => {
@@ -752,7 +723,6 @@ export const Checkout: FC = () => {
           onPlaceOrder={onPlaceOrder}
           setError={setError}
           setModel={setModel}
-          userConfig={userConfig}
           cartId={cartId}
         />
       </SubSection>
@@ -761,7 +731,7 @@ export const Checkout: FC = () => {
           model={model}
           setCoupon={setCoupon}
           setModel={setModel}
-          userConfig={userConfig}
+          coupon={coupon}
         />
       )}
       {confetti.show && (

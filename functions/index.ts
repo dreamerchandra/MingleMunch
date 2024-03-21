@@ -16,6 +16,7 @@ import {
 import { createZendutyIncident, updateWhatsapp } from './src/router/twilio.js';
 import { updateUser } from './src/router/update-user.js';
 import { onCreateUser, updateReferralCode } from './src/router/user.js';
+import { canUseHerCoupon, getHerCoupon } from './src/router/her-coupon.js';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -113,6 +114,8 @@ expressApp.post('/v1/fcm-register', async (req: Request, res: Response) => {
 expressApp.post('/v1/order', authMiddle, createOrder);
 expressApp.post('/v1/home-order', authMiddle, createHomeOrder);
 expressApp.post('/v1/referral', authMiddle, updateReferralCode);
+expressApp.post('/v1/canUseHerCoupon', authMiddle, canUseHerCoupon);
+expressApp.get('/v1/her-coupon', authMiddle, getHerCoupon);
 expressApp.post(
   '/v1/onboard-referral',
   authMiddle,

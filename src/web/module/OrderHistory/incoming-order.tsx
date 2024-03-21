@@ -47,7 +47,7 @@ const initialCongestion = {
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
-  const { addMultipleToCart, removeAll, updateCartId } = useCart();
+  const { addMultipleToCart, removeAll, updateCartId, updateCoupon } = useCart();
   const navigate = useNavigate();
   const [showCongestion, setShowCongestion] = useState(initialCongestion);
   const onCongestion = async (congestion: number) => {
@@ -204,6 +204,7 @@ export const IncomingOrder = () => {
                     onClick={async () => {
                       removeAll();
                       updateCartId(order.orderId);
+                      updateCoupon(order.appliedCoupon);
                       await addAllToCart(
                         Object.keys(order.itemToQuantity).reduce(
                           (acc, id) => ({

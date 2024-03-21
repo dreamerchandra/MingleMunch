@@ -37,13 +37,30 @@ const reportUrl = isLocalhost()
 
 export const get = async (
   urlString: string,
-  params: any,
+  params?: any,
   signal?: AbortController['signal']
 ) => {
-  const url = new URL(`${baseUrl}${urlString}}`);
-  url.search = constructSearch(params).toString();
+  const url = new URL(`${baseUrl}${urlString}`);
+  url.search = params ? constructSearch(params).toString() : '';
+  console.log(url.pathname, url.search);
   try {
-    const res = await fetch(url, { signal });
+    let token = await firebaseAuth.currentUser?.getIdToken();
+    const result = await firebaseAuth.currentUser?.getIdTokenResult();
+    if (!result) {
+      throw new Error('No token found');
+    }
+    if (new Date(result.expirationTime).valueOf() < Date.now()) {
+      console.log('token expired, refreshing');
+      token = await firebaseAuth.currentUser?.getIdToken(true);
+    }
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + token
+      },
+      body: JSON.stringify(params),
+      signal
+    });
     handleError(res);
     const data = await res.json();
     return data;
@@ -98,7 +115,7 @@ export const generateReport = async () => {
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + token
-      },
+      }
     });
     await handleError(res);
     const data = await res.json();

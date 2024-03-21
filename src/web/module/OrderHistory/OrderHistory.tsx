@@ -18,6 +18,12 @@ const getReadableStatus = (status: OrderStatus) => {
       return 'Prepared';
     case 'delivered':
       return 'Delivered';
+    case 'picked_up':
+      return 'Picked Up';
+    case 'reached_location':
+      return 'Reached Location';
+    case 'rejected':
+      return 'Rejected';
     default:
       return 'Unknown';
   }

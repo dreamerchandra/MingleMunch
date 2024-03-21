@@ -1,8 +1,13 @@
 import { useTheme } from '@emotion/react';
 import {
   ArrowDropDown,
+  ArrowDropDownOutlined,
   ArrowDropUp,
+  ArrowDropUpOutlined,
   AutoAwesome,
+  ExpandLess,
+  ExpandLessOutlined,
+  ExpandMoreOutlined,
   UnfoldLess,
   UnfoldMore
 } from '@mui/icons-material';
@@ -140,7 +145,10 @@ export const Products: FC<{
                 if (collapsed.length) {
                   setCollapsed([]);
                 } else {
-                  setCollapsed(categories?.map((c) => c.categoryId) ?? []);
+                  setCollapsed([
+                    '-1',
+                    ...(categories?.map((c) => c.categoryId) ?? [])
+                  ]);
                 }
               }}
               style={{
@@ -152,7 +160,7 @@ export const Products: FC<{
                 alignItems: 'center'
               }}
             >
-              {categories?.length === collapsed.length ? (
+              {categories?.length === collapsed.length - 1 ? (
                 <UnfoldMore />
               ) : (
                 <UnfoldLess />
@@ -263,8 +271,9 @@ export const Products: FC<{
                       justifyContent: 'start',
                       width: '100%',
                       position: 'sticky',
-                      top: '5px',
-                      zIndex: 100
+                      top: '0px',
+                      zIndex: 100,
+                      background: '#fff'
                     }}
                     onClick={() => {
                       if (collapsed.includes(category.categoryId)) {
@@ -321,27 +330,23 @@ export const Products: FC<{
                         </Typography>
                       </Box>
                       {collapsed.includes(category.categoryId) ? (
-                        <ArrowDropDown
+                        <ExpandMoreOutlined
                           sx={{
                             fontSize: '25px',
-                            color: '#ff0000',
-                            backgroundColor: '#c3c0c0a2',
                             borderRadius: '50%'
                           }}
                         />
                       ) : (
-                        <ArrowDropUp
+                        <ExpandLessOutlined
                           sx={{
                             fontSize: '25px',
-                            color: '#ff0000',
-                            backgroundColor: '#c3c0c0a2',
                             borderRadius: '50%'
                           }}
                         />
                       )}
                     </Container>
                   </Box>
-                  {category.categoryId === '-1' &&
+                  {(category.categoryId === '-1' && !collapsed.includes('-1')) &&
                     filteredList
                       .filter((p) => p.isRecommended)
                       .filter((p) =>
