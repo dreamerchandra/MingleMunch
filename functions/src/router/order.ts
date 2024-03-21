@@ -13,12 +13,12 @@ import { Shop } from '../types/Shop.js';
 import { OrderDb } from './order-helper.js';
 import { updateWhatsapp } from './twilio.js';
 import {
-  canProceedApplyingCoupon,
   removeCoupon,
   updateFreeDeliveryForInvitedUser
 } from './user.js';
 import { createOrderInDb } from './create-order.js';
 import { getLocationById } from './location.js';
+import { applyHerCoupon, canProceedToApply, canUseHerCoupon } from './her-coupon.js';
 
 interface OrderBody {
   details: [{ itemId: string; quantity: number }];
@@ -112,7 +112,8 @@ const getTotalByShop = (
     acc[shopId].displaySubTotal += p.itemPrice * quantity;
     acc[shopId].costPriceSubTotal += p.costPrice * quantity;
     acc[shopId].parcelChargesTotal += (p?.parcelCharges ?? 0) * quantity;
-    acc[shopId].costPriceParcelChargesTotal += (p?.costParcelCharges ?? 0) * quantity;
+    acc[shopId].costPriceParcelChargesTotal +=
+      (p?.costParcelCharges ?? 0) * quantity;
     return acc;
   }, {} as OrderDb['shopOrderValue']);
   for (const shopId in shopOrderValue) {

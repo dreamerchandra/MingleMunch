@@ -53,7 +53,7 @@ const getBackgroundColor = (status: OrderStatus): string => {
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
-  const { addMultipleToCart, removeAll, updateCartId, updateLocation } = useCart();
+  const { addMultipleToCart, removeAll, updateCartId, updateLocation, updateCoupon } = useCart();
   const navigate = useNavigate();
   const [showCongestion, setShowCongestion] = useState(initialCongestion);
   const onCongestion = async (congestion: number) => {
@@ -213,6 +213,7 @@ export const IncomingOrder = () => {
                       removeAll();
                       updateCartId(order.orderId);
                       updateLocation(order.locationId);
+                      updateCoupon(order.appliedCoupon);
                       await addAllToCart(
                         Object.keys(order.itemToQuantity).reduce(
                           (acc, id) => ({

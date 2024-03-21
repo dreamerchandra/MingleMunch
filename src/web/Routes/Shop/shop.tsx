@@ -23,6 +23,7 @@ import { FullPageBanner } from '../../module/full-page-banner';
 import { Footer } from '../../../common/footer';
 import { NoticeBoard } from '../../module/notice--board';
 import { LocationDrawer } from '../../module/location/location-drawer';
+import { HerCoupon } from '../../module/her-coupon/her-coupon';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -80,8 +81,7 @@ export const ShopPage = () => {
             height: '10px'
           }}
         ></div>
-        <NoticeBoard
-        />
+        <HerCoupon />
         <Box marginTop={2}>
           <MasterControl />
           <Shops />

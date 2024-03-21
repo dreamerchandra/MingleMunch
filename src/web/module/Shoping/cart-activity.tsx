@@ -15,6 +15,7 @@ type CartState = {
   totalItems: number;
   cartId?: string;
   locationId: string;
+  coupon?: string;
 };
 
 const initialState: CartState = {
@@ -22,7 +23,8 @@ const initialState: CartState = {
   total: 0,
   totalItems: 0,
   cartId: '',
-  locationId: ''
+  locationId: '',
+  coupon: '',
 };
 
 interface AddToCartAction {
@@ -51,6 +53,12 @@ interface UpdateLocation {
   type: 'UPDATE_LOCATION';
   payload: {
     locationId: string;
+  }
+};
+interface UpdateCoupon {
+  type: 'COUPON';
+  payload: {
+    coupon: string;
   };
 }
 
@@ -59,7 +67,8 @@ type Actions =
   | RemoveFromCartAction
   | RemoveAllFromCartAction
   | UpdateCartId
-  | UpdateLocation;
+  | UpdateLocation
+  | UpdateCoupon;
 
 const cartActivityReducer = (state: CartState, action: Actions) => {
   switch (action.type) {
@@ -96,6 +105,12 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
       return {
         ...state,
         cartId: action.payload.cartId
+      };
+    }
+    case 'COUPON': {
+      return {
+        ...state,
+        coupon: action.payload.coupon
       };
     }
     default:
@@ -190,6 +205,9 @@ const useCartActivity = () => {
   const updateLocation = useCallback((locationId: string) => {
     dispatch({ type: 'UPDATE_LOCATION', payload: { locationId } });
   }, []);
+  const updateCoupon = useCallback((coupon: string) => {
+    dispatch({ type: 'COUPON', payload: { coupon } });
+  }, []);
 
   return useMemo(
     () => ({
@@ -199,7 +217,8 @@ const useCartActivity = () => {
       removeAll,
       addMultipleToCart,
       updateCartId,
-      updateLocation
+      updateLocation,
+      updateCoupon
     }),
     [
       addToCart,
@@ -208,7 +227,8 @@ const useCartActivity = () => {
       removeAll,
       addMultipleToCart,
       updateCartId,
-      updateLocation
+      updateLocation,
+      updateCoupon
     ]
   );
 };

@@ -17,6 +17,7 @@ import { createZendutyIncident, updateWhatsapp } from './src/router/twilio.js';
 import { updateUser } from './src/router/update-user.js';
 import { onCreateUser, updateReferralCode } from './src/router/user.js';
 import { Shop } from './src/types/Shop.js';
+import { canUseHerCoupon, getHerCoupon } from './src/router/her-coupon.js';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -125,6 +126,8 @@ expressApp.post('/v1/shop', authMiddle, authorizedAsAdmin, async (req, res) => {
   });
   return res.json({ id: response.id });
 });
+expressApp.post('/v1/canUseHerCoupon', authMiddle, canUseHerCoupon);
+expressApp.get('/v1/her-coupon', authMiddle, getHerCoupon);
 expressApp.post(
   '/v1/onboard-referral',
   authMiddle,
