@@ -17,7 +17,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
-        minHeight: 100,
+        minHeight: 125,
         maxHeight: 200,
         height: 'fit-content',
         backgroundColor: '#fff',
@@ -26,7 +26,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
         borderRadius: '10px',
         pt: 1,
         position: 'relative',
-        boxShadow: '0px 0px 5px 0px #0000001f'
+        boxShadow: '0px 0px 5px 0px #0000001f',
       }}
       elevation={0}
       onClick={() => {
@@ -94,11 +94,11 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
       </Box>
       <CardMedia
         component="img"
-        sx={{ width: 75, height: 75, borderRadius: '50%', mr: 3 }}
+        sx={{ width: 95, height: 95, borderRadius: 8, mr: 1 }}
         image={shop.shopImage}
         alt={shop.shopName}
         style={{
-          filter: shop.isOpen ? 'none' : 'grayscale(1)'
+          filter: shop.isOpen ? 'drop-shadow(black 1px 1px 2px)' : 'grayscale(1)'
         }}
       />
     </Card>

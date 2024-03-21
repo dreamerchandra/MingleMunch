@@ -151,20 +151,29 @@ const FooterActions: FC<{
                   ':active': {
                     boxShadow: '0px 0px 0px 0px',
                     top: '5px',
-                    left: '5px',
+                    left: '5px'
                   }
                 }}
                 disableRipple
               >
-                <Add fontSize='small'/>
+                <Add fontSize="small" />
                 ADD
               </Button>
             )}
           </Container>
         )}
       </div>
+
       {product.suggestionIds && product.suggestionIds.length > 0 && (
-        <Typography variant="caption">Customization</Typography>
+        <Typography
+          variant="caption"
+          onClick={() => {
+            onAdd();
+            addToCart(product);
+          }}
+        >
+          Customization
+        </Typography>
       )}
     </Container>
   );

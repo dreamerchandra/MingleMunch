@@ -9,7 +9,6 @@ import {
 import { Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Fuse from 'fuse.js';
@@ -321,17 +320,12 @@ export const Products: FC<{
                           component="h2"
                           sx={{
                             fontWeight: 'bold',
-                            color: 'aliceblue',
+                            color: category.categoryId === '-1' ? '#b9ffe7': 'aliceblue',
                             display: 'flex',
                             flexDirection: 'row',
                             alignItems: 'center',
                             gap: 1
                           }}
-                          className={
-                            category.categoryId === '-1'
-                              ? 'rainbow_text_animated'
-                              : ''
-                          }
                         >
                           {category.categoryId === '-1' && (
                             <AutoAwesome
