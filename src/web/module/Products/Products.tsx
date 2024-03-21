@@ -14,13 +14,13 @@ import Fuse from 'fuse.js';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useUser } from '../../firebase/auth';
+import { SkeletonLoading } from '../Shop/shop-list';
 import { useShopQuery } from '../Shop/shop-query';
+import { CheckoutHeadsUpInShop } from '../Shoping/CheckoutHeadup';
 import { CategoryList } from '../category/category-list';
 import { useCategoryQuery } from '../category/category-query';
 import { ProductItem } from './Product-iitems';
 import { useProductsQuery } from './product-query';
-import { SkeletonLoading } from '../Shop/shop-list';
-import { CheckoutHeadsUpInShop } from '../Shoping/CheckoutHeadup';
 
 const fuseOptions = {
   shouldSort: true,
@@ -375,8 +375,7 @@ export const Products: FC<{
                       )}
                     </Container>
                   </Box>
-                  {category.categoryId === '-1' &&
-                    !collapsed.includes('-1') &&
+                  {(category.categoryId === '-1' && !collapsed.includes('-1')) &&
                     filteredList
                       .filter((p) => p.isRecommended)
                       .filter((p) =>

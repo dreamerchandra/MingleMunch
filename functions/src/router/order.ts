@@ -13,11 +13,11 @@ import { Shop } from '../types/Shop.js';
 import { OrderDb } from './order-helper.js';
 import { updateWhatsapp } from './twilio.js';
 import {
-  canProceedApplyingCoupon,
   removeCoupon,
   updateFreeDeliveryForInvitedUser
 } from './user.js';
 import { createOrderInDb } from './create-order.js';
+import { applyHerCoupon, canProceedToApply, canUseHerCoupon } from './her-coupon.js';
 
 interface OrderBody {
   details: [{ itemId: string; quantity: number }];
@@ -102,7 +102,8 @@ const getTotalByShop = (
     acc[shopId].displaySubTotal += p.itemPrice * quantity;
     acc[shopId].costPriceSubTotal += p.costPrice * quantity;
     acc[shopId].parcelChargesTotal += (p?.parcelCharges ?? 0) * quantity;
-    acc[shopId].costPriceParcelChargesTotal += (p?.costParcelCharges ?? 0) * quantity;
+    acc[shopId].costPriceParcelChargesTotal +=
+      (p?.costParcelCharges ?? 0) * quantity;
     return acc;
   }, {} as OrderDb['shopOrderValue']);
   for (const shopId in shopOrderValue) {
@@ -182,7 +183,13 @@ export const createOrder = async (req: Request, res: Response) => {
   logger.log(`started ${Date.now() - time}`);
   const productIds = details.map((d) => d.itemId);
   try {
-    await canProceedApplyingCoupon(req.user.uid, appliedCoupon);
+    if (appliedCoupon && !orderId) {
+      const herCouponData = await canProceedToApply(appliedCoupon, req.user.uid);
+      if (!herCouponData.canProceed) {
+        throw new HttpError(400, `Invalid coupon`);
+      }
+      await applyHerCoupon(appliedCoupon, req.user.uid);
+    }
     const { products, shops, appConfig, shopCommission } = await getAllData(
       productIds
     );
