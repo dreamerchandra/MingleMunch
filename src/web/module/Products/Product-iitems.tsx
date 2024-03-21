@@ -1,7 +1,4 @@
-import {
-    Add,
-    Remove
-} from '@mui/icons-material';
+import { Add, Remove } from '@mui/icons-material';
 import AddToCart from '@mui/icons-material/AddShoppingCart';
 import Edit from '@mui/icons-material/Edit';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -15,10 +12,7 @@ import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '../../../common/types/Product';
 import { useCart } from '../Shoping/cart-activity';
-import {
-    useMutationProductEdit,
-    useProductQuery
-} from './product-query';
+import { useMutationProductEdit, useProductQuery } from './product-query';
 
 const FooterActions: FC<{
   product: Product;
@@ -47,27 +41,39 @@ const FooterActions: FC<{
       <div>
         {inCart.length ? (
           <Container
-            style={{
+            sx={{
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'end'
+              justifyContent: 'end',
+              p: 0
             }}
           >
-            <Button size="small" onClick={() => removeFromCart(product)}>
-              <Remove color="warning" />
+            <Button
+              size="small"
+              sx={{
+                px: 2,
+                minWidth: '0px'
+              }}
+              onClick={() => removeFromCart(product)}
+            >
+              <Remove color="info" fontSize="small" />
             </Button>
             <Typography variant="h6" color="green">
               {inCart.length}
             </Typography>
             <Button
               size="small"
+              sx={{
+                px: 2,
+                minWidth: '0px'
+              }}
               onClick={() => {
                 onAdd();
                 addToCart(product);
               }}
             >
-              <Add color="info" />
+              <Add color="info" fontSize="small" />
             </Button>
           </Container>
         ) : (

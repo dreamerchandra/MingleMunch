@@ -106,7 +106,7 @@ export const OurStories = () => {
               <Avatar
                 alt={getStory(id)?.title}
                 src={getStory(id)?.profileUrl}
-                sx={{ width: 64, height: 64 }}
+                sx={{ width: 64, height: 64, filter: 'contrast(0.5)'}}
               />
             </div>
           );

@@ -53,9 +53,9 @@ export const ShopPage = () => {
         title="Burn Home"
         logo={
           <img
-            src="/dark_v1.svg"
+            src="/favicon.png"
             style={{
-              width: '76px'
+              width: '25px'
             }}
           />
         }
@@ -65,7 +65,7 @@ export const ShopPage = () => {
       <Container
         component="main"
         sx={{
-          height: 'calc(100svh - 150px)',
+          height: 'calc(100svh - 120px)',
           overflowY: 'auto',
           overflowX: 'hidden',
           backgroundColor: '#f5f5f5',
