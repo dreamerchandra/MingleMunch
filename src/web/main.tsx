@@ -16,6 +16,7 @@ import { CartProvider } from './module/Shoping/cart-activity';
 import { theme as GlobalTheme } from './theme';
 import { Analytics } from '../common/analytics';
 import { isInternal } from '../common/types/constant';
+import { SkeletonLoader } from './module/loading';
 
 declare global {
   interface Window {
@@ -94,6 +95,7 @@ const onError = (e: Error) => {
 const router = createBrowserRouter([
   {
     path: '/login',
+    loader: () => <SkeletonLoader />,
     lazy: () =>
       import('./Routes/Login/Login')
         .then((m) => ({
@@ -103,6 +105,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/',
+    loader: () => <SkeletonLoader />,
     lazy: () =>
       import('./Routes/Shop/shop')
         .then((m) => ({
@@ -112,6 +115,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/shop/:shopId',
+    loader: () => <SkeletonLoader />,
     lazy: () =>
       import('./Routes/Menu/Menu')
         .then((m) => ({
@@ -121,6 +125,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/shop/:shopId/product/:productId',
+    loader: () => <SkeletonLoader />,
     lazy: () =>
       import('./Routes/Menu/Menu')
         .then((m) => ({
@@ -130,6 +135,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/splash',
+    loader: () => <SkeletonLoader />,
     lazy: () =>
       import('./Routes/Splash/Splash')
         .then((m) => ({
@@ -139,6 +145,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/cart',
+    loader: () => <SkeletonLoader />,
     lazy: () =>
       import('./Routes/Cart/cart')
         .then((m) => ({
@@ -148,6 +155,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/order-history',
+    loader: () => <SkeletonLoader />,
     lazy: () =>
       import('./Routes/OrderHistory/order-history')
         .then((m) => ({

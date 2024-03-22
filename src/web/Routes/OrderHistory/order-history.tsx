@@ -2,8 +2,10 @@ import { Box, Container } from '@mui/material';
 import { useProtectedRoute, useUser } from '../../firebase/auth';
 import { Header } from '../../module/Header/header';
 import { OrderHistory } from '../../module/OrderHistory/OrderHistory';
-import { IncomingOrder } from '../../module/OrderHistory/incoming-order';
+import { Suspense, lazy } from 'react';
+import { SkeletonLoader } from '../../module/loading';
 
+const IncomingOrder = lazy(() => import('../../module/OrderHistory/incoming-order').then((m) => ({ default: m.IncomingOrder })));
 export const OrderHistoryRoute = () => {
   useProtectedRoute();
   const {
@@ -22,7 +24,9 @@ export const OrderHistoryRoute = () => {
       >
         <Box marginTop={2}>
           {['admin', 'vendor'].includes(role) ? (
-            <IncomingOrder />
+            <Suspense fallback={<SkeletonLoader />}>
+              <IncomingOrder />
+            </Suspense>
           ) : (
             <OrderHistory />
           )}

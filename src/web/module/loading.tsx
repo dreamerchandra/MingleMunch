@@ -1,4 +1,9 @@
-import { CircularProgress, styled } from '@mui/material';
+import { styled } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
+import Typography from '@mui/material/Typography';
 
 const Imag = styled('img')`
   mask-image: url(./slit.svg);
@@ -47,5 +52,52 @@ export const Loading = () => {
         <CircularProgress color="secondary" />
       </Center>
     </div>
+  );
+};
+
+function SkeletonLoading() {
+  return (
+    <div
+      style={{
+        width: '80%'
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ margin: 1 }}>
+          <Skeleton variant="circular">
+            <Avatar />
+          </Skeleton>
+        </Box>
+        <Box sx={{ width: '100%' }}>
+          <Skeleton width="100%">
+            <Typography>.</Typography>
+          </Skeleton>
+        </Box>
+      </Box>
+      <Skeleton variant="rectangular" width="100%">
+        <div style={{ paddingTop: '57%' }} />
+      </Skeleton>
+    </div>
+  );
+}
+
+export const SkeletonLoader = () => {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        pt: 2,
+        alignItems: 'center',
+        gap: 1,
+        pb: 16
+      }}
+    >
+      <SkeletonLoading />
+      <SkeletonLoading />
+      <SkeletonLoading />
+      <SkeletonLoading />
+      <SkeletonLoading />
+    </Box>
   );
 };
