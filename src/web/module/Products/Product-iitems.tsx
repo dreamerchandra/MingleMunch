@@ -35,7 +35,7 @@ const FooterActions: FC<{
         alignItems: 'center',
         justifyContent: 'end',
         p: 0,
-        pr: 1
+        pr: 1,
       }}
     >
       <div>
@@ -204,7 +204,7 @@ const ItemDescription: FC<{ description: string }> = ({ description }) => {
       >
         {description}
       </Typography>
-      {description.length > 15 ? (
+      {description.length > 20 ? (
         <Button
           onClick={() => {
             setMore(!more);
@@ -271,7 +271,7 @@ export const ProductItem: FC<{
         onClose={() => setOpen(false)}
         anchor="bottom"
         sx={{
-          zIndex: 2000
+          zIndex: 20000
         }}
       >
         <Box
