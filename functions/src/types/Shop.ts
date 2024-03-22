@@ -1,4 +1,15 @@
-export interface Shop {
+type FreeDeliveryShops = {
+  deliveryFee: 0;
+  minOrderValue: number;
+  minOrderDeliveryFee: number; 
+}
+
+type NonFreeDeliveryShops = {
+  deliveryFee: number;
+}
+
+
+export type Shop = FreeDeliveryShops & NonFreeDeliveryShops & {
   shopName: string;
   shopAddress: string;
   shopMapLocation: string;
@@ -6,9 +17,9 @@ export interface Shop {
   shopImage: string;
   description: string;
   isOpen: boolean;
-  deliveryFee: number;
   commission: number;
   carousel?: { image: string; url?: string, isPublished: boolean }[];
   tag?: string;
   orderRank: number;
+  platformFee: number;
 }
