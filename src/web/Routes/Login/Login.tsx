@@ -102,6 +102,7 @@ export function LoginPage() {
                       id="otp"
                       autoComplete="otp"
                       inputMode="numeric"
+                      inputProps={{ inputMode: 'numeric' }}
                     />
                     <LoadingButton
                       type="submit"

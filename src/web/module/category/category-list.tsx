@@ -17,8 +17,6 @@ const StyledUl = styled('ul')<{ wrap: boolean }>`
   margin-block: 0;
   padding: 0;
   flex-wrap: ${(props) => (props.wrap ? 'wrap' : 'nowrap')};
-  width: 89%;
-  overflow-x: auto;
   padding: 8px;
   padding-top: 0;
 `;
@@ -42,7 +40,6 @@ const SwipeUpDetector: FC<{
 
     if (deltaY > 50) {
       // Perform your swipe up action here
-      console.log('Swipe Up Detected!');
       // Reset touchStartY
       touchStartY.current = null;
       onSwipeUp();
@@ -58,7 +55,8 @@ const SwipeUpDetector: FC<{
       onTouchEnd={() => (touchStartY.current = null)}
       style={{
         display: 'flex',
-        gap: '8px'
+        gap: '8px',
+        touchAction: 'none',
       }}
     >
       {children}
@@ -122,73 +120,83 @@ export const CategoryList: FC<{
             setWrap(!wrap);
           }}
           sx={{
-            p: 0,
+            p: 0
           }}
         >
           {wrap ? <KeyboardArrowDownOutlined /> : <KeyboardArrowUpOutlined />}
         </Button>
-        <Button
-          onClick={() => {
-            onChange([]);
-          }}
-          sx={{
-            position: 'absolute',
-            right: 20,
-            top: 25,
-            backgroundColor: '#e6e6e6',
-            p: 0,
-            px: 1,
-            minWidth: 0,
-            zIndex: 1
-          }}
-        >
-          <Badge badgeContent={selected.length} color="primary">
-            <TuneOutlined />
-          </Badge>
-        </Button>
         <Box
           style={{
             display: 'flex',
-            gap: '8px'
+            gap: '8px',
+            width: 'min(100vw, 900px)',
+            alignItems: 'center'
           }}
         >
-          <StyledUl ref={animationParent} wrap={wrap}>
-            {[...selectedCategories, ...notSelectedCategories]?.map(
-              (category) => (
-                <li key={category.categoryId}>
-                  <Chip
-                    label={category.categoryName}
-                    color={
-                      selected.includes(category.categoryId)
-                        ? 'primary'
-                        : 'info'
-                    }
-                    variant={
-                      selected.includes(category.categoryId)
-                        ? 'filled'
-                        : 'outlined'
-                    }
-                    onClick={() => {
-                      if (selected.includes(category.categoryId)) {
-                        onChange(
-                          selected.filter(
-                            (item) => item !== category.categoryId
-                          )
-                        );
-                      } else {
-                        onChange([...selected, category.categoryId]);
+          <Box
+            style={{
+              display: 'flex',
+              gap: '8px',
+              width: 'calc(100% - 40px)',
+              overflowX: 'auto'
+            }}
+          >
+            <StyledUl ref={animationParent} wrap={wrap}>
+              {[...selectedCategories, ...notSelectedCategories]?.map(
+                (category) => (
+                  <li key={category.categoryId}>
+                    <Chip
+                      label={category.categoryName}
+                      color={
+                        selected.includes(category.categoryId)
+                          ? 'primary'
+                          : 'info'
                       }
-                    }}
-                    sx={{
-                      fontWeight: '700',
-                      border: 0,
-                      borderRadius: '5px'
-                    }}
-                  />
-                </li>
-              )
-            )}
-          </StyledUl>
+                      variant={
+                        selected.includes(category.categoryId)
+                          ? 'filled'
+                          : 'outlined'
+                      }
+                      onClick={() => {
+                        if (selected.includes(category.categoryId)) {
+                          onChange(
+                            selected.filter(
+                              (item) => item !== category.categoryId
+                            )
+                          );
+                        } else {
+                          onChange([...selected, category.categoryId]);
+                        }
+                      }}
+                      sx={{
+                        fontWeight: '700',
+                        border: 0,
+                        borderRadius: '5px'
+                      }}
+                    />
+                  </li>
+                )
+              )}
+            </StyledUl>
+          </Box>
+          <Button
+            onClick={() => {
+              onChange([]);
+            }}
+            sx={{
+              backgroundColor: '#e6e6e6',
+              position: wrap ? '' : 'absolute',
+              bottom: 10,
+              right: 10,
+              p: 1,
+              minWidth: 0,
+              zIndex: 1
+            }}
+          >
+            <Badge badgeContent={selected.length} color="primary">
+              <TuneOutlined />
+            </Badge>
+          </Button>
         </Box>
       </Box>
     </SwipeUpDetector>

@@ -2,7 +2,6 @@ import { Box, Checkbox, Drawer, ListItemText } from '@mui/material';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -17,6 +16,7 @@ import { updateCongestion } from '../../firebase/order';
 import { useCart } from '../Shoping/cart-activity';
 import { Time } from '../time';
 import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
+import { SkeletonLoader } from '../loading';
 
 // const internalOrder = [
 //   '8754791569',
@@ -58,7 +58,7 @@ export const IncomingOrder = () => {
     });
   };
   if (loading) {
-    return <CircularProgress />;
+    return <SkeletonLoader />;
   }
   const getShopName = (shopId: string, order: Order) => {
     return order.shops?.find((s) => s.shopId === shopId)?.shopName ?? 'Their';

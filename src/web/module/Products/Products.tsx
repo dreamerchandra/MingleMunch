@@ -125,6 +125,7 @@ export const Products: FC<{
             sx={{
               display: 'flex',
               flexDirection: 'row',
+              alignItems: 'center',
               justifyContent: 'space-between',
               width: '100%',
               mb: 1
@@ -134,14 +135,14 @@ export const Products: FC<{
               <Paper
               elevation={0}
                 sx={{
-                  background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
+                  background: '#ff8c0087',
                   px: 1,
                   py: 1,
-                  color: '#fff',
+                  color: '#000000',
                   borderRadius: '5px',
                   fontSize: '0.6rem',
                   width: 'fit-content',
-                  fontWeight: '900',
+                  fontWeight: '700',
                   height: 'fit-content'
                 }}
               >
