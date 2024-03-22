@@ -88,7 +88,8 @@ export const CategoryList: FC<{
     const fuse = new Fuse(categories, fuseOptions);
     setFuse(fuse);
   }, [categories]);
-  const res = search ? fuse?.search(search).map((i) => i.item) : categories;
+  const _res = search ? fuse?.search(search).map((i) => i.item) : categories;
+  const res = _res?.length ? _res : categories;
   const selectedCategories =
     res?.filter((category) => selected.includes(category.categoryId)) ?? [];
   const notSelectedCategories =
@@ -109,7 +110,7 @@ export const CategoryList: FC<{
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'start',
-          backgroundColor: '#fff',
+          backgroundColor: '#e6e6e6',
           borderRadius: '5px',
           width: 'min(100vw, 900px)',
           boxShadow: '5px 0px 10px 0px rgba(0,0,0,0.1)',
@@ -134,7 +135,7 @@ export const CategoryList: FC<{
             position: 'absolute',
             right: 20,
             top: 25,
-            backgroundColor: '#fff',
+            backgroundColor: '#e6e6e6',
             p: 0,
             px: 1,
             minWidth: 0,

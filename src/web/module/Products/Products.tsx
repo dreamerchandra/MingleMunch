@@ -396,7 +396,6 @@ export const Products: FC<{
             position: 'fixed',
             bottom: 0,
             zIndex: 10000,
-            background: '#fff',
           }}
         >
           <CategoryList
