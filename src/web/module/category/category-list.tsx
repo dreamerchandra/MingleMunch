@@ -1,9 +1,13 @@
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import {
+  KeyboardArrowDownOutlined,
+  KeyboardArrowUpOutlined,
+  TuneOutlined
+} from '@mui/icons-material';
 import { Badge, Box, Button, Chip, styled } from '@mui/material';
 import Fuse from 'fuse.js';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Category } from './category-query';
-import { TuneOutlined } from '@mui/icons-material';
 
 const StyledUl = styled('ul')<{ wrap: boolean }>`
   display: flex;
@@ -16,6 +20,7 @@ const StyledUl = styled('ul')<{ wrap: boolean }>`
   width: 89%;
   overflow-x: auto;
   padding: 8px;
+  padding-top: 0;
 `;
 
 const SwipeUpDetector: FC<{
@@ -91,77 +96,100 @@ export const CategoryList: FC<{
   const [wrap, setWrap] = useState(false);
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'start',
-        backgroundColor: '#fff',
-        borderRadius: '5px',
-        width: 'min(100vw, 900px)'
+    <SwipeUpDetector
+      onSwipeUp={() => {
+        setWrap(true);
+      }}
+      onSwipeDown={() => {
+        setWrap(false);
       }}
     >
-      <Button
-        onClick={() => {
-          setWrap(!wrap);
-        }}
+      <Box
         sx={{
-          position: 'absolute',
-          right: 20,
-          top: 12,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'start',
           backgroundColor: '#fff',
-          p: 0,
-          px: 1,
-          minWidth: 0,
-          zIndex: 1
+          borderRadius: '5px',
+          width: 'min(100vw, 900px)',
+          boxShadow: '5px 0px 10px 0px rgba(0,0,0,0.1)',
+          alignItems: 'center'
         }}
       >
-        <Badge badgeContent={selected.length} color="primary">
-          <TuneOutlined />
-        </Badge>
-      </Button>
-      <SwipeUpDetector
-        onSwipeUp={() => {
-          setWrap(true);
-        }}
-        onSwipeDown={() => {
-          setWrap(false);
-        }}
-      >
-        <StyledUl ref={animationParent} wrap={wrap}>
-          {[...selectedCategories, ...notSelectedCategories]?.map(
-            (category) => (
-              <li key={category.categoryId}>
-                <Chip
-                  label={category.categoryName}
-                  color={
-                    selected.includes(category.categoryId) ? 'primary' : 'info'
-                  }
-                  variant={
-                    selected.includes(category.categoryId)
-                      ? 'filled'
-                      : 'outlined'
-                  }
-                  onClick={() => {
-                    if (selected.includes(category.categoryId)) {
-                      onChange(
-                        selected.filter((item) => item !== category.categoryId)
-                      );
-                    } else {
-                      onChange([...selected, category.categoryId]);
+        <Button
+          onClick={() => {
+            setWrap(!wrap);
+          }}
+          sx={{
+            p: 0,
+          }}
+        >
+          {wrap ? <KeyboardArrowDownOutlined /> : <KeyboardArrowUpOutlined />}
+        </Button>
+        <Button
+          onClick={() => {
+            onChange([]);
+          }}
+          sx={{
+            position: 'absolute',
+            right: 20,
+            top: 25,
+            backgroundColor: '#fff',
+            p: 0,
+            px: 1,
+            minWidth: 0,
+            zIndex: 1
+          }}
+        >
+          <Badge badgeContent={selected.length} color="primary">
+            <TuneOutlined />
+          </Badge>
+        </Button>
+        <Box
+          style={{
+            display: 'flex',
+            gap: '8px'
+          }}
+        >
+          <StyledUl ref={animationParent} wrap={wrap}>
+            {[...selectedCategories, ...notSelectedCategories]?.map(
+              (category) => (
+                <li key={category.categoryId}>
+                  <Chip
+                    label={category.categoryName}
+                    color={
+                      selected.includes(category.categoryId)
+                        ? 'primary'
+                        : 'info'
                     }
-                  }}
-                  sx={{
-                    fontWeight: '700',
-                    border: 0,
-                    borderRadius: '5px'
-                  }}
-                />
-              </li>
-            )
-          )}
-        </StyledUl>
-      </SwipeUpDetector>
-    </Box>
+                    variant={
+                      selected.includes(category.categoryId)
+                        ? 'filled'
+                        : 'outlined'
+                    }
+                    onClick={() => {
+                      if (selected.includes(category.categoryId)) {
+                        onChange(
+                          selected.filter(
+                            (item) => item !== category.categoryId
+                          )
+                        );
+                      } else {
+                        onChange([...selected, category.categoryId]);
+                      }
+                    }}
+                    sx={{
+                      fontWeight: '700',
+                      border: 0,
+                      borderRadius: '5px'
+                    }}
+                  />
+                </li>
+              )
+            )}
+          </StyledUl>
+        </Box>
+      </Box>
+    </SwipeUpDetector>
   );
 };

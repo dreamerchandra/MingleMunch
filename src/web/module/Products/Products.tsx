@@ -163,12 +163,12 @@ export const Products: FC<{
                 }
               }}
               style={{
-                width: '35px',
-                height: '35px',
+                width: '48px',
+                height: '48px',
                 borderRadius: '50%',
                 display: 'flex',
                 justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               {categories?.length === collapsed.length - 1 ? (
@@ -258,7 +258,7 @@ export const Products: FC<{
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: '10px',
-                  mb: 2,
+                  mb: 1,
                   background: '#fff',
                   p: 1,
                   boxShadow: '0px 0px 10px 0px #0000001f'
@@ -395,8 +395,7 @@ export const Products: FC<{
           sx={{
             position: 'fixed',
             bottom: 0,
-            zIndex: 100,
-            boxShadow: '2px 2px 10px 0px #0000001f',
+            zIndex: 10000,
             background: '#fff',
           }}
         >
