@@ -178,41 +178,38 @@ export const Header: FC<{
         </Box>
       )}
 
-      <Paper
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: 'min(100vw, 1200px)',
-          margin: 'auto'
-        }}
-      >
-        <BottomNavigation
-          showLabels
-          value={location.pathname}
-          onChange={(_, newValue) => {
-            console.log(newValue);
-            navigate(newValue);
+      {['/', '/order-history'].includes(location.pathname) && (
+        <Paper
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: 'min(100vw, 1200px)',
+            margin: 'auto'
           }}
         >
-          <StyledBottomNavigationAction
-            label="Home"
-            value="/"
-            icon={<Home />}
-          />
-          <StyledBottomNavigationAction
-            label="Order History"
-            value="/order-history"
-            icon={<History />}
-          />
-          {/* <StyledBottomNavigationAction
-            label="Refer & Earn"
-            value="/profile"
-            icon={<ShareIcon />}
-          /> */}
-        </BottomNavigation>
-      </Paper>
+          <BottomNavigation
+            showLabels
+            value={location.pathname}
+            onChange={(_, newValue) => {
+              console.log(newValue);
+              navigate(newValue);
+            }}
+          >
+            <StyledBottomNavigationAction
+              label="Home"
+              value="/"
+              icon={<Home />}
+            />
+            <StyledBottomNavigationAction
+              label="Order History"
+              value="/order-history"
+              icon={<History />}
+            />
+          </BottomNavigation>
+        </Paper>
+      )}
     </>
   );
 };

@@ -7,4 +7,8 @@ export interface Shop {
   description: string;
   isOpen: boolean;
   deliveryFee: number;
+  commission: number;
+  carousel?: { image: string; url?: string, isPublished: boolean }[];
+  tag?: string;
+  orderRank: number;
 }

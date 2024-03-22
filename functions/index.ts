@@ -16,6 +16,7 @@ import {
 import { createZendutyIncident, updateWhatsapp } from './src/router/twilio.js';
 import { updateUser } from './src/router/update-user.js';
 import { onCreateUser, updateReferralCode } from './src/router/user.js';
+import { Shop } from './src/types/Shop.js';
 
 const expressApp: Express = express();
 expressApp.use(cors({ origin: true }));
@@ -113,6 +114,17 @@ expressApp.post('/v1/fcm-register', async (req: Request, res: Response) => {
 expressApp.post('/v1/order', authMiddle, createOrder);
 expressApp.post('/v1/home-order', authMiddle, createHomeOrder);
 expressApp.post('/v1/referral', authMiddle, updateReferralCode);
+expressApp.post('/v1/shop', authMiddle, authorizedAsAdmin, async (req, res) => {
+  const { commission, ...rest } = req.body as Shop;
+  const response = await firebaseDb.collection('shop').add({
+    ...rest
+  });
+  await firebaseDb.doc(`shop-internals/${response.id}`).set({
+    commission,
+    shopId: response.id
+  });
+  return res.json({ id: response.id });
+});
 expressApp.post(
   '/v1/onboard-referral',
   authMiddle,

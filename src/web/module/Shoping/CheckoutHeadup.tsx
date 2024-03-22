@@ -8,7 +8,7 @@ import { Notifications } from '@mui/icons-material';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   position: 'fixed',
-  bottom: '28px',
+  bottom: '68px',
   right: '16px',
   zIndex: theme?.zIndex?.drawer + 1
 }));

@@ -1,4 +1,3 @@
-import { useTheme } from '@emotion/react';
 import {
   AutoAwesome,
   ExpandLessOutlined,
@@ -72,9 +71,7 @@ export const Products: FC<{
       .map((item) => item.item)
       .filter(filterByCategory);
   }, [data, search, selectedCategoryIds]);
-  const theme = useTheme() as {
-    breakpoints: { down: (key: string) => string };
-  };
+
 
   if (isLoading) {
     return (
@@ -397,12 +394,10 @@ export const Products: FC<{
         <Box
           sx={{
             position: 'fixed',
-            bottom: 60,
+            bottom: 0,
             zIndex: 100,
             boxShadow: '2px 2px 10px 0px #0000001f',
-            [theme.breakpoints.down('md')]: {
-              left: 10
-            }
+            background: '#fff',
           }}
         >
           <CategoryList
