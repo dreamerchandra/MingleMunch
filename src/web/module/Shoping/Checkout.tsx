@@ -790,7 +790,7 @@ function SuccessCheckout() {
   return (
     <div
       style={{
-        height: 'calc(100svh - 80px)',
+        height: '100svh',
         width: '100vw',
         backgroundImage: 'url(/abstract_emoji.png)',
         filter: 'brightness(70%)',

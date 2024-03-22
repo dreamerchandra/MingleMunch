@@ -44,7 +44,7 @@ export const CartPage = () => {
           backgroundColor: '#f1f1f1',
           p: 0,
           overflow: 'auto',
-          height: 'calc(100dvh - 117px)',
+          height: 'calc(100dvh - 60px)',
           m: 'atuo'
         }}
       >
