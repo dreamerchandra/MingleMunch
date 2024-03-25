@@ -31,6 +31,7 @@ import {
 } from '../appconfig';
 import { useCart } from './cart-activity';
 import { useDeliveryFee, useMutationCreateOrder } from './checkout-query';
+import { SkeletonLoader } from '../loading';
 
 const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
   display: 'flex',
@@ -668,16 +669,16 @@ export const Checkout: FC = () => {
     0
   );
   if (!shops) {
-    return null;
+    return <SkeletonLoader />;
   }
   if (!appConfig) {
-    return null;
+    return <SkeletonLoader />;
   }
   if (!userConfig) {
-    return null;
+    return <SkeletonLoader />;
   }
   if (isDeliveryFeeLoading) {
-    return null;
+    return <SkeletonLoader />;
   }
   const init = {
     amount: 0
@@ -688,9 +689,6 @@ export const Checkout: FC = () => {
     platformFee = init,
     smallCartFree = init
   } = deliveryDetails || {};
-  console.log({
-    deliveryDetails
-  });
 
   const grandTotal = Number(
     (
