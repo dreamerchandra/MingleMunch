@@ -6,6 +6,7 @@ import {
 import {
   createHomeOrder,
   createOrder,
+  DeliveryFeeResponse,
   getDeliveryFee,
   OrderPayload
 } from '../../firebase/order';
@@ -59,11 +60,11 @@ export const useMutationHomeOrder = (): UseMutationResult<
 export const useDeliveryFee = () => {
   const { cartDetails } = useCart();
   const [data, setData] = useState<{
-    deliveryFee: number;
+    deliveryDetails: DeliveryFeeResponse | null;
     isLoading: boolean;
     error?: string;
   }>({
-    deliveryFee: 0,
+    deliveryDetails: null,
     isLoading: true
   });
   const details = useMemo(() => {
@@ -91,14 +92,14 @@ export const useDeliveryFee = () => {
     })
       .then((res) => {
         setData({
-          deliveryFee: res,
+          deliveryDetails: res,
           isLoading: false,
           error: ''
         });
       })
       .catch((e) => {
         setData({
-          deliveryFee: 0,
+          deliveryDetails: null,
           isLoading: false,
           error: e.message
         });

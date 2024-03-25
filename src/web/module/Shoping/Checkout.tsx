@@ -1,4 +1,4 @@
-import { Add, Check, CopyAll, WhatsApp } from '@mui/icons-material';
+import { Add, Check, CopyAll, Remove, WhatsApp } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
@@ -8,7 +8,6 @@ import { SwipeableDrawer } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Container from '@mui/material/Container';
@@ -21,6 +20,7 @@ import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
+import { DeliveryFeeResponse } from '../../firebase/order';
 import { LastOrder } from '../LastOrder/LastOrder';
 import { useShopQuery } from '../Shop/shop-query';
 import {
@@ -61,9 +61,24 @@ const TotalWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: theme.spacing(8),
-  width: '100%',
-  marginTop: theme.spacing(1)
+  width: '84vw',
+  marginTop: theme.spacing(1),
+  '.right': {
+    fontWeight: 400,
+    fontSize: '1rem'
+  },
+  '.left': {
+    width: '70vw',
+    m: 0,
+    lineHeight: 1,
+    '*': {
+      m: 0,
+      lineHeight: 1
+    }
+  },
+  h4: {
+    lineHeight: 1
+  }
 }));
 
 const SubSection = styled('div')(({ theme }) => ({
@@ -98,40 +113,51 @@ const CheckoutCard: FC<{
             error={error.products.includes(item.product.itemId)}
           >
             <div>
-              <Typography component="h6">{item.product.itemName}</Typography>
-              <Typography component="h6">₹{item.product.itemPrice}</Typography>
+              <Typography component="h6" variant="h4">
+                {item.product.itemName}
+              </Typography>
+              <Typography component="h6" variant="body2">
+                ₹{item.product.itemPrice}
+              </Typography>
             </div>
             <div>
-              <ButtonGroup
-                variant="outlined"
-                aria-label="update cart"
+              <Container
                 sx={{
-                  p: 0,
-                  m: 0
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'end',
+                  p: 0
                 }}
               >
                 <Button
-                  variant="outlined"
+                  size="small"
                   sx={{
-                    border: 0
+                    paddingLeft: '16px',
+                    paddingRight: '16px',
+                    minWidth: '0px'
                   }}
                   onClick={() => removeFromCart(item.product)}
                 >
-                  -
+                  <Remove fontSize="small" />
                 </Button>
-                <Button variant="outlined" sx={{ maxWidth: '2ch', border: 0 }}>
+                <Typography variant="h4" color="green">
                   {item.quantity}
-                </Button>
+                </Typography>
                 <Button
-                  variant="outlined"
+                  size="small"
                   sx={{
-                    border: 0
+                    paddingLeft: '16px',
+                    paddingRight: '16px',
+                    minWidth: '0px'
                   }}
-                  onClick={() => addToCart(item.product)}
+                  onClick={() => {
+                    addToCart(item.product);
+                  }}
                 >
-                  +
+                  <Add fontSize="small" />
                 </Button>
-              </ButtonGroup>
+              </Container>
             </div>
           </StyledProduct>
         ))}
@@ -196,14 +222,14 @@ const TotalCard: FC<{
   platformFee: number;
   parcelChargesTotal: number;
   grandTotal: number;
+  deliveryDetails: DeliveryFeeResponse | null;
 }> = ({
   itemsTotal,
-  coupon,
-  originalDeliveryFee,
   deliveryFee,
   platformFee,
   parcelChargesTotal,
-  grandTotal
+  grandTotal,
+  deliveryDetails
 }) => {
   return (
     <Card
@@ -226,63 +252,107 @@ const TotalCard: FC<{
             padding: 2,
             display: 'flex',
             flexDirection: 'column',
-            width: '100%'
+            width: '100%',
+            gap: 0.5
           }}
         >
           <TotalWrapper>
-            <Typography component="h6">Item Total </Typography>
-            <Typography component="h6">₹{itemsTotal}</Typography>
-          </TotalWrapper>
-          <TotalWrapper>
-            <Typography component="h6">
-              Delivery
-              <Tooltip
-                title={
-                  !coupon
-                    ? 'This helps our delivery partners to serve you better.'
-                    : `Delivery fee Rs.${originalDeliveryFee} has been waved off`
-                }
-                enterTouchDelay={20}
-                leaveTouchDelay={5_000}
-              >
-                <IconButton sx={{ p: 0, ml: 1 }}>
-                  <InfoIcon sx={{ width: 20 }} />
-                </IconButton>
-              </Tooltip>
+            <Typography component="h4" variant="h6">
+              Item Total
             </Typography>
-            <div>
-              {coupon && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    textDecoration: 'line-through',
-                    color: '#ff4b4b'
-                  }}
-                >
-                  ₹ {originalDeliveryFee}
+            <Typography component="h6" className="right">
+              ₹{itemsTotal}
+            </Typography>
+          </TotalWrapper>
+          {deliveryFee != 0 && (
+            <TotalWrapper>
+              <div className="left">
+                <Typography component="h4" variant="h6">
+                  Delivery
+                  <Tooltip
+                    title={deliveryDetails?.deliveryFee.info}
+                    enterTouchDelay={20}
+                    leaveTouchDelay={5_000}
+                  >
+                    <IconButton sx={{ p: 0, ml: 1 }}>
+                      <InfoIcon sx={{ width: 20 }} />
+                    </IconButton>
+                  </Tooltip>
                 </Typography>
-              )}
-              <Typography component="h6">₹ {deliveryFee}</Typography>
-            </div>
-          </TotalWrapper>
+                {deliveryDetails?.deliveryFee.reason && (
+                  <Typography variant="caption" color={'red'}>
+                    {deliveryDetails?.deliveryFee.reason}
+                  </Typography>
+                )}
+              </div>
+              <Typography component="h6" className="right">
+                ₹ {deliveryFee}
+              </Typography>
+            </TotalWrapper>
+          )}
+          {(deliveryDetails?.smallCartFree?.amount ?? 0) != 0 && (
+            <TotalWrapper>
+              <div className="left">
+                <Typography component="h4" variant="h6">
+                  Small Cart Fee
+                </Typography>
+                <Typography variant="caption" color="red">
+                  {deliveryDetails?.smallCartFree?.reason}
+                </Typography>
+              </div>
+              <Typography component="h6" className="right">
+                ₹ {deliveryDetails?.smallCartFree?.amount}
+              </Typography>
+            </TotalWrapper>
+          )}
+          {(deliveryDetails?.convenienceFee?.amount ?? 0) != 0 && (
+            <TotalWrapper>
+              <div className="left">
+                <Typography component="h4" variant="h6">
+                  Convenience Fee
+                  <Tooltip
+                    title={deliveryDetails?.convenienceFee.info}
+                    enterTouchDelay={20}
+                    leaveTouchDelay={5_000}
+                  >
+                    <IconButton sx={{ p: 0, ml: 1 }}>
+                      <InfoIcon sx={{ width: 20 }} />
+                    </IconButton>
+                  </Tooltip>
+                </Typography>
+                {deliveryDetails?.convenienceFee?.reason && (
+                  <Typography variant="caption" color="red">
+                    {deliveryDetails?.convenienceFee?.reason}
+                  </Typography>
+                )}
+              </div>
+              <Typography component="h6" className="right">
+                ₹ {deliveryDetails?.convenienceFee?.amount}
+              </Typography>
+            </TotalWrapper>
+          )}
           <TotalWrapper>
-            <Typography component="h6">
-              Platform Fee
-              <Tooltip
-                title="This small fee helps us to keep this platform running."
-                enterTouchDelay={20}
-                leaveTouchDelay={5_000}
-              >
-                <IconButton sx={{ p: 0, ml: 1 }}>
-                  <InfoIcon sx={{ width: 20 }} />
-                </IconButton>
-              </Tooltip>
+            <div className="left">
+              <Typography component="h4" variant="h6">
+                Platform Fee
+                <Tooltip
+                  title={deliveryDetails?.platformFee.info}
+                  enterTouchDelay={20}
+                  leaveTouchDelay={5_000}
+                >
+                  <IconButton sx={{ p: 0, ml: 1 }}>
+                    <InfoIcon sx={{ width: 20 }} />
+                  </IconButton>
+                </Tooltip>
+              </Typography>
+            </div>
+            <Typography component="h6" className="right">
+              ₹ {platformFee}
             </Typography>
-            <Typography component="h6">₹ {platformFee}</Typography>
           </TotalWrapper>
           {parcelChargesTotal > 0 ? (
             <TotalWrapper>
-              <Typography component="h6">
+              <Typography component="h4" variant="h6">
                 Parcel Charges
                 <Tooltip
                   title="Industry's lowest ever parcel charges by burn!"
@@ -298,7 +368,9 @@ const TotalCard: FC<{
             </TotalWrapper>
           ) : null}
           <TotalWrapper>
-            <Typography component="h6">GrandTotal </Typography>
+            <Typography component="h4" variant="h4">
+              GrandTotal
+            </Typography>
             <Typography
               component="h6"
               sx={{
@@ -548,7 +620,7 @@ export const Checkout: FC = () => {
   const { data: appConfig } = useAppConfig();
   const { data: userConfig } = useUserConfig();
   const [coupon, _setCoupon] = useState('');
-  const { deliveryFee, isLoading: isDeliveryFeeLoading } = useDeliveryFee();
+  const { deliveryDetails, isLoading: isDeliveryFeeLoading } = useDeliveryFee();
   const [confetti, setConfetti] = useState({
     show: false,
     opacity: 0.5
@@ -604,21 +676,29 @@ export const Checkout: FC = () => {
   if (!userConfig) {
     return null;
   }
-  if(isDeliveryFeeLoading) {
+  if (isDeliveryFeeLoading) {
     return null;
   }
-  const shopIds = [...new Set(items.map((i) => i.product.shopId))];
-  const platformFee = Math.min(
-    ...shopIds.map(
-      (s) => shops.find((shop) => shop.shopId === s)?.platformFee ?? 0
-    )
-  );
+  const init = {
+    amount: 0
+  };
+  const {
+    convenienceFee = init,
+    deliveryFee = init,
+    platformFee = init,
+    smallCartFree = init
+  } = deliveryDetails || {};
+  console.log({
+    deliveryDetails
+  });
 
   const grandTotal = Number(
     (
       itemsTotal +
-      (deliveryFee ?? 0) +
-      platformFee +
+      convenienceFee.amount +
+      smallCartFree.amount +
+      deliveryFee.amount +
+      platformFee.amount +
       parcelChargesTotal
     ).toFixed(2)
   );
@@ -669,6 +749,13 @@ export const Checkout: FC = () => {
   if (success) {
     return <SuccessCheckout />;
   }
+  const itemByShop = items.reduce((acc, item) => {
+    if (!acc[item.product.shopId]) {
+      acc[item.product.shopId] = [];
+    }
+    acc[item.product.shopId].push(item);
+    return acc;
+  }, {} as Record<string, { product: Product; quantity: number }[]>);
   return (
     <Box
       sx={{
@@ -690,10 +777,37 @@ export const Checkout: FC = () => {
               borderRadius: '5px'
             }}
           >
-            You have saved Rs.{deliveryFee} on this order.
+            You have saved Rs.{deliveryFee.amount} on this order.
           </Alert>
         )}
-        <CheckoutCard items={items} error={error} />
+        {Object.keys(itemByShop).map((shopId) => {
+          return (
+            <Box>
+              <Typography variant="h4" component="h4" color="text.secondary">
+                {shops.find((shop) => shop.shopId === shopId)?.shopName}
+              </Typography>
+              <CheckoutCard
+                items={itemByShop[shopId]}
+                error={error}
+                key={shopId}
+              />
+            </Box>
+          );
+        })}
+        {deliveryDetails?.smallCartFree?.reason && (
+          <Alert severity="error">
+            <Typography variant="caption">
+              {deliveryDetails?.smallCartFree?.reason}
+            </Typography>
+          </Alert>
+        )}
+        {deliveryDetails?.deliveryFee?.reason && (
+          <Alert severity="error">
+            <Typography variant="caption">
+              {deliveryDetails?.deliveryFee?.reason}
+            </Typography>
+          </Alert>
+        )}
         <Button
           onClick={() => {
             navigate('/');
@@ -732,11 +846,12 @@ export const Checkout: FC = () => {
         <TotalCard
           itemsTotal={itemsTotal}
           coupon={coupon}
-          originalDeliveryFee={deliveryFee ?? 0}
-          deliveryFee={deliveryFee ?? 0}
-          platformFee={platformFee}
+          originalDeliveryFee={deliveryFee.amount}
+          deliveryFee={deliveryFee.amount}
+          platformFee={platformFee.amount}
           parcelChargesTotal={parcelChargesTotal}
           grandTotal={grandTotal}
+          deliveryDetails={deliveryDetails}
         />
       </SubSection>
       <SubSection

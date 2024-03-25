@@ -213,7 +213,20 @@ interface DeliveryFeePayload {
   details: { itemId: string; quantity: number }[];
 }
 
-export const getDeliveryFee = async (order: DeliveryFeePayload): Promise<number> => {
-  const data = await post('/v1/delivery-fee', order);
-  return data.deliveryFee;
+interface FeeDetail {
+  amount: number;
+  info?: string;
+  reason?: string;
+}
+
+export interface DeliveryFeeResponse {
+  deliveryFee: FeeDetail;
+  platformFee: FeeDetail;
+  convenienceFee: FeeDetail;
+  smallCartFree?: FeeDetail;
+}
+
+export const getDeliveryFee = async (order: DeliveryFeePayload): Promise<DeliveryFeeResponse> => {
+  const data = await post('/v1/delivery-fee', order) as {data: DeliveryFeeResponse};
+  return data.data;
 }

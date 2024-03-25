@@ -1,51 +1,158 @@
 import { Request, Response } from 'express';
 import { logger } from 'firebase-functions';
-import { getAllData } from './order.js';
-import { Shop } from '../types/Shop.js';
 import { Product } from '../types/Product.js';
+import { Shop } from '../types/Shop.js';
+import { getAllData } from './order.js';
 
 interface DeliveryFee {
   details: [{ itemId: string; quantity: number }];
 }
 
+interface FeeDetail {
+  amount: number;
+  info?: string;
+  reason?: string;
+}
+
+interface DeliveryFeeResponse {
+  deliveryFee: FeeDetail;
+  platformFee: FeeDetail;
+  convenienceFee: FeeDetail;
+  smallCartFree?: FeeDetail;
+}
+
 // clubbed order of two non free delivery shop should have a x value to it
-const getNonFreeDeliveryClubbedOrder = (shops: Shop[]) => {
-  if (shops.length > 1) {
-    const highestDeliveryFee = Math.max(...shops.map((s) => s.deliveryFee));
-    return highestDeliveryFee * 1.5;
-  }
-  return shops[0].deliveryFee;
+const getNonFreeDeliveryClubbedOrder = (shops: Shop[]): DeliveryFeeResponse => {
+  return {
+    deliveryFee: {
+      amount: 29,
+      info: 'This helps our delivery partners to serve you better.'
+    },
+    platformFee: {
+      amount: 4,
+      info: 'This small fee helps us to keep this platform running.'
+    },
+    convenienceFee: {
+      amount: 4,
+      reason: 'This is a multi shop order hence a small fee is added.',
+      info: 'This small fee helps us to keep this platform running.'
+    }
+  };
 };
 
 // free delivery clubbed order of two non free delivery shop should have a x+ value to it
-const getFreeDeliveryClubbedOrder = (shops: Shop[]) => {
-  return 20;
+const getFreeDeliveryClubbedOrder = (
+  shops: Shop[],
+  products: Product[],
+  details: DeliveryFee['details']
+): DeliveryFeeResponse => {
+  const itemPrice = details.reduce((acc, d) => {
+    const product = products.find((s) => s.itemId === d.itemId);
+    const itemPrice = product!.itemPrice * d.quantity;
+    const parcelCharges = (product?.parcelCharges ?? 0) * d.quantity;
+    return acc + itemPrice + parcelCharges;
+  }, 0);
+  const totalByShop = details.reduce((acc, d) => {
+    const product = products.find((s) => s.itemId === d.itemId);
+    const itemPrice = product!.itemPrice * d.quantity;
+    const parcelCharges = (product?.parcelCharges ?? 0) * d.quantity;
+    const shopId = product?.shopId ?? '';
+    if (!acc[shopId]) {
+      acc[shopId] = 0;
+    }
+    acc[shopId] += itemPrice + parcelCharges;
+    return acc;
+  }, {} as Record<string, number>);
+  const isAllAbove49 = Object.values(totalByShop).every((t) => t > 49);
+  if (itemPrice >= 149 && isAllAbove49) {
+    return {
+      deliveryFee: {
+        amount: 0,
+        info: 'Woa! Your delivery upon us! Its a free delivery.'
+      },
+      platformFee: {
+        amount: 5,
+        info: 'This small fee helps us to keep this platform running.'
+      },
+      convenienceFee: {
+        amount: 4,
+        reason: 'This is a multi shop order hence a small fee is added.',
+        info: 'This small fee helps us to keep this platform running.'
+      }
+    };
+  }
+  const notAbove49 = Object.entries(totalByShop)
+    .filter(([, t]) => t <= 49)
+    .map(([shopId]) => shops.find((s) => s.shopId === shopId)!.shopName);
+  return {
+    deliveryFee: {
+      amount: 0,
+      info: 'Woa! Your delivery upon us! Its a free delivery.'
+    },
+    platformFee: {
+      amount: 5,
+      info: 'This small fee helps us to keep this platform running.'
+    },
+    convenienceFee: {
+      amount: 4,
+      reason: 'This is a multi shop order hence a small fee is added.',
+      info: 'This small fee helps us to keep this platform running.'
+    },
+    smallCartFree: {
+      amount: 10,
+      reason:
+        itemPrice < 149
+          ? 'You are just ₹' +
+            (149 - itemPrice) +
+            ' away from removing this fee'
+          : `Order above ₹49 from ${notAbove49.join(
+              ', '
+            )} shop to remove this fee.`
+    }
+  };
 };
 
-const getSomeFreeDeliveryClubbedOrder = (shops: Shop[]) => {
-  return 35;
+const getSomeFreeDeliveryClubbedOrder = (
+  shops: Shop[]
+): DeliveryFeeResponse => {
+  return {
+    deliveryFee: {
+      amount: 25,
+      info: 'This helps our delivery partners to serve you better.'
+    },
+    platformFee: {
+      amount: 4,
+      info: 'This small fee helps us to keep this platform running.'
+    },
+    convenienceFee: {
+      amount: 4,
+      reason: 'This is a multi shop order hence a small fee is added.',
+      info: 'This small fee helps us to keep this platform running.'
+    }
+  };
 };
 
-const getClubbedOrder = (shops: Shop[]) => {
+const getClubbedOrder = (
+  shops: Shop[],
+  products: Product[],
+  details: DeliveryFee['details']
+): DeliveryFeeResponse => {
   const nonFreeDeliveryShops = shops.every((s) => s.deliveryFee > 0);
   if (nonFreeDeliveryShops) {
     return getNonFreeDeliveryClubbedOrder(shops);
   }
   const freeDeliveryShops = shops.every((s) => s.deliveryFee === 0);
   if (freeDeliveryShops) {
-    return getFreeDeliveryClubbedOrder(shops);
+    return getFreeDeliveryClubbedOrder(shops, products, details);
   }
-  const someFreeDeliveryShops = shops.some((s) => s.deliveryFee === 0);
-  if (someFreeDeliveryShops) {
-    return getSomeFreeDeliveryClubbedOrder(shops);
-  }
+  return getSomeFreeDeliveryClubbedOrder(shops);
 };
 
 const getFreeDeliveryNonClubbedOrder = (
   shop: Shop,
   products: Product[],
   details: DeliveryFee['details']
-) => {
+): DeliveryFeeResponse => {
   const total = products.reduce((acc, p) => {
     const itemPrice =
       p.itemPrice * details.find((d) => d.itemId === p.itemId)!.quantity;
@@ -56,32 +163,73 @@ const getFreeDeliveryNonClubbedOrder = (
   }, 0);
   logger.log('shop.minOrderValue', shop.minOrderValue, total);
   if (total <= shop.minOrderValue) {
-    return shop.minOrderDeliveryFee;
+    return {
+      deliveryFee: {
+        amount: shop.minOrderDeliveryFee,
+        info: 'This helps our delivery partners to serve you better.',
+        reason: 'Order above ₹' + shop.minOrderValue + ' to get free delivery.'
+      },
+      platformFee: {
+        amount: 4,
+        info: 'This small fee helps us to keep this platform running.'
+      },
+      convenienceFee: {
+        amount: 0,
+        info: ''
+      }
+    };
   }
-  return shop.deliveryFee;
+  return {
+    deliveryFee: {
+      amount: 0,
+      info: 'Woa! Your delivery upon us! Its a free delivery.'
+    },
+    platformFee: {
+      amount: 4,
+      info: 'This small fee helps us to keep this platform running.'
+    },
+    convenienceFee: {
+      amount: 0,
+      info: ''
+    }
+  };
 };
 
 const getDeliveryFee = (
   shops: Shop[],
   products: Product[],
   details: DeliveryFee['details']
-) => {
+): DeliveryFeeResponse => {
   const isClubbedOrder = shops.length > 1;
   if (isClubbedOrder) {
-    return getClubbedOrder(shops);
+    return getClubbedOrder(shops, products, details);
   }
   const isFreeDelivery = shops.length === 1 && shops[0].deliveryFee === 0;
   if (isFreeDelivery) {
     logger.log('free delivery');
     return getFreeDeliveryNonClubbedOrder(shops[0], products, details);
   }
-  return shops[0].deliveryFee;
+  return {
+    deliveryFee: {
+      amount: shops[0].deliveryFee,
+      info: 'This helps our delivery partners to serve you better.'
+    },
+    platformFee: {
+      amount: 4,
+      info: 'This small fee helps us to keep this platform running.'
+    },
+    convenienceFee: {
+      amount: 0,
+      info: ''
+    }
+  };
 };
+
 export const calculateDeliveryFee = async (req: Request, res: Response) => {
   const { details } = req.body as DeliveryFee;
   logger.info(`incoming request payload, ${JSON.stringify(details)}`);
   const productIds = details.map((d) => d.itemId);
   const data = await getAllData(productIds);
   const deliveryFee = getDeliveryFee(data.shops, data.products, details);
-  return res.status(200).send({ deliveryFee });
+  return res.status(200).send({ data: deliveryFee });
 };
