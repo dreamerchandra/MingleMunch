@@ -151,7 +151,7 @@ const getSomeFreeDeliveryClubbedOrder = (
       return shop?.deliveryFee === 0;
     })
     .every(([k, t]) => t > 49);
-  if (itemPrice >= 149 && !isAllAbove49) {
+  if (!isAllAbove49) {
     const notAbove49 = Object.entries(totalByShop)
       .filter(([k, t]) => {
         const shop = shops.find((s) => s.shopId === k);
@@ -193,6 +193,29 @@ const getSomeFreeDeliveryClubbedOrder = (
         acc[shop.shopId] = 'Order above ₹49 to remove small cart fee.';
         return acc;
       }, {} as Record<string, string>)
+    };
+  }
+  if (itemPrice <= 149) {
+    return {
+      deliveryFee: {
+        amount: 25,
+        info: 'This helps our delivery partners to serve you better.'
+      },
+      platformFee: {
+        amount: 4,
+        info: 'This small fee helps us to keep this platform running.'
+      },
+      convenienceFee: {
+        amount: 4,
+        reason: 'This is a multi shop order hence a small fee is added.',
+        info: 'This small fee helps us to keep this platform running.'
+      },
+      smallCartFree: {
+        '-1': {
+          amount: 10,
+          reason: `You are just ₹${149 - itemPrice} away from removing this fee`
+        }
+      },
     };
   }
   return {
