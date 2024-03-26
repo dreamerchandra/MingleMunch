@@ -223,7 +223,8 @@ export interface DeliveryFeeResponse {
   deliveryFee: FeeDetail;
   platformFee: FeeDetail;
   convenienceFee: FeeDetail;
-  smallCartFree?: FeeDetail;
+  smallCartFree?: Record<string, FeeDetail>;
+  overallReason?: Record<string, string>;
 }
 
 export const getDeliveryFee = async (order: DeliveryFeePayload): Promise<DeliveryFeeResponse> => {

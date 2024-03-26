@@ -20,7 +20,6 @@ export interface OrderDb {
   };
   shopOrderValue: {
     [shopId: string]: {
-      deliveryCharges: number;
       displaySubTotal: number;
       costPriceSubTotal: number;
       parcelChargesTotal: number;
@@ -36,5 +35,7 @@ export interface OrderDb {
     grandTotal: number;
     costPriceSubTotal: number;
     deliveryCharges: number;
+    convenienceFee: number;
+    smallCartFee: number;
   };
 }

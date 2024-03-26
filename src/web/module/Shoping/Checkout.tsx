@@ -62,14 +62,12 @@ const TotalWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  width: '84vw',
   marginTop: theme.spacing(1),
   '.right': {
     fontWeight: 400,
     fontSize: '1rem'
   },
   '.left': {
-    width: '70vw',
     m: 0,
     lineHeight: 1,
     '*': {
@@ -228,7 +226,6 @@ const TotalCard: FC<{
   itemsTotal,
   deliveryFee,
   platformFee,
-  parcelChargesTotal,
   grandTotal,
   deliveryDetails
 }) => {
@@ -291,21 +288,6 @@ const TotalCard: FC<{
               </Typography>
             </TotalWrapper>
           )}
-          {(deliveryDetails?.smallCartFree?.amount ?? 0) != 0 && (
-            <TotalWrapper>
-              <div className="left">
-                <Typography component="h4" variant="h6">
-                  Small Cart Fee
-                </Typography>
-                <Typography variant="caption" color="red">
-                  {deliveryDetails?.smallCartFree?.reason}
-                </Typography>
-              </div>
-              <Typography component="h6" className="right">
-                ₹ {deliveryDetails?.smallCartFree?.amount}
-              </Typography>
-            </TotalWrapper>
-          )}
           {(deliveryDetails?.convenienceFee?.amount ?? 0) != 0 && (
             <TotalWrapper>
               <div className="left">
@@ -351,23 +333,6 @@ const TotalCard: FC<{
               ₹ {platformFee}
             </Typography>
           </TotalWrapper>
-          {parcelChargesTotal > 0 ? (
-            <TotalWrapper>
-              <Typography component="h4" variant="h6">
-                Parcel Charges
-                <Tooltip
-                  title="Industry's lowest ever parcel charges by burn!"
-                  enterTouchDelay={20}
-                  leaveTouchDelay={5_000}
-                >
-                  <IconButton sx={{ p: 0, ml: 1 }}>
-                    <InfoIcon sx={{ width: 20 }} />
-                  </IconButton>
-                </Tooltip>
-              </Typography>
-              <Typography component="h6">₹ {parcelChargesTotal}</Typography>
-            </TotalWrapper>
-          ) : null}
           <TotalWrapper>
             <Typography component="h4" variant="h4">
               GrandTotal
@@ -668,6 +633,14 @@ export const Checkout: FC = () => {
     (old, item) => old + (item.product.parcelCharges ?? 0) * item.quantity,
     0
   );
+  const parcelChargesByShop = items.reduce((old, item) => {
+    if (!old[item.product.shopId]) {
+      old[item.product.shopId] = 0;
+    }
+    old[item.product.shopId] +=
+      (item.product.parcelCharges ?? 0) * item.quantity;
+    return old;
+  }, {} as Record<string, number>);
   if (!shops) {
     return <SkeletonLoader />;
   }
@@ -687,14 +660,18 @@ export const Checkout: FC = () => {
     convenienceFee = init,
     deliveryFee = init,
     platformFee = init,
-    smallCartFree = init
+    smallCartFree
   } = deliveryDetails || {};
 
+  const smallCartFeeTotal = Object.values(smallCartFree ?? {}).reduce(
+    (sum, s) => s.amount + sum,
+    0
+  );
   const grandTotal = Number(
     (
       itemsTotal +
       convenienceFee.amount +
-      smallCartFree.amount +
+      smallCartFeeTotal +
       deliveryFee.amount +
       platformFee.amount +
       parcelChargesTotal
@@ -754,6 +731,7 @@ export const Checkout: FC = () => {
     acc[item.product.shopId].push(item);
     return acc;
   }, {} as Record<string, { product: Product; quantity: number }[]>);
+  const isMultiCart = Object.keys(itemByShop).length > 1;
   return (
     <Box
       sx={{
@@ -761,9 +739,23 @@ export const Checkout: FC = () => {
         flexDirection: 'column',
         width: '100%',
         justifyContent: 'space-between',
-        minHeight: '87dvh'
+        minHeight: '87dvh',
+        backgroundColor: isMultiCart ? '#eef7e6' : ''
       }}
     >
+      {isMultiCart && (
+        <Alert
+          sx={{
+            backgroundColor: '#c5f2a9',
+            borderRadius: '0 0 45px 45px'
+          }}
+        >
+          <Typography variant="h4" color='text.secondary'>Congrats!</Typography>
+          <Typography variant="caption">
+            You can save a lot with ordering from multiple hotel.
+          </Typography>
+        </Alert>
+      )}
       <SubSection>
         {coupon && (
           <Alert
@@ -780,7 +772,12 @@ export const Checkout: FC = () => {
         )}
         {Object.keys(itemByShop).map((shopId) => {
           return (
-            <Box>
+            <Box
+              key={shopId}
+              sx={{
+                mt: 3
+              }}
+            >
               <Typography variant="h4" component="h4" color="text.secondary">
                 {shops.find((shop) => shop.shopId === shopId)?.shopName}
               </Typography>
@@ -789,16 +786,77 @@ export const Checkout: FC = () => {
                 error={error}
                 key={shopId}
               />
+              {parcelChargesByShop[shopId] ||
+              deliveryDetails?.smallCartFree?.[shopId] ? (
+                <Card
+                  sx={{
+                    flexShrink: 0,
+                    borderRadius: 1,
+                    backgroundColor: '#fff',
+                    position: 'relative',
+                    boxShadow: '0px 0px 10px 0px #0000001f',
+                    mt: 1
+                  }}
+                >
+                  <Box
+                    sx={{
+                      alignSelf: 'flex-end'
+                    }}
+                  >
+                    <Container
+                      component="div"
+                      sx={{
+                        padding: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        width: '100%',
+                        gap: 0.5
+                      }}
+                    >
+                      {parcelChargesByShop[shopId] ? (
+                        <TotalWrapper>
+                          <Typography component="h4" variant="h6">
+                            Parcel Charges (
+                            {
+                              shops.find((shop) => shop.shopId === shopId)
+                                ?.shopName
+                            }
+                            )
+                          </Typography>
+                          <Typography component="h6" className="right">
+                            ₹{parcelChargesByShop[shopId]}
+                          </Typography>
+                        </TotalWrapper>
+                      ) : null}
+                      {(deliveryDetails?.smallCartFree?.[shopId].amount ?? 0) !=
+                        0 && (
+                        <TotalWrapper>
+                          <div className="left">
+                            <Typography component="h4" variant="h6">
+                              Small Cart Fee (
+                              {
+                                shops.find((shop) => shop.shopId === shopId)
+                                  ?.shopName
+                              }
+                              )
+                            </Typography>
+                            <Typography variant="caption" color="red">
+                              {deliveryDetails?.smallCartFree?.[shopId].reason}
+                            </Typography>
+                          </div>
+                          <Typography component="h6" className="right">
+                            ₹ {deliveryDetails?.smallCartFree?.[shopId].amount}
+                          </Typography>
+                        </TotalWrapper>
+                      )}
+                    </Container>
+                  </Box>
+                </Card>
+              ) : null}
             </Box>
           );
         })}
-        {deliveryDetails?.smallCartFree?.reason && (
-          <Alert severity="error">
-            <Typography variant="caption">
-              {deliveryDetails?.smallCartFree?.reason}
-            </Typography>
-          </Alert>
-        )}
+
         {deliveryDetails?.deliveryFee?.reason && (
           <Alert severity="error">
             <Typography variant="caption">

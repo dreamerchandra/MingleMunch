@@ -16,6 +16,13 @@ const LinkBehavior = forwardRef<
 
 export const theme: ThemeOptions = {
   components: {
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgb(255 170 170)',
+        }
+      }
+    },
     MuiCard: {
       styleOverrides: {
         root: {

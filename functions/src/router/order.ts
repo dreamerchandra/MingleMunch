@@ -18,6 +18,7 @@ import {
   updateFreeDeliveryForInvitedUser
 } from './user.js';
 import { createOrderInDb } from './create-order.js';
+import { getOtherFee } from './delivery-fee.js';
 
 interface OrderBody {
   details: [{ itemId: string; quantity: number }];
@@ -83,7 +84,6 @@ const getTotalByShop = (
       acc[shopId] = {
         costPriceParcelChargesTotal: 0,
         costPriceSubTotal: 0,
-        deliveryCharges: shop.deliveryFee,
         parcelChargesTotal: 0,
         displaySubTotal: 0
       };
@@ -124,11 +124,17 @@ const getDetailsToQuantity = (details: OrderBody['details']) => {
 const getBill = ({
   coupon,
   shopOrderValue,
-  platformFee
+  platformFee,
+  convenienceFee,
+  smallCartFee,
+  deliveryCharges,
 }: {
   coupon?: string;
   shopOrderValue: OrderDb['shopOrderValue'];
   platformFee: number;
+  convenienceFee: number;
+  smallCartFee: number;
+  deliveryCharges: number;
 }): OrderDb['bill'] => {
   const allShopOrderValue = Object.values(shopOrderValue);
   const displaySubTotal = allShopOrderValue.reduce(
@@ -139,17 +145,13 @@ const getBill = ({
     (acc, s) => acc + s.parcelChargesTotal,
     0
   );
-  const totalDeliveryCharges = allShopOrderValue.reduce(
-    (acc, s) => acc + s.deliveryCharges,
-    0
-  );
   const costPriceSubTotal = allShopOrderValue.reduce(
     (acc, s) => acc + s.costPriceSubTotal + s.costPriceParcelChargesTotal,
     0
   );
   const grandTotalBeforeDiscount =
-    displaySubTotal + platformFee + totalDeliveryCharges;
-  const discountFee = coupon ? totalDeliveryCharges : 0;
+    displaySubTotal + platformFee + deliveryCharges + convenienceFee + smallCartFee;
+  const discountFee = coupon ? deliveryCharges : 0;
   const grandTotal = grandTotalBeforeDiscount - discountFee;
   return {
     subTotal: displaySubTotal,
@@ -159,7 +161,9 @@ const getBill = ({
     grandTotalBeforeDiscount: Math.round(grandTotalBeforeDiscount),
     grandTotal: Math.round(grandTotal),
     costPriceSubTotal,
-    deliveryCharges: totalDeliveryCharges
+    deliveryCharges,
+    convenienceFee,
+    smallCartFee
   };
 };
 export const createOrder = async (req: Request, res: Response) => {
@@ -173,7 +177,6 @@ export const createOrder = async (req: Request, res: Response) => {
     const { products, shops, appConfig, shopCommission } = await getAllData(
       productIds
     );
-    const { platformFee } = appConfig;
     const { detailsToQuantity } = getDetailsToQuantity(details);
     const shopOrderValue = getTotalByShop(
       products,
@@ -181,10 +184,15 @@ export const createOrder = async (req: Request, res: Response) => {
       shops,
       shopCommission
     );
+    const {convenienceFee, deliveryFee, platformFee, smallCartFree} = getOtherFee(shops, products, details);
+    const smallCartFee = Object.values(smallCartFree ?? {}).reduce((acc, s) => acc + s.amount, 0);
     const bill = getBill({
       coupon: appliedCoupon,
       shopOrderValue,
-      platformFee
+      platformFee: platformFee.amount,
+      convenienceFee: convenienceFee.amount,
+      smallCartFee,
+      deliveryCharges: deliveryFee.amount,
     });
     logger.info(
       `grand total is ${bill.grandTotal} ${JSON.stringify({
@@ -203,7 +211,7 @@ export const createOrder = async (req: Request, res: Response) => {
       {
         bill,
         itemToQuantity: detailsToQuantity,
-        platformFee,
+        platformFee: platformFee.amount,
         products,
         shopOrderValue,
         shops,
