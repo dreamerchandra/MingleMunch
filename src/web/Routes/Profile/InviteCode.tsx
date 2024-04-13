@@ -69,7 +69,7 @@ export const GettingStarted = () => {
         <LoadingButton
           sx={{
             backgroundColor: 'white',
-            color: 'black',
+            color: '#151B33',
             padding: '10px 20px',
             borderRadius: '5px',
             border: 'none',

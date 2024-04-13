@@ -48,13 +48,14 @@ const report = async () => {
 
 const reportMonth = async () => {
   const startDate = new Date();
-  startDate.setDate(7);
+  startDate.setDate(8);
   startDate.setHours(0, 0, 0, 0);
-  startDate.setMonth(1);
+  startDate.setMonth(2);
   const endDate = new Date();
   endDate.setDate(7);
-  endDate.setMonth(2);
-  endDate.setHours(23, 59, 59, 999);
+  endDate.setMonth(3);
+  endDate.setHours(23, 59, 59, 0);
+  console.log(startDate.toLocaleString(), endDate.toLocaleString());
   const snap = await firebaseDb
     .collection('internal-orders')
     .where('createdAt', '>=', startDate)
@@ -66,7 +67,7 @@ const reportMonth = async () => {
     .filter((o) => o.status !== 'rejected');
   const byShop = orders.reduce((acc, order) => {
     const shopsIds = Object.keys(order.shopOrderValue);
-    console.log(acc, 'start');
+    // console.log(acc, 'start');
     shopsIds.forEach((shopId) => {
       if (!acc[shopId]) {
         acc[shopId] = {
@@ -91,7 +92,7 @@ const reportMonth = async () => {
       acc[shopId].parcelChargesTotal +=
         order.shopOrderValue[shopId].parcelChargesTotal;
     });
-    console.log(shopsIds, 'end');
+    // console.log(shopsIds, 'end');
     return acc;
   }, {});
   const data = orders.map((order) => {
@@ -138,4 +139,5 @@ const updateToSheet = async (data) => {
 
 report().then(data => {
   updateToSheet(data)
+  console.log(data)
 })

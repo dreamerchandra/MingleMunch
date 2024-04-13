@@ -79,8 +79,8 @@ export const useToSignIn = () => {
         setError(err.message);
       })
       .finally(() => {
-        setIsLoading(false)
-        setIsOtpRequested(true)
+        setIsLoading(false);
+        setIsOtpRequested(true);
       });
   }, []);
 
@@ -109,7 +109,7 @@ export const useToSignIn = () => {
     isPhoneNumberInvalid,
     loginWithOtp,
     error,
-    isLoading,
+    isLoading
   };
 };
 
@@ -152,4 +152,25 @@ export const useProtectedRoute = () => {
       localStorage.removeItem('redirect');
     }
   }, [navigation, userDetails]);
+};
+
+export const useToLogin = () => {
+  const { userDetails } = useUser();
+  const navigation = useNavigate();
+  const triggerLogin = useCallback(() => {
+    const { loading, user } = userDetails;
+    if (loading) {
+      return;
+    }
+    if (user == null) {
+      if (window.location.pathname === '/login') return;
+      localStorage.setItem('redirect', window.location.pathname);
+      return navigation('/login', {
+        replace: true
+      });
+    } else {
+      localStorage.removeItem('redirect');
+    }
+  }, [navigation, userDetails]);
+  return { triggerLogin };
 };

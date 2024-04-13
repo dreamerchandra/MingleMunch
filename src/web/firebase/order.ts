@@ -85,12 +85,12 @@ export const incomingOrderSocketUupdate = async (
   const internalOrderQuery = query(
     collection(firebaseDb, 'internal-orders').withConverter(orderConverters),
     orderBy('createdAt', 'desc'),
-    limit(15)
+    limit(25)
   );
   const orderQuery = query(
     collection(firebaseDb, 'orders').withConverter(orderConverters),
     orderBy('createdAt', 'desc'),
-    limit(15)
+    limit(25)
   );
 
   const internalOrderData = await getDocs(internalOrderQuery);

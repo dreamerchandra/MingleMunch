@@ -6,7 +6,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 
 const Imag = styled('img')`
-  mask-image: url(./slit.svg);
+  mask-image: url(./slit_v1.svg);
   mask-repeat: no-repeat;
   mask-size: contain;
   margin: auto;
@@ -44,7 +44,7 @@ export const Loading = () => {
     <div
       style={{
         height: '100dvh',
-        background: 'black'
+        background: '#151B33'
       }}
     >
       <Center>

@@ -1,4 +1,4 @@
-import { ArrowBackRounded } from '@mui/icons-material';
+import { ArrowBackRounded, Instagram } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/CloseOutlined';
 import History from '@mui/icons-material/History';
 import Home from '@mui/icons-material/Home';
@@ -10,8 +10,8 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { styled, useTheme } from '@mui/material/styles';
 import { FC, ReactNode, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const StyledBottomNavigationAction = styled(BottomNavigationAction)(`
   &.Mui-selected {
@@ -162,13 +162,40 @@ export const Header: FC<{
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                padding: '4px 16px',
-                width: '100%',
-                height: '100%'
+                justifyContent: 'space-between',
+                width: '100%'
               }}
             >
-              {logo}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px 16px',
+                  width: '100%',
+                  height: '100%'
+                }}
+              >
+                {logo}
+              </div>
+              <Button
+                onClick={() => {
+                  window.open('https://www.instagram.com/burn_delivery/');
+                }}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontSize: '8px'
+                  }}
+                >
+                  Follow Us
+                </Typography>
+                <Instagram color="error" />
+              </Button>
             </div>
           ) : (
             <Typography variant="h6" sx={{ pl: 4 }} color="text.secondary">

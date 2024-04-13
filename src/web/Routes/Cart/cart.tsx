@@ -1,7 +1,6 @@
 import { ArrowDownward } from '@mui/icons-material';
 import { Badge, Container, Fab, styled } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
-import { useProtectedRoute } from '../../firebase/auth';
 import { Header } from '../../module/Header/header';
 import { Checkout } from '../../module/Shoping/Checkout';
 
@@ -32,7 +31,6 @@ const useTrackHeight = () => {
 };
 
 export const CartPage = () => {
-  useProtectedRoute();
   const { ref, trackHeight, setShow, show } = useTrackHeight();
   return (
     <>

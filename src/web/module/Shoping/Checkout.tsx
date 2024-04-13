@@ -21,6 +21,7 @@ import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
+import { useToLogin, useUser } from '../../firebase/auth';
 import { LastOrder } from '../LastOrder/LastOrder';
 import { useShopQuery } from '../Shop/shop-query';
 import {
@@ -318,7 +319,7 @@ const initialErrorState = { message: '', products: [] as string[] };
 const ApplyCouponDrawer: FC<{
   model: boolean;
   setModel: (open: boolean) => void;
-  userConfig: UserConfig;
+  userConfig?: UserConfig;
   setCoupon: (c: string) => void;
 }> = ({ model, setModel, userConfig, setCoupon }) => {
   return (
@@ -402,7 +403,7 @@ const ApplyCouponDrawer: FC<{
             Available coupons
           </Typography>
         )}
-        {userConfig.availableCoupons?.map((coupon) => (
+        {userConfig?.availableCoupons?.map((coupon) => (
           <Card
             key={coupon}
             elevation={4}
@@ -457,7 +458,7 @@ const Footer: FC<{
   coupon: string;
   setModel: (show: boolean) => void;
   appConfig: AppConfig;
-  userConfig: UserConfig;
+  userConfig?: UserConfig | null;
   cartId?: string;
 }> = ({
   error,
@@ -472,6 +473,9 @@ const Footer: FC<{
   cartId
 }) => {
   const { removeAll } = useCart();
+  const {
+    userDetails: { user }
+  } = useUser();
   return (
     <>
       {error.message ? (
@@ -506,7 +510,9 @@ const Footer: FC<{
             color="secondary"
             disableElevation
           >
-            {cartId
+            {!user
+              ? 'Login To Place Order'
+              : cartId
               ? `Update Order ₹ ${grandTotal}`
               : appConfig.isOpen
               ? `Place order ₹ ${grandTotal}`
@@ -523,7 +529,7 @@ const Footer: FC<{
             >
               Coupon applied: {coupon}
             </Typography>
-          ) : userConfig.availableCoupons?.length ? (
+          ) : userConfig?.availableCoupons?.length ? (
             <Button
               variant="text"
               color="success"
@@ -576,10 +582,14 @@ export const Checkout: FC = () => {
     return old;
   }, [] as { product: Product; quantity: number }[]);
   const navigate = useNavigate();
+  const {triggerLogin} = useToLogin()
   const { mutate, isLoading } = useMutationCreateOrder();
   const [success, setShowSuccess] = useState(false);
   const [error, setError] = useState(initialErrorState);
   const [model, setModel] = useState(false);
+  const {
+    userDetails: { user }
+  } = useUser();
   useEffect(() => {
     if (items.length === 0) {
       navigate('/');
@@ -598,9 +608,6 @@ export const Checkout: FC = () => {
     return null;
   }
   if (!appConfig) {
-    return null;
-  }
-  if (!userConfig) {
     return null;
   }
   const shopIds = [...new Set(items.map((i) => i.product.shopId))];
@@ -623,6 +630,9 @@ export const Checkout: FC = () => {
   );
 
   const onPlaceOrder = () => {
+    if (!user) {
+      return triggerLogin()
+    }
     mutate(
       {
         details: items.map((item) => ({
@@ -756,7 +766,7 @@ export const Checkout: FC = () => {
           cartId={cartId}
         />
       </SubSection>
-      {userConfig.availableCoupons && (
+      {userConfig?.availableCoupons && (
         <ApplyCouponDrawer
           model={model}
           setCoupon={setCoupon}

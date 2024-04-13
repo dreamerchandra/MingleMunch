@@ -53,7 +53,7 @@ export const ShopPage = () => {
         title="Burn Home"
         logo={
           <img
-            src="/dark_v1.svg"
+            src="/dark_v2.svg"
             style={{
               width: '75px'
             }}

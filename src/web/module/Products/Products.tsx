@@ -308,7 +308,7 @@ export const Products: FC<{
                     >
                       <Box
                         sx={{
-                          background: 'black',
+                          background: '#151B33',
                           borderRadius: '5px',
                           px: 1
                         }}
