@@ -88,14 +88,14 @@ export const theme: ThemeOptions = {
       fontSize: '1.75rem',
       fontWeight: 900,
       lineHeight: 1.2222222222222223,
-      color: '#000000'
+      color: '#151B33'
     },
     h3: {
       fontFamily: "'Nunito', sans-serif ",
       fontSize: '1.375rem',
       fontWeight: 600,
       lineHeight: 1.2222222222222223,
-      color: '#000000'
+      color: '#151B33'
     },
     h4: {
       fontFamily: "'Nunito', sans-serif ",

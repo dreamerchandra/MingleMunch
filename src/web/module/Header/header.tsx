@@ -95,7 +95,7 @@ export const Header: FC<{
             }}
             sx={{
               position: 'relative',
-              boxShadow: '0px 0px 1px 0px #00000050',
+              boxShadow: '0px 0px 1px 0px #151B3350',
               div: {
                 py: '4px'
               }
@@ -135,7 +135,7 @@ export const Header: FC<{
             [theme.breakpoints.up('sm')]: [{ margin: 'auto' }],
             display: 'flex',
             alignItems: 'center',
-            boxShadow: '0px 1px 0px #00000050',
+            boxShadow: '0px 1px 0px #151B3350',
             height: '60px',
             width: 'min(100vw, 1200px)'
           }}

@@ -50,7 +50,7 @@ export const ShopPage = () => {
   return (
     <>
       <Header
-        title="Burn Home"
+        title="Goburn Home"
         logo={
           <img
             src="/dark_v2.svg"

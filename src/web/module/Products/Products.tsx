@@ -138,7 +138,7 @@ export const Products: FC<{
                   background: '#ff8c0087',
                   px: 1,
                   py: 1,
-                  color: '#000000',
+                  color: '#151B33',
                   borderRadius: '5px',
                   fontSize: '0.6rem',
                   width: 'fit-content',
@@ -224,7 +224,7 @@ export const Products: FC<{
               backgroundColor: '#fff',
               justifyItems: 'space-between',
               borderRadius: '10px',
-              boxShadow: '0px 0px 2px 0px #0000001f'
+              boxShadow: '0px 0px 2px 0px #151B331f'
             }}
           >
             {filteredList?.map((product) => (
@@ -262,7 +262,7 @@ export const Products: FC<{
                   mb: 1,
                   background: '#fff',
                   p: 1,
-                  boxShadow: '0px 0px 10px 0px #0000001f'
+                  boxShadow: '0px 0px 10px 0px #151B331f'
                 }}
               >
                 <Typography

@@ -161,7 +161,7 @@ export const Footer = () => {
         <div className="copyright">
           &copy; Copyright{' '}
           <strong>
-            <span>BURN</span>
+            <span>Goburn</span>
           </strong>
           . All Rights Reserved
         </div>

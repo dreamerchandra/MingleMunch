@@ -101,7 +101,7 @@ export const Feedback = () => {
           sx={{
             backgroundColor: 'white',
             borderRadius: '10px',
-            boxShadow: '0px 0px 20px 0px #0000001f',
+            boxShadow: '0px 0px 20px 0px #151B331f',
             width: 'min(90vw, 1200px)',
             display: 'flex',
             flexDirection: 'column'

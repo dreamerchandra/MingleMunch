@@ -26,7 +26,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
         borderRadius: '10px',
         pt: 1,
         position: 'relative',
-        boxShadow: '0px 0px 5px 0px #0000001f',
+        boxShadow: '0px 0px 5px 0px #151B331f',
       }}
       elevation={0}
       onClick={() => {
@@ -40,7 +40,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
             top: 0,
             left: 0,
             background: shop.isOpen ? 'black' : 'red',
-            boxShadow: '0px 0px 5px 0px #0000001f',
+            boxShadow: '0px 0px 5px 0px #151B331f',
             p: 0.5
           }}
         >

@@ -58,8 +58,8 @@ expressApp.post(
         notification: {
           title,
           body,
-          badge: 'https://delivery.goburn.in/logo.png',
-          icon: 'https://delivery.goburn.in/logo.png',
+          badge: 'https://delivery.goburn.in/logo_v1.png',
+          icon: 'https://delivery.goburn.in/logo_v1.png',
           requireInteraction,
           ...notificationData
         },

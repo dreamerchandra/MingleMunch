@@ -56,7 +56,7 @@ export function LoginPage() {
                 height: '100%'
               }}
             >
-              <img src="./logo_with_best_price.png" height={250} />
+              <img src="./logo_with_best_price_v1.png" width={370} />
               <Box
                 component="form"
                 onSubmit={handleSubmit}

@@ -100,7 +100,7 @@ export const LastOrder: FC = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#000000',
+        backgroundColor: '#151B33',
         pt: 2,
         pb: 2,
         gap: 2,

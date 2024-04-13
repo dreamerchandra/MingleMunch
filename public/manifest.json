@@ -1,14 +1,14 @@
 {
-  "name": "BURN",
-  "short_name": "Burn",
+  "name": "Goburn",
+  "short_name": "Goburn",
   "description": "The best price food app.",
-  "start_url": "http://delivery.goburn.in/?standalone=true",
+  "start_url": "https://delivery.goburn.in",
   "display": "standalone",
-  "background_color": "#000000",
+  "background_color": "#151B33",
   "theme_color": "#Cfff04",
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/logo_v1.png",
       "sizes": "512x512",
       "type": "image/png"
     }

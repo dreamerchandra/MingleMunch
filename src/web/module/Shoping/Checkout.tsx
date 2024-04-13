@@ -86,7 +86,7 @@ const CheckoutCard: FC<{
       elevation={2}
       color="white"
       sx={{
-        boxShadow: '0px 0px 10px 0px #0000001f',
+        boxShadow: '0px 0px 10px 0px #151B331f',
         background: '#fff',
         px: 2
       }}
@@ -148,7 +148,7 @@ const CompetitorBanner: FC<{ grandTotal: number }> = ({ grandTotal }) => {
         borderRadius: 2,
         backgroundColor: '#c0eade',
         position: 'relative',
-        boxShadow: '0px 0px 10px 0px #0000001f',
+        boxShadow: '0px 0px 10px 0px #151B331f',
         backgroundImage:
           'linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.9))'
       }}
@@ -213,7 +213,7 @@ const TotalCard: FC<{
         borderRadius: 2,
         backgroundColor: '#fff',
         position: 'relative',
-        boxShadow: '0px 0px 10px 0px #0000001f'
+        boxShadow: '0px 0px 10px 0px #151B331f'
       }}
     >
       <Box
@@ -878,7 +878,7 @@ const ReferButton: FC<{ myReferralCodes: string }> = ({ myReferralCodes }) => {
       variant="outlined"
       onClick={() => {
         navigator.share({
-          title: 'Burn',
+          title: 'Goburn',
           text: `Hey, I found this amazing app called Burn. It has the lowest prices for food ordering. \n You can also get free delivery on your first order. \n \n Use my referral code ${myReferralCodes} to get your first order delivered free. Use it from http://delivery.goburn.in/`,
           url: 'http://delivery.goburn.in/'
         });

@@ -31,7 +31,7 @@ export const OurStories = () => {
         ...story,
         url: story.imageUrl,
         type: 'video',
-        profileUrl: 'https://mingle-munch.web.app/logo.png'
+        profileUrl: 'https://mingle-munch.web.app/logo_v1.png'
       };
     }
   };

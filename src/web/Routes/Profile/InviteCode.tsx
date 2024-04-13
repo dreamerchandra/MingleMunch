@@ -74,7 +74,7 @@ export const GettingStarted = () => {
             borderRadius: '5px',
             border: 'none',
             cursor: 'pointer',
-            boxShadow: '0px 0px 10px 0px #0000001f'
+            boxShadow: '0px 0px 10px 0px #151B331f'
           }}
           disabled={isLoading}
           loading={isLoading}
@@ -100,7 +100,7 @@ const StyledBox = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   backgroundColor: 'white',
   gap: theme.spacing(2),
-  boxShadow: '0px 0px 2px 0px #0000001f'
+  boxShadow: '0px 0px 2px 0px #151B331f'
 }));
 
 const UserCard: FC<{ name: string; hasOrdered: boolean }> = ({
@@ -189,7 +189,7 @@ export const InvitePage = () => {
             borderRadius: '5px',
             border: 'none',
             cursor: 'pointer',
-            boxShadow: '0px 0px 10px 0px #0000001f',
+            boxShadow: '0px 0px 10px 0px #151B331f',
             gap: 2
           }}
           onClick={() => {

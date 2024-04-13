@@ -221,7 +221,7 @@ const Week: FC<{
             p: 1,
             gap: d.valueOf() === value.valueOf() ? 2 : 1,
             borderRadius: '10px',
-            boxShadow: '0px 0px 10px 0px #0000001f'
+            boxShadow: '0px 0px 10px 0px #151B331f'
           }}
           onClick={() => onChange(d)}
         >
@@ -416,7 +416,7 @@ export const HomeFoodDrawer: FC<{
                 backgroundColor: '#fff',
                 p: 2,
                 borderRadius: '10px',
-                boxShadow: '0px 0px 10px 0px #0000001f'
+                boxShadow: '0px 0px 10px 0px #151B331f'
               }}
             >
               <div
