@@ -21,6 +21,7 @@ import { OurStories } from '../../module/stories/stories';
 import { MasterControl } from '../../module/master-control';
 import { FullPageBanner } from '../../module/full-page-banner';
 import { Footer } from '../../../common/footer';
+import { NoticeBoard } from '../../module/notice--board';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -78,11 +79,8 @@ export const ShopPage = () => {
             height: '10px'
           }}
         ></div>
-        {/* <HomeFoodBanner
-          onClick={() => {
-            setDrawer(true);
-          }}
-        /> */}
+        <NoticeBoard
+        />
         <Box marginTop={2}>
           <MasterControl />
           <Shops />

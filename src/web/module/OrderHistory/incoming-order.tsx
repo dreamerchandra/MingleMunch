@@ -44,6 +44,12 @@ const initialCongestion = {
   delayReason: [] as string[]
 };
 
+const getBackgroundColor = (status: OrderStatus): string => {
+  if (status === 'rejected') return '#dedddd';
+  if (status !== 'delivered') return 'rgb(255 0 0 / 50%)';
+  return '';
+};
+
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
@@ -93,8 +99,7 @@ export const IncomingOrder = () => {
               flexDirection: 'column',
               gap: 2,
               width: '100%',
-              backgroundColor:
-                !['delivered', 'rejected'].includes(order.status) ? 'rgb(255 0 0 / 50%)' : ''
+              backgroundColor: getBackgroundColor(order.status)
             }}
           >
             <Container

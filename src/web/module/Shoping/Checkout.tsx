@@ -8,7 +8,6 @@ import { SwipeableDrawer } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Container from '@mui/material/Container';
@@ -32,18 +31,21 @@ import {
 } from '../appconfig';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
+import { AddItem } from '../Products/Product-iitems';
 
-const StyledProduct = styled('div')<{ error: boolean }>(({ theme, error }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: theme.spacing(2),
-  width: '100%',
-  margin: theme.spacing(2, 0),
-  '> *': {
-    color: error ? theme.palette.error.main : ''
-  }
-}));
+const StyledProduct = styled('div')<{ error: boolean; spacing?: number }>(
+  ({ theme, error, spacing = 2 }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing(2),
+    width: '100%',
+    margin: theme.spacing(spacing, 0),
+    '> *': {
+      color: error ? theme.palette.error.main : ''
+    }
+  })
+);
 
 const Background = styled('div')`
   background-size: contain;
@@ -80,7 +82,6 @@ const CheckoutCard: FC<{
   items: { quantity: number; product: Product }[];
   error: any;
 }> = ({ items, error }) => {
-  const { addToCart, removeFromCart } = useCart();
   return (
     <Card
       elevation={2}
@@ -94,47 +95,35 @@ const CheckoutCard: FC<{
       {items
         .sort((a, b) => a.product.itemName.localeCompare(b.product.itemName))
         .map((item) => (
-          <StyledProduct
-            key={item.product.itemId}
-            error={error.products.includes(item.product.itemId)}
-          >
-            <div>
-              <Typography component="h6">{item.product.itemName}</Typography>
-              <Typography component="h6">₹{item.product.itemPrice}</Typography>
-            </div>
-            <div>
-              <ButtonGroup
-                variant="outlined"
-                aria-label="update cart"
-                sx={{
-                  p: 0,
-                  m: 0
-                }}
-              >
-                <Button
-                  variant="outlined"
-                  sx={{
-                    border: 0
-                  }}
-                  onClick={() => removeFromCart(item.product)}
-                >
-                  -
-                </Button>
-                <Button variant="outlined" sx={{ maxWidth: '2ch', border: 0 }}>
-                  {item.quantity}
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={{
-                    border: 0
-                  }}
-                  onClick={() => addToCart(item.product)}
-                >
+          <>
+            <StyledProduct
+              key={item.product.itemId}
+              error={error.products.includes(item.product.itemId)}
+              spacing={item.product.parcelCharges > 0 ? 0 : 2}
+            >
+              <div>
+                <Typography component="h6">{item.product.itemName}</Typography>
+                <Typography component="h6">
+                  ₹{item.product.itemPrice}
+                </Typography>
+              </div>
+              <div>
+                <AddItem
+                  product={item.product}
+                />
+              </div>
+            </StyledProduct>
+            {item.product.parcelCharges > 0 && (
+              <div>
+                <Typography variant="h6" color="blue" lineHeight={0.5}>
                   +
-                </Button>
-              </ButtonGroup>
-            </div>
-          </StyledProduct>
+                </Typography>
+                <Typography variant="body2">
+                  Parcel Charges {item.product.parcelCharges * item.quantity}
+                </Typography>
+              </div>
+            )}
+          </>
         ))}
     </Card>
   );
@@ -232,7 +221,7 @@ const TotalCard: FC<{
         >
           <TotalWrapper>
             <Typography component="h6">Item Total </Typography>
-            <Typography component="h6">₹{itemsTotal}</Typography>
+            <Typography component="h6">₹{itemsTotal + parcelChargesTotal}</Typography>
           </TotalWrapper>
           <TotalWrapper>
             <Typography component="h6">
@@ -281,23 +270,6 @@ const TotalCard: FC<{
             </Typography>
             <Typography component="h6">₹ {platformFee}</Typography>
           </TotalWrapper>
-          {parcelChargesTotal > 0 ? (
-            <TotalWrapper>
-              <Typography component="h6">
-                Parcel Charges
-                <Tooltip
-                  title="Industry's lowest ever parcel charges by burn!"
-                  enterTouchDelay={20}
-                  leaveTouchDelay={5_000}
-                >
-                  <IconButton sx={{ p: 0, ml: 1 }}>
-                    <InfoIcon sx={{ width: 20 }} />
-                  </IconButton>
-                </Tooltip>
-              </Typography>
-              <Typography component="h6">₹ {parcelChargesTotal}</Typography>
-            </TotalWrapper>
-          ) : null}
           <TotalWrapper>
             <Typography component="h6">GrandTotal </Typography>
             <Typography
@@ -582,7 +554,7 @@ export const Checkout: FC = () => {
     return old;
   }, [] as { product: Product; quantity: number }[]);
   const navigate = useNavigate();
-  const {triggerLogin} = useToLogin()
+  const { triggerLogin } = useToLogin();
   const { mutate, isLoading } = useMutationCreateOrder();
   const [success, setShowSuccess] = useState(false);
   const [error, setError] = useState(initialErrorState);
@@ -631,7 +603,7 @@ export const Checkout: FC = () => {
 
   const onPlaceOrder = () => {
     if (!user) {
-      return triggerLogin()
+      return triggerLogin();
     }
     mutate(
       {

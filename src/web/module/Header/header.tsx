@@ -179,7 +179,7 @@ export const Header: FC<{
               </div>
               <Button
                 onClick={() => {
-                  window.open('https://www.instagram.com/burn_delivery/');
+                  window.open('https://www.instagram.com/goburn.in?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==');
                 }}
                 sx={{
                   display: 'flex',

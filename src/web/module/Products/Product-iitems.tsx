@@ -20,7 +20,7 @@ const FooterActions: FC<{
   isSuggestion: boolean;
   allowEdit: boolean;
 }> = ({ product, onAdd, allowEdit }) => {
-  const { addToCart, removeFromCart, cartDetails } = useCart();
+  const { addToCart, cartDetails } = useCart();
   const inCart = cartDetails.cart.filter(
     (item) => item.itemId === product.itemId
   );
@@ -35,49 +35,12 @@ const FooterActions: FC<{
         alignItems: 'center',
         justifyContent: 'end',
         p: 0,
-        pr: 1,
+        pr: 1
       }}
     >
       <div>
         {inCart.length ? (
-          <Container
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'end',
-              p: 0
-            }}
-          >
-            <Button
-              size="small"
-              sx={{
-                paddingLeft: '16px',
-                paddingRight: '16px',
-                minWidth: '0px'
-              }}
-              onClick={() => removeFromCart(product)}
-            >
-              <Remove fontSize="small" />
-            </Button>
-            <Typography variant="h4" color="green">
-              {inCart.length}
-            </Typography>
-            <Button
-              size="small"
-              sx={{
-                paddingLeft: '16px',
-                paddingRight: '16px',
-                minWidth: '0px'
-              }}
-              onClick={() => {
-                onAdd();
-                addToCart(product);
-              }}
-            >
-              <Add fontSize="small" />
-            </Button>
-          </Container>
+          <AddItem product={product} onAdd={onAdd} />
         ) : (
           <Container
             style={{
@@ -290,3 +253,56 @@ export const ProductItem: FC<{
     </div>
   );
 };
+
+export function AddItem({
+  product,
+  onAdd
+}: {
+  product: Product;
+  onAdd?: () => void;
+}) {
+  const { addToCart, removeFromCart, cartDetails } = useCart();
+  const inCart = cartDetails.cart.filter(
+    (item) => item.itemId === product.itemId
+  );
+  return (
+    <Container
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'end',
+        p: 0
+      }}
+    >
+      <Button
+        size="small"
+        sx={{
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          minWidth: '0px'
+        }}
+        onClick={() => removeFromCart(product)}
+      >
+        <Remove fontSize="small" />
+      </Button>
+      <Typography variant="h4" color="green">
+        {inCart.length}
+      </Typography>
+      <Button
+        size="small"
+        sx={{
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          minWidth: '0px'
+        }}
+        onClick={() => {
+          onAdd?.();
+          addToCart(product);
+        }}
+      >
+        <Add fontSize="small" />
+      </Button>
+    </Container>
+  );
+}

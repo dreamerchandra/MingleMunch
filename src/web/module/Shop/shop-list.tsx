@@ -27,6 +27,8 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
         pt: 1,
         position: 'relative',
         boxShadow: '0px 0px 5px 0px #151B331f',
+        background: shop.isOpen ? 'white' : '#f1f1f1',
+        filter: shop.isOpen ? 'none' : 'grayscale(1)'
       }}
       elevation={0}
       onClick={() => {
@@ -39,7 +41,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
             position: 'absolute',
             top: 0,
             left: 0,
-            background: shop.isOpen ? 'black' : 'red',
+            background: 'black',
             boxShadow: '0px 0px 5px 0px #151B331f',
             p: 0.5
           }}
@@ -98,7 +100,9 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
         image={shop.shopImage}
         alt={shop.shopName}
         style={{
-          filter: shop.isOpen ? 'drop-shadow(black 1px 1px 2px)' : 'grayscale(1)'
+          filter: shop.isOpen
+            ? 'drop-shadow(black 1px 1px 2px)'
+            : 'grayscale(1)'
         }}
       />
     </Card>
@@ -183,16 +187,30 @@ export const Shops = () => {
         )}
       </Box>
 
-      {data?.map((shop) => (
-        <div
-          key={shop.shopId}
-          style={{
-            filter: appConfig?.isOpen ? 'none' : 'grayscale(1)'
-          }}
-        >
-          <Shop shop={shop} />
-        </div>
-      ))}
+      {data
+        ?.filter((s) => s.isOpen)
+        ?.map((shop) => (
+          <div
+            key={shop.shopId}
+            style={{
+              filter: appConfig?.isOpen ? 'none' : 'grayscale(1)'
+            }}
+          >
+            <Shop shop={shop} />
+          </div>
+        ))}
+        {data
+        ?.filter((s) => !s.isOpen)
+        ?.map((shop) => (
+          <div
+            key={shop.shopId}
+            style={{
+              filter: appConfig?.isOpen ? 'none' : 'grayscale(1)'
+            }}
+          >
+            <Shop shop={shop} />
+          </div>
+        ))}
     </Box>
   );
 };

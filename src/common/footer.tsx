@@ -141,7 +141,7 @@ export const Footer = () => {
             <h4>Follow Us</h4>
             <div className="social-links d-flex">
               <a
-                href="https://www.instagram.com/burn_delivery/"
+                href="https://www.instagram.com/goburn.in?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                 className="telegram"
               >
                 <Instagram />
