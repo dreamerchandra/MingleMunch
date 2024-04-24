@@ -22,6 +22,7 @@ import { MasterControl } from '../../module/master-control';
 import { FullPageBanner } from '../../module/full-page-banner';
 import { Footer } from '../../../common/footer';
 import { NoticeBoard } from '../../module/notice--board';
+import { LocationDrawer } from '../../module/location/location-drawer';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -91,6 +92,7 @@ export const ShopPage = () => {
           <LastOrder />
         </Box>
         {/* <HomeFoodDrawer open={drawer} setOpen={setDrawer} /> */}
+        <LocationDrawer />
         <Footer />
       </Container>
     </>

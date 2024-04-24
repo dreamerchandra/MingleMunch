@@ -1,4 +1,3 @@
-import { ArrowBackRounded, Instagram } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/CloseOutlined';
 import History from '@mui/icons-material/History';
 import Home from '@mui/icons-material/Home';
@@ -12,6 +11,12 @@ import { styled, useTheme } from '@mui/material/styles';
 import { FC, ReactNode, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useCart } from '../Shoping/cart-activity';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import Instagram from '@mui/icons-material/Instagram';
+import { useLocationQuery } from '../location/use-location-query';
+import { LocationDrawer } from '../location/location-drawer';
 
 const StyledBottomNavigationAction = styled(BottomNavigationAction)(`
   &.Mui-selected {
@@ -28,6 +33,12 @@ export const Header: FC<{
   const navigate = useNavigate();
   const location = useLocation();
   const [searchPlaceHolder, setSearchPlaceholder] = useState('');
+  const { cartDetails, updateLocation } = useCart();
+  const locationId = cartDetails.locationId;
+  const { data: locationsDetails } = useLocationQuery();
+  const locationName = locationsDetails?.find(
+    (location) => location.id === locationId
+  )?.name;
   useEffect(() => {
     const allPlaceHolders = [
       'Try Mutton Biryani',
@@ -163,27 +174,52 @@ export const Header: FC<{
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                width: '100%'
+                width: '100%',
+                alignItems: 'center'
               }}
             >
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '4px 16px',
-                  width: '100%',
-                  height: '100%'
+                  padding: '4px 16px'
                 }}
               >
                 {logo}
               </div>
               <Button
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
                 onClick={() => {
-                  window.open('https://www.instagram.com/goburn.in?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==');
+                  updateLocation('');
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: '12px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {locationName ?? 'Select Locations...'}
+                </Typography>
+                <LocationOnOutlinedIcon
+                  sx={{
+                    height: '12px'
+                  }}
+                />
+              </Button>
+
+              <Button
+                onClick={() => {
+                  window.open(
+                    'https://www.instagram.com/goburn.in?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=='
+                  );
                 }}
                 sx={{
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexDirection: 'column'
                 }}
               >
                 <Typography
@@ -237,6 +273,7 @@ export const Header: FC<{
           </BottomNavigation>
         </Paper>
       )}
+      <LocationDrawer />
     </>
   );
 };

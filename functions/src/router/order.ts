@@ -23,6 +23,7 @@ interface OrderBody {
   details: [{ itemId: string; quantity: number }];
   appliedCoupon?: string;
   orderId?: string;
+  locationId: string;
 }
 
 const getAllData = async (productIds: string[]) => {
@@ -165,7 +166,7 @@ const getBill = ({
 };
 export const createOrder = async (req: Request, res: Response) => {
   const time = Date.now();
-  const { details, appliedCoupon, orderId } = req.body as OrderBody;
+  const { details, appliedCoupon, orderId, locationId } = req.body as OrderBody;
   logger.log(`incoming request payload, ${JSON.stringify(details)}`);
   logger.log(`started ${Date.now() - time}`);
   const productIds = details.map((d) => d.itemId);

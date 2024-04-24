@@ -9,9 +9,11 @@ import { useNavigate } from 'react-router-dom';
 import { Shop as IShop } from '../../../common/types/shop';
 import { useAppConfig } from '../appconfig';
 import { useShopQuery } from './shop-query';
+import { useUserLocationPricingByShopId } from '../location/use-location-query';
 
 export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
   const navigation = useNavigate();
+  const {deliveryPrice} = useUserLocationPricingByShopId(shop.shopId);
   return (
     <Card
       sx={{
@@ -76,7 +78,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
           <Typography component="h6" variant="h6" color="GrayText">
             {shop.isOpen ? shop.description : 'Currently Closed'}
           </Typography>
-          {shop.deliveryFee === 0 && (
+          {deliveryPrice === 0 && (
             <Paper
               sx={{
                 background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',

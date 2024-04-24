@@ -14,13 +14,15 @@ type CartState = {
   total: number;
   totalItems: number;
   cartId?: string;
-}
+  locationId: string;
+};
 
 const initialState: CartState = {
   cart: [],
   total: 0,
   totalItems: 0,
   cartId: '',
+  locationId: ''
 };
 
 interface AddToCartAction {
@@ -42,10 +44,22 @@ interface UpdateCartId {
   type: 'CART_ID';
   payload: {
     cartId: string;
-  }
+  };
 }
 
-type Actions = AddToCartAction | RemoveFromCartAction | RemoveAllFromCartAction | UpdateCartId;
+interface UpdateLocation {
+  type: 'UPDATE_LOCATION';
+  payload: {
+    locationId: string;
+  };
+}
+
+type Actions =
+  | AddToCartAction
+  | RemoveFromCartAction
+  | RemoveAllFromCartAction
+  | UpdateCartId
+  | UpdateLocation;
 
 const cartActivityReducer = (state: CartState, action: Actions) => {
   switch (action.type) {
@@ -70,6 +84,11 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
         totalItems: state.totalItems - 1
       };
     }
+    case 'UPDATE_LOCATION':
+      return {
+        ...state,
+        locationId: action.payload.locationId
+      };
     case 'REMOVE_ALL': {
       return initialState;
     }
@@ -77,7 +96,7 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
       return {
         ...state,
         cartId: action.payload.cartId
-      }
+      };
     }
     default:
       return state;
@@ -88,9 +107,20 @@ const LOCAL_STORAGE = 'in-cart';
 
 const getFromLocalStorage = () => {
   try {
-    return JSON.parse(
+    const cartDetails = JSON.parse(
       localStorage.getItem(LOCAL_STORAGE) || JSON.stringify(initialState)
     );
+    const locationDetails = JSON.parse(
+      localStorage.getItem('locationId') || JSON.stringify({})
+    );
+    const now = new Date();
+    const twoHours = 1000 * 60 * 60 * 2;
+    const isExpired = now.getTime() - locationDetails.now > twoHours;
+    if (isExpired) {
+      return initialState;
+    }
+    if (!locationDetails.locationId) return initialState;
+    return { ...cartDetails, locationId: locationDetails.locationId };
   } catch {
     /* empty */
   }
@@ -105,7 +135,18 @@ const useCartActivity = () => {
   );
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE, JSON.stringify(cartDetails));
+    const locationId = cartDetails.locationId;
+    if (locationId) {
+      const now = new Date().getTime();
+      const info = { now, locationId };
+      localStorage.setItem('locationId', JSON.stringify(info));
+    }else {
+      localStorage.removeItem('locationId');
+    }
+    localStorage.setItem(
+      LOCAL_STORAGE,
+      JSON.stringify({ ...cartDetails, locationId: '' })
+    );
   }, [cartDetails]);
 
   const addToCart = useCallback((product: Product) => {
@@ -116,11 +157,14 @@ const useCartActivity = () => {
     });
   }, []);
 
-  const addMultipleToCart = useCallback((products: Product, quality: number) => {
-    for (let i = 0; i < quality; i++) {
-      addToCart(products);
-    }
-  }, [addToCart]);
+  const addMultipleToCart = useCallback(
+    (products: Product, quality: number) => {
+      for (let i = 0; i < quality; i++) {
+        addToCart(products);
+      }
+    },
+    [addToCart]
+  );
   const removeFromCart = useCallback((product: Product) => {
     product.suggestionIds?.map((suggestion) => {
       dispatch({
@@ -143,10 +187,29 @@ const useCartActivity = () => {
   const updateCartId = useCallback((cartId: string) => {
     dispatch({ type: 'CART_ID', payload: { cartId } });
   }, []);
+  const updateLocation = useCallback((locationId: string) => {
+    dispatch({ type: 'UPDATE_LOCATION', payload: { locationId } });
+  }, []);
 
   return useMemo(
-    () => ({ cartDetails, addToCart, removeFromCart, removeAll, addMultipleToCart, updateCartId }),
-    [addToCart, cartDetails, removeFromCart, removeAll, addMultipleToCart, updateCartId]
+    () => ({
+      cartDetails,
+      addToCart,
+      removeFromCart,
+      removeAll,
+      addMultipleToCart,
+      updateCartId,
+      updateLocation
+    }),
+    [
+      addToCart,
+      cartDetails,
+      removeFromCart,
+      removeAll,
+      addMultipleToCart,
+      updateCartId,
+      updateLocation
+    ]
   );
 };
 

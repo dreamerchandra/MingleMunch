@@ -22,6 +22,7 @@ import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
 import { useToLogin, useUser } from '../../firebase/auth';
 import { LastOrder } from '../LastOrder/LastOrder';
+import { AddItem } from '../Products/Product-iitems';
 import { useShopQuery } from '../Shop/shop-query';
 import {
   AppConfig,
@@ -29,9 +30,13 @@ import {
   useAppConfig,
   useUserConfig
 } from '../appconfig';
+import {
+  useLocationDetails,
+  useUserLocationPricing
+} from '../location/use-location-query';
 import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
-import { AddItem } from '../Products/Product-iitems';
+import { LocationDrawer } from '../location/location-drawer';
 
 const StyledProduct = styled('div')<{ error: boolean; spacing?: number }>(
   ({ theme, error, spacing = 2 }) => ({
@@ -108,9 +113,7 @@ const CheckoutCard: FC<{
                 </Typography>
               </div>
               <div>
-                <AddItem
-                  product={item.product}
-                />
+                <AddItem product={item.product} />
               </div>
             </StyledProduct>
             {item.product.parcelCharges > 0 && (
@@ -221,7 +224,9 @@ const TotalCard: FC<{
         >
           <TotalWrapper>
             <Typography component="h6">Item Total </Typography>
-            <Typography component="h6">₹{itemsTotal + parcelChargesTotal}</Typography>
+            <Typography component="h6">
+              ₹{itemsTotal + parcelChargesTotal}
+            </Typography>
           </TotalWrapper>
           <TotalWrapper>
             <Typography component="h6">
@@ -448,6 +453,8 @@ const Footer: FC<{
   const {
     userDetails: { user }
   } = useUser();
+  const { location } = useLocationDetails();
+  const { updateLocation } = useCart();
   return (
     <>
       {error.message ? (
@@ -490,6 +497,16 @@ const Footer: FC<{
               ? `Place order ₹ ${grandTotal}`
               : appConfig.closeReason}
           </LoadingButton>
+          <Button
+            variant="text"
+            onClick={() => {
+              updateLocation('');
+            }}
+          >
+            <Typography variant="caption" sx={{ fontWeight: 800 }}>
+              Delivering to {location?.name}
+            </Typography>
+          </Button>
           {coupon ? (
             <Typography
               variant="caption"
@@ -513,6 +530,7 @@ const Footer: FC<{
               {userConfig.availableCoupons.length} COUPON AVAILABLE
             </Button>
           ) : null}
+          <LocationDrawer />
         </SubSection>
       )}
     </>
@@ -559,6 +577,7 @@ export const Checkout: FC = () => {
   const [success, setShowSuccess] = useState(false);
   const [error, setError] = useState(initialErrorState);
   const [model, setModel] = useState(false);
+  const { deliveryPrice } = useUserLocationPricing();
   const {
     userDetails: { user }
   } = useUser();
@@ -584,15 +603,15 @@ export const Checkout: FC = () => {
   }
   const shopIds = [...new Set(items.map((i) => i.product.shopId))];
   const originalDeliveryFee = shopIds.reduce((old, shopId) => {
-    const s = shops?.find((s) => s.shopId === shopId);
+    const s = deliveryPrice?.[shopId];
     if (!s) return old;
-    return old + s.deliveryFee;
+    return old + s;
   }, 0);
   const deliveryFee = !coupon
     ? shopIds.reduce((old, shopId) => {
-        const s = shops?.find((s) => s.shopId === shopId);
+        const s = deliveryPrice?.[shopId];
         if (!s) return old;
-        return old + s.deliveryFee;
+        return old + s;
       }, 0)
     : 0;
 
@@ -612,7 +631,8 @@ export const Checkout: FC = () => {
           quantity: item.quantity
         })),
         appliedCoupon: coupon || '',
-        orderId: cartId
+        orderId: cartId,
+        locationId: cartDetails.locationId
       },
       {
         onSuccess: () => {

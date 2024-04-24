@@ -14,12 +14,13 @@ import Fuse from 'fuse.js';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Product } from '../../../common/types/Product';
 import { useUser } from '../../firebase/auth';
+import { SkeletonLoading } from '../Shop/shop-list';
 import { useShopQuery } from '../Shop/shop-query';
 import { CategoryList } from '../category/category-list';
 import { useCategoryQuery } from '../category/category-query';
+import { useUserLocationPricingByShopId } from '../location/use-location-query';
 import { ProductItem } from './Product-iitems';
 import { useProductsQuery } from './product-query';
-import { SkeletonLoading } from '../Shop/shop-list';
 
 const fuseOptions = {
   shouldSort: true,
@@ -71,9 +72,12 @@ export const Products: FC<{
       .map((item) => item.item)
       .filter(filterByCategory);
   }, [data, search, selectedCategoryIds]);
+  const shop = shops?.find((shop) => shop.shopId === shopId);
+  const {deliveryPrice, isLoading: isDeliveryLoading} = useUserLocationPricingByShopId(shop?.shopId);
 
 
-  if (isLoading) {
+
+  if (isLoading || isDeliveryLoading) {
     return (
       <Box
         sx={{
@@ -93,7 +97,6 @@ export const Products: FC<{
       </Box>
     )
   }
-  const shop = shops?.find((shop) => shop.shopId === shopId);
   const shopName = shop?.shopName ?? 'Loading...';
 
   return (
@@ -131,7 +134,7 @@ export const Products: FC<{
               mb: 1
             }}
           >
-            {shop?.deliveryFee === 0 ? (
+            {deliveryPrice === 0 ? (
               <Paper
               elevation={0}
                 sx={{
