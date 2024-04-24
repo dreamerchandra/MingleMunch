@@ -60,6 +60,12 @@ interface UpdateCoupon {
   type: 'COUPON';
   payload: {
     coupon: string;
+  }
+}
+interface UpdateLocation {
+  type: 'UPDATE_LOCATION';
+  payload: {
+    locationId: string;
   };
 }
 
@@ -208,6 +214,9 @@ const useCartActivity = () => {
   }, []);
   const updateCoupon = useCallback((coupon: string) => {
     dispatch({ type: 'COUPON', payload: { coupon } });
+  }, []);
+  const updateLocation = useCallback((locationId: string) => {
+    dispatch({ type: 'UPDATE_LOCATION', payload: { locationId } });
   }, []);
 
   return useMemo(

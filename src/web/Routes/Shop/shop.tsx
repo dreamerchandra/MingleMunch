@@ -26,6 +26,7 @@ import { LocationDrawer } from '../../module/location/location-drawer';
 import { HerCoupon } from '../../module/her-coupon/her-coupon';
 import { useHerCouponQuery } from '../../module/her-coupon/her-coupon-query';
 import { NewHerCoupon } from '../../module/her-coupon/new-her-coupon';
+import { LocationDrawer } from '../../module/location/location-drawer';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
