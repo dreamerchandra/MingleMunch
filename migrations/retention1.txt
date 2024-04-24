@@ -1,45 +1,39 @@
-orderByUserId 63
-S.RAHUL KANNA  [
-  318, 1038, 248,
-  298,  298, 268,
-  493,  428, 303,
-  443
-]
-Tharungee [
-   483, 298, 1348,
-  1468, 588,  248,
-  2583
-]
-Kamesh shivan  [
-  348, 138, 188,
-  188, 224, 794,
-  208
-]
-Kavin R [ 468, 258, 118, 163 ]
-Rithiesh [ 423, 568, 138, 296 ]
-Jayadev [ 4120, 1113 ]
-C.Bala [ 315, 203, 60 ]
-mathinilavan  [ 163, 610, 152 ]
-Praveen [ 668, 253 ]
-VIJAYARAJ T [ 458, 418, 628 ]
-JeevanKumar [ 188, 218, 208, 298 ]
-Vishal  [ 628, 628, 728 ]
-Baasim Hyder  [ 390, 321 ]
-BHUVAN [ 120, 839, 318, 658, 478, 753 ]
-Manoj Kumar D [ 438, 433, 218, 323 ]
-Eniyavan M [ 378, 728 ]
-Mani [ 788, 1003 ]
-Ram [ 708, 468, 328 ]
-Monish  [ 658, 628, 718, 678 ]
-Kavi raj.V [ 578, 398, 428, 248 ]
-Lokesh [ 358, 223 ]
-Nithin Prasannna N [ 228, 218 ]
-Santosh RB [ 563, 638, 138, 572, 968 ]
-Viswa [ 123, 208 ]
-Mukesh T [ 383, 318, 338 ]
-S.Abraham [ 152, 123, 145, 133, 133 ]
-Mughilan A [ 778, 773 ]
-Kathir Lakshman [ 888, 173, 313, 398 ]
-Karthikeyan  [ 798, 943 ]
-Sai rohith  [ 418, 1513, 998 ]
-Agilarasu [ 203, 307 ]
+orderByUserId 83
+S.RAHUL KANNA  11
+Tharungee 8
+Dharshan.I 3
+Kamesh shivan  8
+Kavin R 4
+Rithiesh 5
+Jayadev 2
+C.Bala 3
+mathinilavan  3
+Praveen 3
+VIJAYARAJ T 5
+JeevanKumar 5
+Vishal  3
+Baasim Hyder  4
+BHUVAN 7
+Manoj Kumar D 6
+Eniyavan M 3
+Mani 2
+Ram 3
+Monish  5
+Kavi raj.V 4
+Lokesh 2
+Nithin Prasannna N 5
+Santosh RB 6
+Viswa 2
+Mukesh T 3
+Mukilan  2
+S.Abraham 5
+Mughilan A 2
+Kathir Lakshman 4
+Karthikeyan  2
+Sai rohith  5
+Agilarasu 2
+Srikanth M 2
+Rahul P 3
+Manu 2
+Rohith Srinivas  3
+Abhimanyoo 2

@@ -80,7 +80,7 @@ const getUniqueOrders = async () => {
   Object.keys(orderByUserId).forEach((userId) => {
     const orders = orderByUserId[userId];
     if(orders.length < 2) return;
-    console.log(orders[0].name, orders.map(o => o.grandTotal))
+    console.log(orders[0].name, orders.length)
   })
 };
 

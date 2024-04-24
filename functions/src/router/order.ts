@@ -56,7 +56,8 @@ const getAllData = async (productIds: string[]) => {
         .filter((s) => !s.isOpen)
         .map((s) => s.shopId)}`
     );
-    throw new HttpError(400, `Some shops are closed`, {
+    const string = `${shops.filter((s) => !s.isOpen).map((s) => s.shopName).join(', ')} is closed.`;
+    throw new HttpError(400, string, {
       shops: shops.filter((s) => !s.isOpen)
     });
   }
@@ -221,7 +222,7 @@ export const createOrder = async (req: Request, res: Response) => {
       logger.error(`error while creating order ${err.message}`);
       return res.status(400).json({
         error: 'Invalid order',
-        message: err.message
+        message: err.message,
       });
     }
     logger.error(`error while creating order ${err}`);
