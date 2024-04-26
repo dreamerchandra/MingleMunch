@@ -13,7 +13,7 @@ const getFullPageBannerShown = (): Record<string, boolean> => {
   return {};
 };
 const banner =
-  'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/chennai_talapakatti_poster.jpeg?alt=media&token=d29a9928-7a3d-4828-bfc4-d15d9f8d93ba';
+  'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/royal_full_page.jpeg?alt=media&token=5a1c051a-d112-4296-a26d-cf37c4a4cdca';
 
 export const FullPageBanner = () => {
   const [hasShown, _setHasShown] = useState(() => {
@@ -64,7 +64,7 @@ export const FullPageBanner = () => {
           }}
           onClick={() => {
             setShown();
-            navigate('/shop/WLzQJTnUDHkbjjTU7SRC');
+            navigate('/shop/k8cKLWihp00FkUu4pfZj');
           }}
         />
       </Center>
