@@ -13,28 +13,26 @@ const firebaseDb = getFirestore(app);
 const storage = getStorage(app);
 // 8056735175
 
+const availableCategory = ['XpozCHQdgE67lyWRAdax', 'hT0fz8Ke3z4LVwxFkQMR', 'D5P6q80F4LXiQVlu1wKA']
 const backupOrginalItem = async () => {
   const snap = await firebaseDb
     .collection('food')
-    .where('shopId', '==', 'ZbxNQlf03EquM9VEuyHA')
+    .where('shopId', '==', 'BOmEbao75ZSfXusKIOhi')
     .get();
   for (const doc of snap.docs) {
-    const data = doc.data();
     const id = doc.id;
-    console.log(id);
-    let itemPrice = data.itemPrice;
-    const originalPrice = itemPrice;
-    if (itemPrice < 29) {
-      itemPrice += 2;
-    } else if (itemPrice < 66) {
-      itemPrice += 5;
-    } else {
-      itemPrice += 10;
+    const categoryId = doc.data().category.id;
+    if(!availableCategory.includes(categoryId)) {
+      console.log(id);
+      await firebaseDb.collection('food').doc(id).update({
+        isAvailable: false,
+      });
+    }else {
+      console.log(categoryId)
     }
-    await firebaseDb.collection('food').doc(id).update({
-      itemPrice,
-      originalPrice
-    });
+    // await firebaseDb.collection('food').doc(id).update({
+    //   isAvailable: false,
+    // });
     // break;
   }
 };
