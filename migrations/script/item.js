@@ -16,24 +16,17 @@ const storage = getStorage(app);
 const backupOrginalItem = async () => {
   const snap = await firebaseDb
     .collection('food')
-    .where('shopId', '==', 'ZbxNQlf03EquM9VEuyHA')
+    .where('shopId', '==', 'BOmEbao75ZSfXusKIOhi')
     .get();
   for (const doc of snap.docs) {
     const data = doc.data();
     const id = doc.id;
     console.log(id);
-    let itemPrice = data.itemPrice;
-    const originalPrice = itemPrice;
-    if (itemPrice < 29) {
-      itemPrice += 2;
-    } else if (itemPrice < 66) {
-      itemPrice += 5;
-    } else {
-      itemPrice += 10;
-    }
     await firebaseDb.collection('food').doc(id).update({
-      itemPrice,
-      originalPrice
+      parcelCharges: 0,
+    });
+    await firebaseDb.collection('food-internal').doc(id).update({
+      costParcelCharges: 0,
     });
     // break;
   }

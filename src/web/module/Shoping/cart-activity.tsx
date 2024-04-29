@@ -90,7 +90,7 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
         locationId: action.payload.locationId
       };
     case 'REMOVE_ALL': {
-      return initialState;
+      return { ...initialState, locationId: state.locationId };
     }
     case 'CART_ID': {
       return {
@@ -140,7 +140,7 @@ const useCartActivity = () => {
       const now = new Date().getTime();
       const info = { now, locationId };
       localStorage.setItem('locationId', JSON.stringify(info));
-    }else {
+    } else {
       localStorage.removeItem('locationId');
     }
     localStorage.setItem(

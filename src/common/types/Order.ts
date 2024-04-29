@@ -1,6 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 import { Product } from './Product';
 import { Shop } from './shop';
+import { LocationData } from '../../web/module/location/use-location-query';
 
 export type OrderStatus =
   | 'pending'
@@ -51,4 +52,6 @@ export interface Order {
   congestionReportTiming?: Timestamp;
   timeStamps?: Record<OrderStatus, Timestamp>;
   delayReason: Record<OrderStatus, string[]>;
+  locationId: string;
+  locationDetails?: LocationData;
 }

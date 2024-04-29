@@ -18,6 +18,7 @@ import {
   updateFreeDeliveryForInvitedUser
 } from './user.js';
 import { createOrderInDb } from './create-order.js';
+import { getLocationById } from './location.js';
 
 interface OrderBody {
   details: [{ itemId: string; quantity: number }];
@@ -26,7 +27,7 @@ interface OrderBody {
   locationId: string;
 }
 
-const getAllData = async (productIds: string[]) => {
+const getAllData = async (productIds: string[], locationId: string) => {
   const products = await getProducts(productIds);
   const isAllAvailable = products.every((p) => p.isAvailable);
   if (!isAllAvailable) {
@@ -62,7 +63,15 @@ const getAllData = async (productIds: string[]) => {
       shops: shops.filter((s) => !s.isOpen)
     });
   }
-  return { products, shops, uniqueShopIds, appConfig, shopCommission };
+  const locationDetails = await getLocationById(locationId);
+  if(!locationDetails) {
+    throw new HttpError(400, `Location not found`);
+  }
+  const updateDeliveryFee = shops.map((s) => ({
+    ...s,
+    deliveryFee: locationDetails?.deliveryPrice[s.shopId] ?? 0,
+  }))
+  return { products, shops: updateDeliveryFee, uniqueShopIds, appConfig, shopCommission, locationDetails };
 };
 
 const getTotalByShop = (
@@ -172,8 +181,9 @@ export const createOrder = async (req: Request, res: Response) => {
   const productIds = details.map((d) => d.itemId);
   try {
     await canProceedApplyingCoupon(req.user.uid, appliedCoupon);
-    const { products, shops, appConfig, shopCommission } = await getAllData(
-      productIds
+    const { products, shops, appConfig, shopCommission, locationDetails } = await getAllData(
+      productIds,
+      locationId
     );
     const { platformFee } = appConfig;
     const { detailsToQuantity } = getDetailsToQuantity(details);
@@ -210,7 +220,9 @@ export const createOrder = async (req: Request, res: Response) => {
         shopOrderValue,
         shops,
         appliedCoupon,
-        orderId
+        orderId,
+        locationId,
+        locationDetails
       }
     );
     logger.log(`order created ${JSON.stringify(orderDetails)}`);

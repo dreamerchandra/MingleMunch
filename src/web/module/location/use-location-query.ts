@@ -9,7 +9,7 @@ import {
 import { firebaseDb } from '../../firebase/firebase/db';
 import { useCart } from '../Shoping/cart-activity';
 
-interface LocationData {
+export interface LocationData {
   name: string;
   deliveryPrice: Record<string, number>;
   id: string;

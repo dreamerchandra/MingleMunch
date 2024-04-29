@@ -43,6 +43,7 @@ const getOrders = async () => {
       deliveryFee: order.bill.deliveryCharges,
       userId: order.userId,
       createdAt: order.createdAt.toDate(),
+      phone: order.user.phone,
     };
   });
   return data;
@@ -77,10 +78,17 @@ const getUniqueOrders = async () => {
   }, {});
   console.log('orderByUserId', Object.keys(orderByUserId).length);
   
+  let result = []
   Object.keys(orderByUserId).forEach((userId) => {
     const orders = orderByUserId[userId];
     if(orders.length < 2) return;
-    console.log(orders[0].name, orders.length)
+    result.push(orders);
+  })
+  result = result.sort((a, b) => {
+    return a.length - b.length;
+  });
+  result.forEach((orders) => {
+    console.log(orders[0].name, orders[0].phone, orders.length);
   })
 };
 

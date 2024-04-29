@@ -4,6 +4,7 @@ import { firebaseDb } from '../firebase.js';
 import { Product } from '../types/Product.js';
 import { Shop } from '../types/Shop.js';
 import { OrderDb } from './order-helper.js';
+import { LocationData } from './location.js';
 type PublicOrder = Omit<OrderDb, 'items' | 'shopOrderValue' | 'bill'> & {
   shopOrderValue?: never;
   items: Omit<Product, 'costPrice' | 'costParcelCharges'> &
@@ -44,7 +45,9 @@ export const createOrderInDb = async (
     shops,
     bill,
     shopOrderValue,
-    orderId
+    orderId,
+    locationDetails,
+    locationId
   }: {
     products: Product[];
     itemToQuantity: { [key: string]: number };
@@ -54,6 +57,8 @@ export const createOrderInDb = async (
     bill: OrderDb['bill'];
     shopOrderValue: OrderDb['shopOrderValue'];
     orderId?: string;
+    locationId: string;
+    locationDetails: LocationData;
   }
 ) => {
   const ref = firebaseDb.collection('orders');
@@ -69,7 +74,9 @@ export const createOrderInDb = async (
     itemToQuantity,
     shops,
     shopOrderValue: shopOrderValue,
-    createdAt: Timestamp.now()
+    createdAt: Timestamp.now(),
+    locationId,
+    locationDetails
   };
   const isInternal =
     user.role === 'admin' || user.role === 'vendor' || user.internal === true;
