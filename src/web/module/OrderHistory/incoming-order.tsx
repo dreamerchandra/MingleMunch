@@ -214,6 +214,7 @@ export const IncomingOrder = () => {
                       updateCartId(order.orderId);
                       updateLocation(order.locationId);
                       updateCoupon(order.appliedCoupon);
+                      updateLocation(order.locationId);
                       await addAllToCart(
                         Object.keys(order.itemToQuantity).reduce(
                           (acc, id) => ({

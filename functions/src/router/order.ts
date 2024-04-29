@@ -208,8 +208,9 @@ export const createOrder = async (req: Request, res: Response) => {
       }
       await applyHerCoupon(appliedCoupon, req.user.uid);
     }
-    const { products, shops, appConfig, shopCommission } = await getAllData(
-      productIds
+    const { products, shops, appConfig, shopCommission, locationDetails } = await getAllData(
+      productIds,
+      locationId
     );
     const { platformFee } = appConfig;
     const { detailsToQuantity } = getDetailsToQuantity(details);

@@ -22,30 +22,13 @@ import { toast } from 'react-toastify';
 import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
 import { useToLogin, useUser } from '../../firebase/auth';
-import { LastOrder } from '../LastOrder/LastOrder';
-import { AddItem } from '../Products/Product-iitems';
-import { useShopQuery } from '../Shop/shop-query';
-import {
-  AppConfig,
-  UserConfig,
-  useAppConfig,
-  useUserConfig
-} from '../appconfig';
-import {
-  useLocationDetails,
-  useUserLocationPricing
-} from '../location/use-location-query';
-import { useCart } from './cart-activity';
-import { useMutationCreateOrder } from './checkout-query';
-import { LocationDrawer } from '../location/location-drawer';
-import { AddItem } from '../Products/Product-iitems';
 import { post } from '../../firebase/fetch';
 import { LastOrder } from '../LastOrder/LastOrder';
 import { AddItem } from '../Products/Product-iitems';
 import { useShopQuery } from '../Shop/shop-query';
 import {
   AppConfig,
-  useAppConfig,
+  useAppConfig
 } from '../appconfig';
 import { LocationDrawer } from '../location/location-drawer';
 import {
