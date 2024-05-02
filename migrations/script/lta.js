@@ -14,7 +14,7 @@ const storage = getStorage(app);
 
 const report = async () => {
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 8);
+  startDate.setDate(startDate.getDate() - 1);
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date();
   endDate.setDate(endDate.getDate() - 1);
