@@ -17,7 +17,7 @@ import {
 import { Feedback } from '../../module/feedback/feedback';
 // import { FullPageBanner } from '../../module/full-page-banner';
 import { Loading } from '../../module/loading';
-import { OurStories } from '../../module/stories/stories';
+// import { OurStories } from '../../module/stories/stories';
 import { MasterControl } from '../../module/master-control';
 import { FullPageBanner } from '../../module/full-page-banner';
 import { Footer } from '../../../common/footer';
@@ -74,7 +74,7 @@ export const ShopPage = () => {
           p: 0
         }}
       >
-        <OurStories />
+        {/* <OurStories /> */}
         <div
           style={{
             height: '10px'
