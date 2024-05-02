@@ -1,12 +1,12 @@
 import { Box, Skeleton } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 export const NoticeBoard: FC = () => {
   const [src] = useState(
-    'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/zawarma.png?alt=media&token=5e3a456d-7834-4f79-ba95-342ba78e1886'
+    'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/%E2%80%94Pngtree%E2%80%94whiteboard_7420722.png?alt=media&token=8107db3a-3ec4-4bbf-87e2-be60326948b2'
   );
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -32,9 +32,9 @@ export const NoticeBoard: FC = () => {
           setLoading(false);
         }}
         src={src}
-        onClick={() => {
-          navigate('/shop/BOmEbao75ZSfXusKIOhi');
-        }}
+        // onClick={() => {
+        //   navigate('/shop/BOmEbao75ZSfXusKIOhi');
+        // }}
       />
       {loading && (
         <Skeleton variant="rectangular" width="100%">
