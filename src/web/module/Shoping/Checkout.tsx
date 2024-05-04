@@ -572,6 +572,13 @@ export const Checkout: FC = () => {
     (old, item) => old + item.product.itemPrice * item.quantity,
     0
   );
+  const totalByShopId = items.reduce((acc, i) => {
+    if(!acc[i.product.shopId]) {
+      acc[i.product.shopId] = 0;
+    }
+    acc[i.product.shopId] += i.product.itemPrice * i.quantity;
+    return acc;
+  }, {} as Record<string, number>)
   const parcelChargesTotal = items.reduce(
     (old, item) => old + (item.product.parcelCharges ?? 0) * item.quantity,
     0
@@ -586,16 +593,22 @@ export const Checkout: FC = () => {
   const originalDeliveryFee = shopIds.reduce((old, shopId) => {
     const s = shops?.find((s) => s.shopId === shopId);
     if (!s) return old;
+    if(!s.minOrderValue) return old + s.deliveryFee;
+    const total = totalByShopId[shopId] || 0;
+    if(total >= s.minOrderValue) return old;
     return old + s.deliveryFee;
   }, 0);
   const deliveryFee = !coupon
     ? shopIds.reduce((old, shopId) => {
         const s = shops?.find((s) => s.shopId === shopId);
         if (!s) return old;
+        if(!s.minOrderValue) return old + s.deliveryFee;
+        const total = totalByShopId[shopId] || 0;
+        if(total >= s.minOrderValue) return old;
+        if(s.minOrderDeliveryFee) return old + s.minOrderDeliveryFee;
         return old + s.deliveryFee;
       }, 0)
     : 0;
-
   const { platformFee } = appConfig;
   const grandTotal = Number(
     (itemsTotal + deliveryFee + platformFee + parcelChargesTotal).toFixed(2)
