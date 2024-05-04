@@ -186,7 +186,6 @@ export const CategoryList: FC<{
             sx={{
               backgroundColor: '#e6e6e6',
               position: wrap ? '' : 'absolute',
-              bottom: 10,
               right: 10,
               p: 1,
               minWidth: 0,

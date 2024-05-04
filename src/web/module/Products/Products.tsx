@@ -21,6 +21,8 @@ import { useCategoryQuery } from '../category/category-query';
 import { useUserLocationPricingByShopId } from '../location/use-location-query';
 import { ProductItem } from './Product-iitems';
 import { useProductsQuery } from './product-query';
+import { SkeletonLoading } from '../Shop/shop-list';
+import { CheckoutHeadsUpInShop } from '../Shoping/CheckoutHeadup';
 
 const fuseOptions = {
   shouldSort: true,
@@ -95,7 +97,7 @@ export const Products: FC<{
         <SkeletonLoading />
         <SkeletonLoading />
       </Box>
-    )
+    );
   }
   const shopName = shop?.shopName ?? 'Loading...';
 
@@ -136,7 +138,7 @@ export const Products: FC<{
           >
             {deliveryPrice === 0 ? (
               <Paper
-              elevation={0}
+                elevation={0}
                 sx={{
                   background: '#ff8c0087',
                   px: 1,
@@ -152,12 +154,29 @@ export const Products: FC<{
                 # FREE DELIVERY
               </Paper>
             ) : (
-              <>.</>
+              shop?.deliveryFee === 0 && (
+                <Paper
+                elevation={0}
+                sx={{
+                  background: '#ff8c0087',
+                  px: 1,
+                  py: 1,
+                  color: '#151B33',
+                  borderRadius: '5px',
+                  fontSize: '0.6rem',
+                  width: 'fit-content',
+                  fontWeight: '700',
+                  height: 'fit-content'
+                }}
+              >
+                # FREE DELIVERY ABOVE ₹ {shop?.minOrderValue}
+              </Paper>
+              )
             )}
             <button
               color="info"
               onClick={() => {
-                if ((collapsed.length - 1) === categories?.length) {
+                if (collapsed.length - 1 === categories?.length) {
                   setCollapsed([]);
                 } else {
                   setCollapsed([
@@ -172,7 +191,7 @@ export const Products: FC<{
                 borderRadius: '50%',
                 display: 'flex',
                 justifyContent: 'center',
-                alignItems: 'center',
+                alignItems: 'center'
               }}
             >
               {categories?.length === collapsed.length - 1 ? (
@@ -321,7 +340,10 @@ export const Products: FC<{
                           component="h2"
                           sx={{
                             fontWeight: 'bold',
-                            color: category.categoryId === '-1' ? '#b9ffe7': 'aliceblue',
+                            color:
+                              category.categoryId === '-1'
+                                ? '#b9ffe7'
+                                : 'aliceblue',
                             display: 'flex',
                             flexDirection: 'row',
                             alignItems: 'center',
@@ -400,6 +422,8 @@ export const Products: FC<{
             position: 'fixed',
             bottom: 0,
             zIndex: 10000,
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <CategoryList
@@ -414,6 +438,7 @@ export const Products: FC<{
             selected={selectedCategoryIds}
             onChange={(e) => setCategory(e)}
           />
+          <CheckoutHeadsUpInShop shopId={shopId}/>
         </Box>
       </Box>
     </>
