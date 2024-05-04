@@ -8,7 +8,6 @@ import { Header } from '../../module/Header/header';
 import { Products } from '../../module/Products/Products';
 import { AddProducts } from '../../module/Products/add-proudct';
 import { useShopQuery } from '../../module/Shop/shop-query';
-import { CheckoutHeadsUp } from '../../module/Shoping/CheckoutHeadup';
 import { AddCategory } from '../../module/category/add-category';
 
 export const MenuPage = () => {
@@ -78,7 +77,6 @@ export const MenuPage = () => {
             allowEdit={allowEdit}
             setAllowEdit={setAllowEdit}
           />
-          <CheckoutHeadsUp />
         </Box>
       </Container>
     </>

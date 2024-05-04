@@ -76,7 +76,7 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
           <Typography component="h6" variant="h6" color="GrayText">
             {shop.isOpen ? shop.description : 'Currently Closed'}
           </Typography>
-          {shop.deliveryFee === 0 && (
+          {shop.deliveryFee === 0 && shop.minOrderValue === 0 && shop.minOrderDeliveryFee === 0 && (
             <Paper
               sx={{
                 background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
@@ -90,6 +90,22 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
               }}
             >
               # FREE DELIVERY
+            </Paper>
+          )}
+          {shop.deliveryFee === 0 && shop.minOrderValue !== 0 && shop.minOrderDeliveryFee !== 0 && (
+            <Paper
+              sx={{
+                background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
+                px: 1,
+                py: 1,
+                color: '#fff',
+                borderRadius: '5px',
+                fontSize: '0.6rem',
+                width: 'fit-content',
+                fontWeight: '900'
+              }}
+            >
+              # FREE DELIVERY ABOVE ₹ {shop.minOrderValue}
             </Paper>
           )}
         </CardContent>

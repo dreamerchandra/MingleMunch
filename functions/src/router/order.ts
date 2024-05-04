@@ -64,6 +64,16 @@ const getAllData = async (productIds: string[]) => {
   return { products, shops, uniqueShopIds, appConfig, shopCommission };
 };
 
+const getDeliveryFee = (shop: Shop, itemTotal: number ): number => {
+  if(shop.minOrderValue && shop.minOrderDeliveryFee) {
+    if(itemTotal >= shop.minOrderValue) {
+      return shop.deliveryFee;
+    }
+    return shop.minOrderDeliveryFee;
+  }
+  return shop.deliveryFee;
+}
+
 const getTotalByShop = (
   products: Product[],
   details: OrderBody['details'],
@@ -108,6 +118,8 @@ const getTotalByShop = (
     shopOrderValue[shopId].parcelChargesTotal = Math.round(
       shopOrderValue[shopId].parcelChargesTotal
     );
+    const shopDetail = shops.find((s) => s.shopId === shopId);
+    shopOrderValue[shopId].deliveryCharges = getDeliveryFee(shopDetail!, shopOrderValue[shopId].displaySubTotal);
   }
   return shopOrderValue;
 };
