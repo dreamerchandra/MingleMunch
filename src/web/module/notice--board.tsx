@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from 'react';
 
 export const NoticeBoard: FC = () => {
   const [src] = useState(
-    'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/%E2%80%94Pngtree%E2%80%94whiteboard_7420722.png?alt=media&token=8107db3a-3ec4-4bbf-87e2-be60326948b2'
+    'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/thanks_you.png?alt=media&token=336f7201-178a-40d2-8c39-e67b59a9475a'
   );
   // const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
