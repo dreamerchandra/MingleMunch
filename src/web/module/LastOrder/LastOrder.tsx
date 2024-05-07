@@ -108,7 +108,7 @@ export const LastOrder: FC = () => {
         color: '#fff',
         borderRadius: 0,
       }}
-      href="tel:+918220080109"
+      href="tel:+918754791569"
     >
       {lastOrder?.status == 'pending' && <Text label="Pending At Hotel" />}
       {lastOrder?.status == 'ack_from_hotel' && (
