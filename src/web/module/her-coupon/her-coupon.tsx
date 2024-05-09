@@ -22,8 +22,13 @@ export const HerCoupon = () => {
       return;
     }
     if (data?.coupon) {
+      toast.dark('Copied to clipboard!');
       copy(`🍔 Craving something delicious? 🍕\n
-      Order now from Go Burn at goburn.in and enjoy free delivery with code \n ${data.coupon}!`);
+      Order now from Go Burn at goburn.in and enjoy free delivery with code \n https://delivery.goburn.in/coupon/${data.coupon}`);
+      navigator.share?.({
+        text: `🍔🍔 Craving something delicious? 🍕\n
+        Order now from Go Burn at goburn.in and enjoy free delivery \n https://delivery.goburn.in/coupon/${data.coupon}`
+      });
     }
   };
   return (

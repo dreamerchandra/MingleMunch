@@ -14,7 +14,7 @@ const storage = getStorage(app);
 
 const report = async () => {
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 4);
+  startDate.setDate(startDate.getDate() - 2);
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date();
   endDate.setDate(endDate.getDate() - 1);
@@ -50,10 +50,10 @@ const reportMonth = async () => {
   const startDate = new Date();
   startDate.setDate(8);
   startDate.setHours(0, 0, 0, 0);
-  startDate.setMonth(2);
+  startDate.setMonth(3);
   const endDate = new Date();
   endDate.setDate(7);
-  endDate.setMonth(3);
+  endDate.setMonth(4);
   endDate.setHours(23, 59, 59, 0);
   console.log(startDate.toLocaleString(), endDate.toLocaleString());
   const snap = await firebaseDb
@@ -63,7 +63,6 @@ const reportMonth = async () => {
     .get();
   const orders = snap.docs
     .map((doc) => doc.data())
-    .filter((o) => !o.user.isInternal)
     .filter((o) => o.status !== 'rejected');
   const byShop = orders.reduce((acc, order) => {
     const shopsIds = Object.keys(order.shopOrderValue);

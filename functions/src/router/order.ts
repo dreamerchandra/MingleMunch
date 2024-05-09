@@ -12,12 +12,13 @@ import { Product } from '../types/Product.js';
 import { Shop } from '../types/Shop.js';
 import { OrderDb } from './order-helper.js';
 import { updateWhatsapp } from './twilio.js';
-import {
-  removeCoupon,
-  updateFreeDeliveryForInvitedUser
-} from './user.js';
+import { removeCoupon, updateFreeDeliveryForInvitedUser } from './user.js';
 import { createOrderInDb } from './create-order.js';
-import { applyHerCoupon, canProceedToApply, canUseHerCoupon } from './her-coupon.js';
+import {
+  applyHerCoupon,
+  canProceedToApply,
+  canUseHerCoupon
+} from './her-coupon.js';
 
 interface OrderBody {
   details: [{ itemId: string; quantity: number }];
@@ -56,7 +57,10 @@ const getAllData = async (productIds: string[]) => {
         .filter((s) => !s.isOpen)
         .map((s) => s.shopId)}`
     );
-    const string = `${shops.filter((s) => !s.isOpen).map((s) => s.shopName).join(', ')} is closed.`;
+    const string = `${shops
+      .filter((s) => !s.isOpen)
+      .map((s) => s.shopName)
+      .join(', ')} is closed.`;
     throw new HttpError(400, string, {
       shops: shops.filter((s) => !s.isOpen)
     });
@@ -64,15 +68,15 @@ const getAllData = async (productIds: string[]) => {
   return { products, shops, uniqueShopIds, appConfig, shopCommission };
 };
 
-const getDeliveryFee = (shop: Shop, itemTotal: number ): number => {
-  if(shop.minOrderValue && shop.minOrderDeliveryFee) {
-    if(itemTotal >= shop.minOrderValue) {
+const getDeliveryFee = (shop: Shop, itemTotal: number): number => {
+  if (shop.minOrderValue && shop.minOrderDeliveryFee) {
+    if (itemTotal >= shop.minOrderValue) {
       return shop.deliveryFee;
     }
     return shop.minOrderDeliveryFee;
   }
   return shop.deliveryFee;
-}
+};
 
 const getTotalByShop = (
   products: Product[],
@@ -120,7 +124,10 @@ const getTotalByShop = (
       shopOrderValue[shopId].parcelChargesTotal
     );
     const shopDetail = shops.find((s) => s.shopId === shopId);
-    shopOrderValue[shopId].deliveryCharges = getDeliveryFee(shopDetail!, shopOrderValue[shopId].displaySubTotal);
+    shopOrderValue[shopId].deliveryCharges = getDeliveryFee(
+      shopDetail!,
+      shopOrderValue[shopId].displaySubTotal
+    );
   }
   return shopOrderValue;
 };
@@ -184,9 +191,14 @@ export const createOrder = async (req: Request, res: Response) => {
   const productIds = details.map((d) => d.itemId);
   try {
     if (appliedCoupon && !orderId) {
-      const herCouponData = await canProceedToApply(appliedCoupon, req.user.uid);
+      const herCouponData = await canProceedToApply(
+        appliedCoupon,
+        req.user.uid
+      );
       if (!herCouponData.canProceed) {
-        throw new HttpError(400, `Invalid coupon`);
+        throw new HttpError(400, herCouponData.error ?? 'Invalid Coupon', {
+          removeCoupon: true,
+        });
       }
       await applyHerCoupon(appliedCoupon, req.user.uid);
     }
@@ -242,6 +254,7 @@ export const createOrder = async (req: Request, res: Response) => {
       return res.status(400).json({
         error: 'Invalid order',
         message: err.message,
+        ...err.extra,
       });
     }
     logger.error(`error while creating order ${err}`);
