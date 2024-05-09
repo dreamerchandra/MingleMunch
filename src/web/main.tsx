@@ -104,6 +104,16 @@ const router = createBrowserRouter([
         .catch(onError)
   },
   {
+    path: '/coupon/:couponId',
+    loader: () => <SkeletonLoader />,
+    lazy: () =>
+      import('./Routes/Coupon/coupon')
+        .then((m) => ({
+          element: <m.Coupon />
+        }))
+        .catch(onError)
+  },
+  {
     path: '/',
     loader: () => <SkeletonLoader />,
     lazy: () =>

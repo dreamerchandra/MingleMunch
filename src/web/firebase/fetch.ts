@@ -42,7 +42,6 @@ export const get = async (
 ) => {
   const url = new URL(`${baseUrl}${urlString}`);
   url.search = params ? constructSearch(params).toString() : '';
-  console.log(url.pathname, url.search);
   try {
     let token = await firebaseAuth.currentUser?.getIdToken();
     const result = await firebaseAuth.currentUser?.getIdTokenResult();

@@ -33,6 +33,7 @@ import { useCart } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
 import { AddItem } from '../Products/Product-iitems';
 import { post } from '../../firebase/fetch';
+import { toast } from 'react-toastify';
 
 const StyledProduct = styled('div')<{ error: boolean; spacing?: number }>(
   ({ theme, error, spacing = 2 }) => ({
@@ -625,13 +626,21 @@ export const Checkout: FC = () => {
           }, 7_000);
         },
         onError: (err) => {
-          setError({
-            message:
-              err.cause?.message ??
-              'Something went wrong. Please try again later.',
-            products:
-              err.cause?.products?.map((product) => product.itemId) ?? []
-          });
+          if (err.cause.removeCoupon) {
+            toast.error(`${err.cause.message}`);
+            setTimeout(() => {
+              updateCoupon('');
+              toast.error(`Removing Coupon`);
+            }, 1000);
+          } else {
+            setError({
+              message:
+                err.cause?.message ??
+                'Something went wrong. Please try again later.',
+              products:
+                err.cause?.products?.map((product) => product.itemId) ?? []
+            });
+          }
         }
       }
     );

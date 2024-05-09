@@ -32,10 +32,10 @@ export const canProceedToApply = async (couponCode: string, userId: string) => {
         error: 'You cant use your own coupon',
       }
     }
-    if (usedBy.length === 2) {
+    if (usedBy.length >= 2) {
       return {
         canProceed: false,
-        error: 'Coupon already used',
+        error: 'Coupon Limit reached',
       }
     }
     const hasUsed = await firebaseDb
@@ -132,8 +132,8 @@ export const getHerCoupon = async (req: Request, res: Response) => {
     .get();
   logger.log(`Coupon for ${userId} is empty ${couponRef.empty}`);
   if (couponRef.empty) {
-    const code = await createMyHerCoupon(userId);
-    return res.json({ coupon: code });
+    // const code = await createMyHerCoupon(userId);
+    return res.send(400);
   }
   const coupon = couponRef.docs[0].id;
   return res.json({ coupon });
