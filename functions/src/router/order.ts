@@ -10,15 +10,12 @@ import {
 } from '../firestore/shop.js';
 import { Product } from '../types/Product.js';
 import { Shop } from '../types/Shop.js';
+import { createOrderInDb } from './create-order.js';
+import { applyHerCoupon, canProceedToApply } from './her-coupon.js';
+import { getLocationById } from './location.js';
 import { OrderDb } from './order-helper.js';
 import { updateWhatsapp } from './twilio.js';
-import {
-  removeCoupon,
-  updateFreeDeliveryForInvitedUser
-} from './user.js';
-import { createOrderInDb } from './create-order.js';
-import { getLocationById } from './location.js';
-import { applyHerCoupon, canProceedToApply, canUseHerCoupon } from './her-coupon.js';
+import { removeCoupon, updateFreeDeliveryForInvitedUser } from './user.js';
 
 interface OrderBody {
   details: [{ itemId: string; quantity: number }];
@@ -58,7 +55,10 @@ const getAllData = async (productIds: string[], locationId: string) => {
         .filter((s) => !s.isOpen)
         .map((s) => s.shopId)}`
     );
-    const string = `${shops.filter((s) => !s.isOpen).map((s) => s.shopName).join(', ')} is closed.`;
+    const string = `${shops
+      .filter((s) => !s.isOpen)
+      .map((s) => s.shopName)
+      .join(', ')} is closed.`;
     throw new HttpError(400, string, {
       shops: shops.filter((s) => !s.isOpen)
     });
@@ -74,15 +74,15 @@ const getAllData = async (productIds: string[], locationId: string) => {
   return { products, shops: updateDeliveryFee, uniqueShopIds, appConfig, shopCommission, locationDetails };
 };
 
-const getDeliveryFee = (shop: Shop, itemTotal: number ): number => {
-  if(shop.minOrderValue && shop.minOrderDeliveryFee) {
-    if(itemTotal >= shop.minOrderValue) {
+const getDeliveryFee = (shop: Shop, itemTotal: number): number => {
+  if (shop.minOrderValue && shop.minOrderDeliveryFee) {
+    if (itemTotal >= shop.minOrderValue) {
       return shop.deliveryFee;
     }
     return shop.minOrderDeliveryFee;
   }
   return shop.deliveryFee;
-}
+};
 
 const getTotalByShop = (
   products: Product[],
@@ -130,7 +130,10 @@ const getTotalByShop = (
       shopOrderValue[shopId].parcelChargesTotal
     );
     const shopDetail = shops.find((s) => s.shopId === shopId);
-    shopOrderValue[shopId].deliveryCharges = getDeliveryFee(shopDetail!, shopOrderValue[shopId].displaySubTotal);
+    shopOrderValue[shopId].deliveryCharges = getDeliveryFee(
+      shopDetail!,
+      shopOrderValue[shopId].displaySubTotal
+    );
   }
   return shopOrderValue;
 };
@@ -193,10 +196,20 @@ export const createOrder = async (req: Request, res: Response) => {
   logger.log(`started ${Date.now() - time}`);
   const productIds = details.map((d) => d.itemId);
   try {
-    await canProceedApplyingCoupon(req.user.uid, appliedCoupon);
-    const { products, shops, appConfig, shopCommission, locationDetails } = await getAllData(
-      productIds,
-      locationId
+    if (appliedCoupon && !orderId) {
+      const herCouponData = await canProceedToApply(
+        appliedCoupon,
+        req.user.uid
+      );
+      if (!herCouponData.canProceed) {
+        throw new HttpError(400, herCouponData.error ?? 'Invalid Coupon', {
+          removeCoupon: true,
+        });
+      }
+      await applyHerCoupon(appliedCoupon, req.user.uid);
+    }
+    const { products, shops, appConfig, shopCommission } = await getAllData(
+      productIds
     );
     const { platformFee } = appConfig;
     const { detailsToQuantity } = getDetailsToQuantity(details);
@@ -249,6 +262,7 @@ export const createOrder = async (req: Request, res: Response) => {
       return res.status(400).json({
         error: 'Invalid order',
         message: err.message,
+        ...err.extra,
       });
     }
     logger.error(`error while creating order ${err}`);
