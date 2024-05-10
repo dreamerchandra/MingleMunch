@@ -154,6 +154,8 @@ export function SkeletonLoading() {
 export const Shops = () => {
   const { data: appConfig } = useAppConfig();
   const { data, isLoading } = useShopQuery();
+  const { get } = useCoupon();
+  const coupon = get();
 
   if (isLoading) {
     return (
@@ -188,7 +190,11 @@ export const Shops = () => {
     >
       <Box
         sx={{
-          mb: 2
+          mb: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 1
         }}
       >
         <Typography
@@ -198,6 +204,7 @@ export const Shops = () => {
         >
           ALL RESTAURANTS
         </Typography>
+        {coupon && <Typography variant='caption' color='green' fontWeight={700}>1 Free Delivery Left</Typography>}
         {!appConfig?.isOpen && (
           <Typography variant="h6" color="darkorange" textAlign="center">
             {appConfig?.closeReason}
@@ -217,7 +224,7 @@ export const Shops = () => {
             <Shop shop={shop} />
           </div>
         ))}
-        {data
+      {data
         ?.filter((s) => !s.isOpen)
         ?.map((shop) => (
           <div

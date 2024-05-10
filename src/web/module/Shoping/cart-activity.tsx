@@ -244,3 +244,17 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 export const useCart = () => {
   return useContext(CartContext);
 };
+
+export const useCoupon = () => {
+  const key = 'INVITE_COUPON';
+  const set = useCallback((coupon: string) => {
+    localStorage.setItem(key, coupon);
+  }, []);
+  const get = useCallback(() => {
+    return localStorage.getItem(key);
+  }, []);
+  const remove = useCallback(() => {
+    localStorage.removeItem(key);
+  }, []);
+  return { set, get, remove };
+};

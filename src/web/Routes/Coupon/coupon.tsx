@@ -2,28 +2,30 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Box, Button, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useCart } from '../../module/Shoping/cart-activity';
+import { useCoupon } from '../../module/Shoping/cart-activity';
 
 export const Coupon = () => {
   const navigate = useNavigate();
-  const { updateCoupon } = useCart();
+  const { set } = useCoupon();
   const param = useParams();
   const [timer, setTimer] = useState(0);
   useEffect(() => {
     if (param.couponId) {
-      updateCoupon(param.couponId);
+      set(param.couponId);
     }
     const intervalId = setInterval(() => {
       setTimer((prev) => prev + 1);
     }, 1000);
     const timerId = setTimeout(() => {
-      navigate('/');
+      navigate('/', {
+        replace: true
+      });
     }, 5000);
     return () => {
       clearTimeout(timerId);
       clearInterval(intervalId);
     };
-  }, [navigate, param.couponId, updateCoupon]);
+  }, [navigate, param.couponId, set]);
   return (
     <Box
       sx={{
@@ -49,6 +51,11 @@ export const Coupon = () => {
         sx={{
           fontSize: '0.75rem',
           mt: 5
+        }}
+        onClick={() => {
+          navigate('/', {
+            replace: true
+          });
         }}
       >
         Back To Home {5 - timer}

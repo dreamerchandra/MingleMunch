@@ -13,7 +13,7 @@ const getFullPageBannerShown = (): Record<string, boolean> => {
   return {};
 };
 const banner =
-  'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/her_coupon_poster.jpeg?alt=media&token=806fae14-817a-4340-afed-e2ce162caa8f';
+  'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/royal_full_page.jpeg?alt=media&token=5a1c051a-d112-4296-a26d-cf37c4a4cdca';
 
 export const FullPageBanner = () => {
   const [hasShown, _setHasShown] = useState(() => {
