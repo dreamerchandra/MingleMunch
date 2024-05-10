@@ -179,11 +179,13 @@ export const Header: FC<{
               </div>
               <Button
                 onClick={() => {
-                  window.open('https://www.instagram.com/goburn.in?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==');
+                  window.open(
+                    'https://www.instagram.com/goburn.in?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=='
+                  );
                 }}
                 sx={{
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexDirection: 'column'
                 }}
               >
                 <Typography
@@ -204,7 +206,6 @@ export const Header: FC<{
           )}
         </Box>
       )}
-
       {['/', '/order-history'].includes(location.pathname) && (
         <Paper
           sx={{
@@ -213,7 +214,8 @@ export const Header: FC<{
             left: 0,
             right: 0,
             width: 'min(100vw, 1200px)',
-            margin: 'auto'
+            margin: 'auto',
+            height: 'fit-content'
           }}
         >
           <BottomNavigation

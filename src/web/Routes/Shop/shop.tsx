@@ -22,6 +22,8 @@ import { MasterControl } from '../../module/master-control';
 import { FullPageBanner } from '../../module/full-page-banner';
 import { Footer } from '../../../common/footer';
 import { NoticeBoard } from '../../module/notice--board';
+import { HerCoupon } from '../../module/her-coupon/her-coupon';
+import { useHerCouponQuery } from '../../module/her-coupon/her-coupon-query';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -30,6 +32,7 @@ export const ShopPage = () => {
   const [notificationGranted, setNotification] = useState(() =>
     !isNotificationSupported() ? true : Notification.permission === 'granted'
   );
+  const { data: herCoupon } = useHerCouponQuery();
   // const [drawer, setDrawer] = useState(false);
   useEffect(() => {
     if (loading) {
@@ -79,14 +82,19 @@ export const ShopPage = () => {
             height: '10px'
           }}
         ></div>
-        <NoticeBoard
-        />
+        {herCoupon ? <HerCoupon /> : <NoticeBoard />}
         <Box marginTop={2}>
           <MasterControl />
           <Shops />
-          {!notificationGranted ? <NotificationInfo onClick={() => setNotification(true)} />: <div style={{
-            height: '96px'
-          }}></div>}
+          {!notificationGranted ? (
+            <NotificationInfo onClick={() => setNotification(true)} />
+          ) : (
+            <div
+              style={{
+                height: '96px'
+              }}
+            ></div>
+          )}
           <CheckoutHeadsUp />
           <LastOrder />
         </Box>

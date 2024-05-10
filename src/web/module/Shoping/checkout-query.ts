@@ -10,6 +10,7 @@ import { Product } from '../../../common/types/Product';
 interface OrderError {
   error: string;
   message?: string;
+  removeCoupon?: boolean;
   products?: Product[];
 }
 

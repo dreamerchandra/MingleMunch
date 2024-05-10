@@ -1,6 +1,6 @@
+import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@emotion/react';
 import { createTheme } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { User } from 'firebase/auth';
 import LogRocket from 'logrocket';
@@ -100,6 +100,16 @@ const router = createBrowserRouter([
       import('./Routes/Login/Login')
         .then((m) => ({
           element: <m.LoginPage />
+        }))
+        .catch(onError)
+  },
+  {
+    path: '/coupon/:couponId',
+    loader: () => <SkeletonLoader />,
+    lazy: () =>
+      import('./Routes/Coupon/coupon')
+        .then((m) => ({
+          element: <m.Coupon />
         }))
         .catch(onError)
   },

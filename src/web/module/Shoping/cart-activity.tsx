@@ -14,13 +14,15 @@ type CartState = {
   total: number;
   totalItems: number;
   cartId?: string;
-}
+  coupon?: string;
+};
 
 const initialState: CartState = {
   cart: [],
   total: 0,
   totalItems: 0,
   cartId: '',
+  coupon: ''
 };
 
 interface AddToCartAction {
@@ -42,10 +44,22 @@ interface UpdateCartId {
   type: 'CART_ID';
   payload: {
     cartId: string;
-  }
+  };
 }
 
-type Actions = AddToCartAction | RemoveFromCartAction | RemoveAllFromCartAction | UpdateCartId;
+interface UpdateCoupon {
+  type: 'COUPON';
+  payload: {
+    coupon: string;
+  };
+}
+
+type Actions =
+  | AddToCartAction
+  | RemoveFromCartAction
+  | RemoveAllFromCartAction
+  | UpdateCartId
+  | UpdateCoupon;
 
 const cartActivityReducer = (state: CartState, action: Actions) => {
   switch (action.type) {
@@ -77,7 +91,13 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
       return {
         ...state,
         cartId: action.payload.cartId
-      }
+      };
+    }
+    case 'COUPON': {
+      return {
+        ...state,
+        coupon: action.payload.coupon
+      };
     }
     default:
       return state;
@@ -116,11 +136,14 @@ const useCartActivity = () => {
     });
   }, []);
 
-  const addMultipleToCart = useCallback((products: Product, quality: number) => {
-    for (let i = 0; i < quality; i++) {
-      addToCart(products);
-    }
-  }, [addToCart]);
+  const addMultipleToCart = useCallback(
+    (products: Product, quality: number) => {
+      for (let i = 0; i < quality; i++) {
+        addToCart(products);
+      }
+    },
+    [addToCart]
+  );
   const removeFromCart = useCallback((product: Product) => {
     product.suggestionIds?.map((suggestion) => {
       dispatch({
@@ -143,10 +166,29 @@ const useCartActivity = () => {
   const updateCartId = useCallback((cartId: string) => {
     dispatch({ type: 'CART_ID', payload: { cartId } });
   }, []);
+  const updateCoupon = useCallback((coupon: string) => {
+    dispatch({ type: 'COUPON', payload: { coupon } });
+  }, []);
 
   return useMemo(
-    () => ({ cartDetails, addToCart, removeFromCart, removeAll, addMultipleToCart, updateCartId }),
-    [addToCart, cartDetails, removeFromCart, removeAll, addMultipleToCart, updateCartId]
+    () => ({
+      cartDetails,
+      addToCart,
+      removeFromCart,
+      removeAll,
+      addMultipleToCart,
+      updateCartId,
+      updateCoupon
+    }),
+    [
+      addToCart,
+      cartDetails,
+      removeFromCart,
+      removeAll,
+      addMultipleToCart,
+      updateCartId,
+      updateCoupon
+    ]
   );
 };
 
@@ -160,4 +202,18 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useCart = () => {
   return useContext(CartContext);
+};
+
+export const useCoupon = () => {
+  const key = 'INVITE_COUPON';
+  const set = useCallback((coupon: string) => {
+    localStorage.setItem(key, coupon);
+  }, []);
+  const get = useCallback(() => {
+    return localStorage.getItem(key);
+  }, []);
+  const remove = useCallback(() => {
+    localStorage.removeItem(key);
+  }, []);
+  return { set, get, remove };
 };

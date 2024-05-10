@@ -1,4 +1,4 @@
-import { Add, Check, CopyAll, WhatsApp } from '@mui/icons-material';
+import { Add, Check, DoneRounded } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
@@ -18,20 +18,17 @@ import { green } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
 import { useToLogin, useUser } from '../../firebase/auth';
+import { post } from '../../firebase/fetch';
 import { LastOrder } from '../LastOrder/LastOrder';
-import { useShopQuery } from '../Shop/shop-query';
-import {
-  AppConfig,
-  UserConfig,
-  useAppConfig,
-  useUserConfig
-} from '../appconfig';
-import { useCart } from './cart-activity';
-import { useMutationCreateOrder } from './checkout-query';
 import { AddItem } from '../Products/Product-iitems';
+import { useShopQuery } from '../Shop/shop-query';
+import { AppConfig, useAppConfig } from '../appconfig';
+import { useCart, useCoupon } from './cart-activity';
+import { useMutationCreateOrder } from './checkout-query';
 
 const StyledProduct = styled('div')<{ error: boolean; spacing?: number }>(
   ({ theme, error, spacing = 2 }) => ({
@@ -108,9 +105,7 @@ const CheckoutCard: FC<{
                 </Typography>
               </div>
               <div>
-                <AddItem
-                  product={item.product}
-                />
+                <AddItem product={item.product} />
               </div>
             </StyledProduct>
             {item.product.parcelCharges > 0 && (
@@ -221,7 +216,9 @@ const TotalCard: FC<{
         >
           <TotalWrapper>
             <Typography component="h6">Item Total </Typography>
-            <Typography component="h6">₹{itemsTotal + parcelChargesTotal}</Typography>
+            <Typography component="h6">
+              ₹{itemsTotal + parcelChargesTotal}
+            </Typography>
           </TotalWrapper>
           <TotalWrapper>
             <Typography component="h6">
@@ -230,7 +227,7 @@ const TotalCard: FC<{
                 title={
                   !coupon
                     ? 'This helps our delivery partners to serve you better.'
-                    : `Delivery fee Rs.${originalDeliveryFee} has been waved off`
+                    : `Delivery fee Rs.${originalDeliveryFee} has been Waived Off`
                 }
                 enterTouchDelay={20}
                 leaveTouchDelay={5_000}
@@ -291,9 +288,15 @@ const initialErrorState = { message: '', products: [] as string[] };
 const ApplyCouponDrawer: FC<{
   model: boolean;
   setModel: (open: boolean) => void;
-  userConfig?: UserConfig;
   setCoupon: (c: string) => void;
-}> = ({ model, setModel, userConfig, setCoupon }) => {
+  coupon: string;
+}> = ({ model, setModel, setCoupon }) => {
+  const { get } = useCoupon();
+  const [_coupon, _setCoupon] = useState({
+    coupon: get(),
+    error: '',
+    isLoading: false
+  });
   return (
     <SwipeableDrawer
       open={model}
@@ -315,107 +318,141 @@ const ApplyCouponDrawer: FC<{
           background: '#000 url(/abstract_emoji.png)'
         }}
       >
-        {userConfig?.availableCoupons?.length === 0 ? (
-          <SubSection
-            sx={{
+        {/* <Card
+          elevation={4}
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 2,
+            borderRadius: '10px',
+            gap: 4,
+            background: 'transparent',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 2,
+              width: '100%'
+            }}
+          >
+            <TextField
+              variant="filled"
+              label="Coupon"
+              fullWidth
+              placeholder="GET FROM YOUR FRIEND"
+              value={_coupon.coupon}
+              onChange={(e) => {
+                _setCoupon({
+                  ..._coupon,
+                  coupon: e.target.value.toUpperCase(),
+                  error: ''
+                });
+              }}
+            />
+            {_coupon.error && (
+              <Typography variant="caption" color="error">
+                {_coupon.error}
+              </Typography>
+            )}
+          </div>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={async () => {
+              _setCoupon({
+                ..._coupon,
+                error: '',
+                isLoading: true
+              });
+              const { data } = await post('/v1/canUseHerCoupon', {
+                couponCode: _coupon.coupon
+              });
+              const { canProceed, error } = data;
+              if (canProceed) {
+                setCoupon(_coupon.coupon);
+                setModel(false);
+                _setCoupon({
+                  ..._coupon,
+                  error: '',
+                  isLoading: false
+                });
+              } else {
+                _setCoupon({
+                  ..._coupon,
+                  error: error,
+                  isLoading: false
+                });
+              }
+            }}
+          >
+            Apply
+          </Button>
+        </Card> */}
+        <Card
+          elevation={4}
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 2,
+            borderRadius: '10px',
+            backgroundColor: '#c0eade2c'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               gap: 2
             }}
           >
             <Typography variant="h6" color="secondary">
-              No coupons available for you
+              {_coupon.coupon}
             </Typography>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            >
-              <Typography variant="caption" color="secondary">
-                Pro Tip: You could
-                <Typography
-                  variant="caption"
-                  color="secondary"
-                  sx={{ m: 1, textDecoration: 'underline' }}
-                >
-                  refer and earn
-                </Typography>
-                coupons.
-              </Typography>
-              <Typography variant="caption" color="secondary">
-                Your referral code is
-                <Button variant="text" color="info" sx={{ p: 0, ml: 2 }}>
-                  {userConfig?.myReferralCodes}
-                </Button>
-              </Typography>
-            </div>
-            <div
-              style={{
-                height: '12px'
-              }}
-            />
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-evenly',
-                gap: 2
-              }}
-            >
-              <ReferButton myReferralCodes={userConfig.myReferralCodes ?? ''} />
-              <Button
-                variant="contained"
-                onClick={() => setModel(false)}
-                color="secondary"
-              >
-                Close
-              </Button>
-            </Box>
-          </SubSection>
-        ) : (
-          <Typography variant="h6" color="secondary">
-            Available coupons
-          </Typography>
-        )}
-        {userConfig?.availableCoupons?.map((coupon) => (
-          <Card
-            key={coupon}
-            elevation={4}
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: 2,
-              borderRadius: '10px',
-              backgroundColor: '#c0eade2c'
+            <Typography variant="caption" color="secondary">
+              Free delivery
+            </Typography>
+          </div>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={async () => {
+              if (!_coupon.coupon) {
+                return;
+              }
+              _setCoupon({
+                ..._coupon,
+                error: '',
+                isLoading: true
+              });
+              const { data } = await post('/v1/canUseHerCoupon', {
+                couponCode: _coupon.coupon
+              });
+              const { canProceed, error } = data;
+              if (canProceed) {
+                setCoupon(_coupon.coupon);
+                setModel(false);
+                toast.success('Coupon Applied');
+                _setCoupon({
+                  ..._coupon,
+                  error: '',
+                  isLoading: false
+                });
+              } else {
+                toast.error(error);
+              }
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 2
-              }}
-            >
-              <Typography variant="h6" color="secondary">
-                {coupon}
-              </Typography>
-              <Typography variant="caption" color="secondary">
-                Free delivery
-              </Typography>
-            </div>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => {
-                setCoupon(coupon);
-                setModel(false);
-              }}
-            >
-              Apply
-            </Button>
-          </Card>
-        ))}
+            Apply
+          </Button>
+        </Card>
       </Box>
     </SwipeableDrawer>
   );
@@ -430,7 +467,6 @@ const Footer: FC<{
   coupon: string;
   setModel: (show: boolean) => void;
   appConfig: AppConfig;
-  userConfig?: UserConfig | null;
   cartId?: string;
 }> = ({
   error,
@@ -440,8 +476,6 @@ const Footer: FC<{
   onPlaceOrder,
   grandTotal,
   coupon,
-  userConfig,
-  setModel,
   cartId
 }) => {
   const { removeAll } = useCart();
@@ -501,17 +535,6 @@ const Footer: FC<{
             >
               Coupon applied: {coupon}
             </Typography>
-          ) : userConfig?.availableCoupons?.length ? (
-            <Button
-              variant="text"
-              color="success"
-              onClick={() => setModel(true)}
-              sx={{
-                fontWeight: 800
-              }}
-            >
-              {userConfig.availableCoupons.length} COUPON AVAILABLE
-            </Button>
           ) : null}
         </SubSection>
       )}
@@ -519,13 +542,96 @@ const Footer: FC<{
   );
 };
 
+const ApplyCoupon: FC<{
+  setModel: (model: boolean) => void;
+  isApplied: boolean;
+}> = ({ setModel, isApplied }) => {
+  const {
+    userDetails: { user }
+  } = useUser();
+  const navigate = useNavigate();
+  const { get } = useCoupon();
+  const coupon = get();
+  if (!user) {
+    return (
+      <Button
+        variant="text"
+        color="success"
+        onClick={() => navigate('/login')}
+        sx={{
+          fontWeight: 800
+        }}
+      >
+        Login To Apply Coupon
+      </Button>
+    );
+  }
+  return (
+    <Card
+      onClick={() => {
+        if (!coupon) {
+          return;
+        }
+        setModel(true);
+      }}
+      sx={{
+        background: !coupon ? '#fff4f4' : '#f7fffa',
+        boxShadow: '0px 0px 10px 0px #151B331f'
+      }}
+    >
+      <CardContent>
+        <Button
+          variant="text"
+          color="success"
+          onClick={() => setModel(true)}
+          sx={{
+            fontWeight: 800,
+            flexDirection: 'column',
+            width: '100%'
+          }}
+          disabled={!coupon}
+        >
+          {!coupon && (
+            <Typography variant="caption" sx={{ fontWeight: 800 }} color="red">
+              No coupon found
+            </Typography>
+          )}
+          {coupon && !isApplied && (
+            <>
+              <Typography variant="caption" sx={{ fontWeight: 800 }}>
+                Apply Now
+              </Typography>
+              <Typography variant="caption" color="success">
+                1 Coupon Found
+              </Typography>
+            </>
+          )}
+          {isApplied && (
+            <Box sx={{
+              display: 'flex',
+              gap: 1,
+              alignItems: 'center'
+            }}>
+              <DoneRounded />
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 800 }}
+                color="success"
+              >
+                Coupon Applied
+              </Typography>
+            </Box>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
 export const Checkout: FC = () => {
-  const { cartDetails, removeAll } = useCart();
-  const { cartId } = cartDetails;
+  const { cartDetails, removeAll, updateCoupon } = useCart();
+  const { cartId, coupon = '' } = cartDetails;
   const { data: shops } = useShopQuery();
   const { data: appConfig } = useAppConfig();
-  const { data: userConfig } = useUserConfig();
-  const [coupon, _setCoupon] = useState('');
   const [confetti, setConfetti] = useState({
     show: false,
     opacity: 0.5
@@ -541,7 +647,7 @@ export const Checkout: FC = () => {
         return { ...c, opacity: c.opacity - 0.01 };
       });
     }, 100);
-    _setCoupon(coupon);
+    updateCoupon(coupon);
     Analytics.pushEvent('coupon-applied', { coupon });
   };
   const items = cartDetails.cart.reduce((old, cartItem) => {
@@ -572,13 +678,15 @@ export const Checkout: FC = () => {
     (old, item) => old + item.product.itemPrice * item.quantity,
     0
   );
+  const { remove } = useCoupon();
+
   const totalByShopId = items.reduce((acc, i) => {
-    if(!acc[i.product.shopId]) {
+    if (!acc[i.product.shopId]) {
       acc[i.product.shopId] = 0;
     }
     acc[i.product.shopId] += i.product.itemPrice * i.quantity;
     return acc;
-  }, {} as Record<string, number>)
+  }, {} as Record<string, number>);
   const parcelChargesTotal = items.reduce(
     (old, item) => old + (item.product.parcelCharges ?? 0) * item.quantity,
     0
@@ -593,19 +701,19 @@ export const Checkout: FC = () => {
   const originalDeliveryFee = shopIds.reduce((old, shopId) => {
     const s = shops?.find((s) => s.shopId === shopId);
     if (!s) return old;
-    if(!s.minOrderValue) return old + s.deliveryFee;
+    if (!s.minOrderValue) return old + s.deliveryFee;
     const total = totalByShopId[shopId] || 0;
-    if(total >= s.minOrderValue) return old;
+    if (total >= s.minOrderValue) return old;
     return old + s.deliveryFee;
   }, 0);
   const deliveryFee = !coupon
     ? shopIds.reduce((old, shopId) => {
         const s = shops?.find((s) => s.shopId === shopId);
         if (!s) return old;
-        if(!s.minOrderValue) return old + s.deliveryFee;
+        if (!s.minOrderValue) return old + s.deliveryFee;
         const total = totalByShopId[shopId] || 0;
-        if(total >= s.minOrderValue) return old;
-        if(s.minOrderDeliveryFee) return old + s.minOrderDeliveryFee;
+        if (total >= s.minOrderValue) return old;
+        if (s.minOrderDeliveryFee) return old + s.minOrderDeliveryFee;
         return old + s.deliveryFee;
       }, 0)
     : 0;
@@ -632,6 +740,7 @@ export const Checkout: FC = () => {
           if ('navigator' in window && 'vibrate' in navigator) {
             navigator.vibrate(200);
           }
+          remove();
           Analytics.pushEvent('order-placed', {
             productCategory: 'Food',
             productSku: items.map((item) => item.product.itemId),
@@ -649,13 +758,21 @@ export const Checkout: FC = () => {
           }, 7_000);
         },
         onError: (err) => {
-          setError({
-            message:
-              err.cause?.message ??
-              'Something went wrong. Please try again later.',
-            products:
-              err.cause?.products?.map((product) => product.itemId) ?? []
-          });
+          if (err.cause.removeCoupon) {
+            toast.error(`${err.cause.message}`);
+            setTimeout(() => {
+              updateCoupon('');
+              toast.error(`Removing Coupon`);
+            }, 1000);
+          } else {
+            setError({
+              message:
+                err.cause?.message ??
+                'Something went wrong. Please try again later.',
+              products:
+                err.cause?.products?.map((product) => product.itemId) ?? []
+            });
+          }
         }
       }
     );
@@ -721,6 +838,7 @@ export const Checkout: FC = () => {
       </SubSection>
       <SubSection>
         <CompetitorBanner grandTotal={grandTotal} />
+        <ApplyCoupon setModel={setModel} isApplied={!!coupon} />
       </SubSection>
       <SubSection>
         <TotalCard
@@ -747,18 +865,15 @@ export const Checkout: FC = () => {
           onPlaceOrder={onPlaceOrder}
           setError={setError}
           setModel={setModel}
-          userConfig={userConfig}
           cartId={cartId}
         />
       </SubSection>
-      {userConfig?.availableCoupons && (
-        <ApplyCouponDrawer
-          model={model}
-          setCoupon={setCoupon}
-          setModel={setModel}
-          userConfig={userConfig}
-        />
-      )}
+      <ApplyCouponDrawer
+        model={model}
+        setCoupon={setCoupon}
+        setModel={setModel}
+        coupon={coupon}
+      />
       {confetti.show && (
         <div
           style={{
@@ -855,41 +970,41 @@ function SuccessCheckout() {
   );
 }
 
-const ReferButton: FC<{ myReferralCodes: string }> = ({ myReferralCodes }) => {
-  const [copied, setCoped] = useState(false);
+// const ReferButton: FC<{ myReferralCodes: string }> = ({ myReferralCodes }) => {
+//   const [copied, setCoped] = useState(false);
 
-  if (typeof navigator.share === 'function') {
-    <Button
-      variant="outlined"
-      onClick={() => {
-        navigator.share({
-          title: 'Goburn',
-          text: `Hey, I found this amazing app called Burn. It has the lowest prices for food ordering. \n You can also get free delivery on your first order. \n \n Use my referral code ${myReferralCodes} to get your first order delivered free. Use it from http://delivery.goburn.in/`,
-          url: 'http://delivery.goburn.in/'
-        });
-      }}
-      color="secondary"
-    >
-      <WhatsApp />
-      Refer and Earn
-    </Button>;
-  }
-  return (
-    <Button
-      variant="outlined"
-      onClick={() => {
-        navigator.clipboard.writeText(
-          `Food ordering is super cheap at http://delivery.goburn.in/. Use my coupon code to get first delivery free. \nCOUPON CODE: ${myReferralCodes}`
-        );
-        setCoped(true);
-        setTimeout(() => {
-          setCoped(false);
-        }, 1_000);
-      }}
-      color="secondary"
-    >
-      {copied ? <CheckIcon /> : <CopyAll />}
-      Copy Code
-    </Button>
-  );
-};
+//   if (typeof navigator.share === 'function') {
+//     <Button
+//       variant="outlined"
+//       onClick={() => {
+//         navigator.share({
+//           title: 'Goburn',
+//           text: `Hey, I found this amazing app called Burn. It has the lowest prices for food ordering. \n You can also get free delivery on your first order. \n \n Use my referral code ${myReferralCodes} to get your first order delivered free. Use it from http://delivery.goburn.in/`,
+//           url: 'http://delivery.goburn.in/'
+//         });
+//       }}
+//       color="secondary"
+//     >
+//       <WhatsApp />
+//       Refer and Earn
+//     </Button>;
+//   }
+//   return (
+//     <Button
+//       variant="outlined"
+//       onClick={() => {
+//         navigator.clipboard.writeText(
+//           `Food ordering is super cheap at http://delivery.goburn.in/. Use my coupon code to get first delivery free. \nCOUPON CODE: ${myReferralCodes}`
+//         );
+//         setCoped(true);
+//         setTimeout(() => {
+//           setCoped(false);
+//         }, 1_000);
+//       }}
+//       color="secondary"
+//     >
+//       {copied ? <CheckIcon /> : <CopyAll />}
+//       Copy Code
+//     </Button>
+//   );
+// };
