@@ -1,10 +1,10 @@
-import { Add, Check, CopyAll, WhatsApp } from '@mui/icons-material';
+import { Add, Check, DoneRounded } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { SwipeableDrawer, TextField } from '@mui/material';
+import { SwipeableDrawer } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -18,22 +18,17 @@ import { green } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
 import { useToLogin, useUser } from '../../firebase/auth';
-import { LastOrder } from '../LastOrder/LastOrder';
-import { useShopQuery } from '../Shop/shop-query';
-import {
-  AppConfig,
-  UserConfig,
-  useAppConfig,
-  useUserConfig
-} from '../appconfig';
-import { useCart } from './cart-activity';
-import { useMutationCreateOrder } from './checkout-query';
-import { AddItem } from '../Products/Product-iitems';
 import { post } from '../../firebase/fetch';
-import { toast } from 'react-toastify';
+import { LastOrder } from '../LastOrder/LastOrder';
+import { AddItem } from '../Products/Product-iitems';
+import { useShopQuery } from '../Shop/shop-query';
+import { AppConfig, useAppConfig } from '../appconfig';
+import { useCart, useCoupon } from './cart-activity';
+import { useMutationCreateOrder } from './checkout-query';
 
 const StyledProduct = styled('div')<{ error: boolean; spacing?: number }>(
   ({ theme, error, spacing = 2 }) => ({
@@ -232,7 +227,7 @@ const TotalCard: FC<{
                 title={
                   !coupon
                     ? 'This helps our delivery partners to serve you better.'
-                    : `Delivery fee Rs.${originalDeliveryFee} has been waved off`
+                    : `Delivery fee Rs.${originalDeliveryFee} has been Waived Off`
                 }
                 enterTouchDelay={20}
                 leaveTouchDelay={5_000}
@@ -295,9 +290,10 @@ const ApplyCouponDrawer: FC<{
   setModel: (open: boolean) => void;
   setCoupon: (c: string) => void;
   coupon: string;
-}> = ({ model, setModel, coupon, setCoupon }) => {
+}> = ({ model, setModel, setCoupon }) => {
+  const { get } = useCoupon();
   const [_coupon, _setCoupon] = useState({
-    coupon: '',
+    coupon: get(),
     error: '',
     isLoading: false
   });
@@ -318,11 +314,11 @@ const ApplyCouponDrawer: FC<{
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          margin: 'auto'
-          // background: '#000 url(/abstract_emoji.png)'
+          margin: 'auto',
+          background: '#000 url(/abstract_emoji.png)'
         }}
       >
-        <Card
+        {/* <Card
           elevation={4}
           sx={{
             display: 'flex',
@@ -330,8 +326,8 @@ const ApplyCouponDrawer: FC<{
             alignItems: 'center',
             padding: 2,
             borderRadius: '10px',
-            backgroundColor: '#f1f1f1',
-            gap: 4
+            gap: 4,
+            background: 'transparent',
           }}
         >
           <div
@@ -396,6 +392,66 @@ const ApplyCouponDrawer: FC<{
           >
             Apply
           </Button>
+        </Card> */}
+        <Card
+          elevation={4}
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 2,
+            borderRadius: '10px',
+            backgroundColor: '#c0eade2c'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 2
+            }}
+          >
+            <Typography variant="h6" color="secondary">
+              {_coupon.coupon}
+            </Typography>
+            <Typography variant="caption" color="secondary">
+              Free delivery
+            </Typography>
+          </div>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={async () => {
+              if (!_coupon.coupon) {
+                return;
+              }
+              _setCoupon({
+                ..._coupon,
+                error: '',
+                isLoading: true
+              });
+              const { data } = await post('/v1/canUseHerCoupon', {
+                couponCode: _coupon.coupon
+              });
+              const { canProceed, error } = data;
+              if (canProceed) {
+                setCoupon(_coupon.coupon);
+                setModel(false);
+                toast.success('Coupon Applied');
+                _setCoupon({
+                  ..._coupon,
+                  error: '',
+                  isLoading: false
+                });
+              } else {
+                toast.error(error);
+              }
+            }}
+          >
+            Apply
+          </Button>
         </Card>
       </Box>
     </SwipeableDrawer>
@@ -420,7 +476,6 @@ const Footer: FC<{
   onPlaceOrder,
   grandTotal,
   coupon,
-  setModel,
   cartId
 }) => {
   const { removeAll } = useCart();
@@ -481,28 +536,102 @@ const Footer: FC<{
               Coupon applied: {coupon}
             </Typography>
           ) : null}
-          <Button
-            variant="text"
-            color="success"
-            onClick={() => setModel(true)}
-            sx={{
-              fontWeight: 800
-            }}
-          >
-            Apply Coupon
-          </Button>
         </SubSection>
       )}
     </>
   );
 };
 
+const ApplyCoupon: FC<{
+  setModel: (model: boolean) => void;
+  isApplied: boolean;
+}> = ({ setModel, isApplied }) => {
+  const {
+    userDetails: { user }
+  } = useUser();
+  const navigate = useNavigate();
+  const { get } = useCoupon();
+  const coupon = get();
+  if (!user) {
+    return (
+      <Button
+        variant="text"
+        color="success"
+        onClick={() => navigate('/login')}
+        sx={{
+          fontWeight: 800
+        }}
+      >
+        Login To Apply Coupon
+      </Button>
+    );
+  }
+  return (
+    <Card
+      onClick={() => {
+        if (!coupon) {
+          return;
+        }
+        setModel(true);
+      }}
+      sx={{
+        background: !coupon ? '#fff4f4' : '#f7fffa',
+        boxShadow: '0px 0px 10px 0px #151B331f'
+      }}
+    >
+      <CardContent>
+        <Button
+          variant="text"
+          color="success"
+          onClick={() => setModel(true)}
+          sx={{
+            fontWeight: 800,
+            flexDirection: 'column',
+            width: '100%'
+          }}
+          disabled={!coupon}
+        >
+          {!coupon && (
+            <Typography variant="caption" sx={{ fontWeight: 800 }} color="red">
+              No coupon found
+            </Typography>
+          )}
+          {coupon && !isApplied && (
+            <>
+              <Typography variant="caption" sx={{ fontWeight: 800 }}>
+                Apply Now
+              </Typography>
+              <Typography variant="caption" color="success">
+                1 Coupon Found
+              </Typography>
+            </>
+          )}
+          {isApplied && (
+            <Box sx={{
+              display: 'flex',
+              gap: 1,
+              alignItems: 'center'
+            }}>
+              <DoneRounded />
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 800 }}
+                color="success"
+              >
+                Coupon Applied
+              </Typography>
+            </Box>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
 export const Checkout: FC = () => {
   const { cartDetails, removeAll, updateCoupon } = useCart();
   const { cartId, coupon = '' } = cartDetails;
   const { data: shops } = useShopQuery();
   const { data: appConfig } = useAppConfig();
-  const { data: userConfig } = useUserConfig();
   const [confetti, setConfetti] = useState({
     show: false,
     opacity: 0.5
@@ -549,6 +678,8 @@ export const Checkout: FC = () => {
     (old, item) => old + item.product.itemPrice * item.quantity,
     0
   );
+  const { remove } = useCoupon();
+
   const totalByShopId = items.reduce((acc, i) => {
     if (!acc[i.product.shopId]) {
       acc[i.product.shopId] = 0;
@@ -609,6 +740,7 @@ export const Checkout: FC = () => {
           if ('navigator' in window && 'vibrate' in navigator) {
             navigator.vibrate(200);
           }
+          remove();
           Analytics.pushEvent('order-placed', {
             productCategory: 'Food',
             productSku: items.map((item) => item.product.itemId),
@@ -706,6 +838,7 @@ export const Checkout: FC = () => {
       </SubSection>
       <SubSection>
         <CompetitorBanner grandTotal={grandTotal} />
+        <ApplyCoupon setModel={setModel} isApplied={!!coupon} />
       </SubSection>
       <SubSection>
         <TotalCard
@@ -735,14 +868,12 @@ export const Checkout: FC = () => {
           cartId={cartId}
         />
       </SubSection>
-      {userConfig?.availableCoupons && (
-        <ApplyCouponDrawer
-          model={model}
-          setCoupon={setCoupon}
-          setModel={setModel}
-          coupon={coupon}
-        />
-      )}
+      <ApplyCouponDrawer
+        model={model}
+        setCoupon={setCoupon}
+        setModel={setModel}
+        coupon={coupon}
+      />
       {confetti.show && (
         <div
           style={{
@@ -839,41 +970,41 @@ function SuccessCheckout() {
   );
 }
 
-const ReferButton: FC<{ myReferralCodes: string }> = ({ myReferralCodes }) => {
-  const [copied, setCoped] = useState(false);
+// const ReferButton: FC<{ myReferralCodes: string }> = ({ myReferralCodes }) => {
+//   const [copied, setCoped] = useState(false);
 
-  if (typeof navigator.share === 'function') {
-    <Button
-      variant="outlined"
-      onClick={() => {
-        navigator.share({
-          title: 'Goburn',
-          text: `Hey, I found this amazing app called Burn. It has the lowest prices for food ordering. \n You can also get free delivery on your first order. \n \n Use my referral code ${myReferralCodes} to get your first order delivered free. Use it from http://delivery.goburn.in/`,
-          url: 'http://delivery.goburn.in/'
-        });
-      }}
-      color="secondary"
-    >
-      <WhatsApp />
-      Refer and Earn
-    </Button>;
-  }
-  return (
-    <Button
-      variant="outlined"
-      onClick={() => {
-        navigator.clipboard.writeText(
-          `Food ordering is super cheap at http://delivery.goburn.in/. Use my coupon code to get first delivery free. \nCOUPON CODE: ${myReferralCodes}`
-        );
-        setCoped(true);
-        setTimeout(() => {
-          setCoped(false);
-        }, 1_000);
-      }}
-      color="secondary"
-    >
-      {copied ? <CheckIcon /> : <CopyAll />}
-      Copy Code
-    </Button>
-  );
-};
+//   if (typeof navigator.share === 'function') {
+//     <Button
+//       variant="outlined"
+//       onClick={() => {
+//         navigator.share({
+//           title: 'Goburn',
+//           text: `Hey, I found this amazing app called Burn. It has the lowest prices for food ordering. \n You can also get free delivery on your first order. \n \n Use my referral code ${myReferralCodes} to get your first order delivered free. Use it from http://delivery.goburn.in/`,
+//           url: 'http://delivery.goburn.in/'
+//         });
+//       }}
+//       color="secondary"
+//     >
+//       <WhatsApp />
+//       Refer and Earn
+//     </Button>;
+//   }
+//   return (
+//     <Button
+//       variant="outlined"
+//       onClick={() => {
+//         navigator.clipboard.writeText(
+//           `Food ordering is super cheap at http://delivery.goburn.in/. Use my coupon code to get first delivery free. \nCOUPON CODE: ${myReferralCodes}`
+//         );
+//         setCoped(true);
+//         setTimeout(() => {
+//           setCoped(false);
+//         }, 1_000);
+//       }}
+//       color="secondary"
+//     >
+//       {copied ? <CheckIcon /> : <CopyAll />}
+//       Copy Code
+//     </Button>
+//   );
+// };
