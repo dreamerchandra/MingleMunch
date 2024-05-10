@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { Shop as IShop } from '../../../common/types/shop';
 import { useAppConfig } from '../appconfig';
 import { useShopQuery } from './shop-query';
+import { useCoupon } from '../Shoping/cart-activity';
 
 export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
   const navigation = useNavigate();
@@ -76,38 +77,42 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
           <Typography component="h6" variant="h6" color="GrayText">
             {shop.isOpen ? shop.description : 'Currently Closed'}
           </Typography>
-          {shop.deliveryFee === 0 && shop.minOrderValue === 0 && shop.minOrderDeliveryFee === 0 && (
-            <Paper
-              sx={{
-                background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
-                px: 1,
-                py: 1,
-                color: '#fff',
-                borderRadius: '5px',
-                fontSize: '0.6rem',
-                width: 'fit-content',
-                fontWeight: '900'
-              }}
-            >
-              # FREE DELIVERY
-            </Paper>
-          )}
-          {shop.deliveryFee === 0 && shop.minOrderValue !== 0 && shop.minOrderDeliveryFee !== 0 && (
-            <Paper
-              sx={{
-                background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
-                px: 1,
-                py: 1,
-                color: '#fff',
-                borderRadius: '5px',
-                fontSize: '0.6rem',
-                width: 'fit-content',
-                fontWeight: '900'
-              }}
-            >
-              # FREE DELIVERY ABOVE ₹ {shop.minOrderValue}
-            </Paper>
-          )}
+          {shop.deliveryFee === 0 &&
+            shop.minOrderValue === 0 &&
+            shop.minOrderDeliveryFee === 0 && (
+              <Paper
+                sx={{
+                  background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
+                  px: 1,
+                  py: 1,
+                  color: '#fff',
+                  borderRadius: '5px',
+                  fontSize: '0.6rem',
+                  width: 'fit-content',
+                  fontWeight: '900'
+                }}
+              >
+                # FREE DELIVERY
+              </Paper>
+            )}
+          {shop.deliveryFee === 0 &&
+            shop.minOrderValue !== 0 &&
+            shop.minOrderDeliveryFee !== 0 && (
+              <Paper
+                sx={{
+                  background: 'linear-gradient(90deg, #000 10%, #FF8C00 90%)',
+                  px: 1,
+                  py: 1,
+                  color: '#fff',
+                  borderRadius: '5px',
+                  fontSize: '0.6rem',
+                  width: 'fit-content',
+                  fontWeight: '900'
+                }}
+              >
+                # FREE DELIVERY ABOVE ₹ {shop.minOrderValue}
+              </Paper>
+            )}
         </CardContent>
       </Box>
       <CardMedia
@@ -152,6 +157,8 @@ export function SkeletonLoading() {
 export const Shops = () => {
   const { data: appConfig } = useAppConfig();
   const { data, isLoading } = useShopQuery();
+  const { get } = useCoupon();
+  const coupon = get();
 
   if (isLoading) {
     return (
@@ -186,7 +193,11 @@ export const Shops = () => {
     >
       <Box
         sx={{
-          mb: 2
+          mb: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 1
         }}
       >
         <Typography
@@ -196,6 +207,7 @@ export const Shops = () => {
         >
           ALL RESTAURANTS
         </Typography>
+        {coupon && <Typography variant='caption' color='green' fontWeight={700}>1 Free Delivery Left</Typography>}
         {!appConfig?.isOpen && (
           <Typography variant="h6" color="darkorange" textAlign="center">
             {appConfig?.closeReason}
@@ -215,7 +227,7 @@ export const Shops = () => {
             <Shop shop={shop} />
           </div>
         ))}
-        {data
+      {data
         ?.filter((s) => !s.isOpen)
         ?.map((shop) => (
           <div
