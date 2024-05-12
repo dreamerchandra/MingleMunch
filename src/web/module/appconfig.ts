@@ -15,6 +15,7 @@ export interface AppConfig {
   closeReason: string;
   platformFee: number;
   carousel: { image: string; url?: string; isPublished: boolean }[];
+  noticeBoard: string;
 }
 
 const appConfigConverter = {
