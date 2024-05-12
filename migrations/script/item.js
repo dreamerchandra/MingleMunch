@@ -13,11 +13,11 @@ const firebaseDb = getFirestore(app);
 const storage = getStorage(app);
 // 8056735175
 
-const availableCategory = ['XpozCHQdgE67lyWRAdax', 'hT0fz8Ke3z4LVwxFkQMR', 'D5P6q80F4LXiQVlu1wKA']
+// const availableCategory = ['XpozCHQdgE67lyWRAdax', 'hT0fz8Ke3z4LVwxFkQMR', 'D5P6q80F4LXiQVlu1wKA']
 const backupOrginalItem = async () => {
   const snap = await firebaseDb
     .collection('food')
-    .where('shopId', '==', 'BOmEbao75ZSfXusKIOhi')
+    .where('shopId', '==', 'VvfYoaI8uC3K5uJlak7z')
     .get();
   for (const doc of snap.docs) {
     const id = doc.id;

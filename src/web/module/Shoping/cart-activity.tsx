@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { Analytics } from '../../../common/analytics';
 import { Product } from '../../../common/types/Product';
+import { post } from '../../firebase/fetch';
 
 type CartState = {
   cart: Product[];
@@ -246,12 +247,25 @@ export const useCart = () => {
 };
 
 export const useCoupon = () => {
-  const key = 'INVITE_COUPON';
+  const key = 'INVITE_COUPON_V1';
   const set = useCallback((coupon: string) => {
-    localStorage.setItem(key, coupon);
+    const now = new Date();
+    const data = {
+      coupon,
+      date: now.toISOString()
+    };
+    localStorage.setItem(key, JSON.stringify(data));
+    const deviceId = localStorage.getItem('analyticsId');
+    post('/v1/invited-ack', {
+      coupon,
+      deviceId
+    });
   }, []);
   const get = useCallback(() => {
-    return localStorage.getItem(key);
+    const data = localStorage.getItem(key);
+    if (!data) return '';
+    const { coupon } = JSON.parse(data);
+    return coupon;
   }, []);
   const remove = useCallback(() => {
     localStorage.removeItem(key);
