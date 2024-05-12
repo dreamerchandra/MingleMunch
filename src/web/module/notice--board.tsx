@@ -1,11 +1,11 @@
 import { Box, Skeleton } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
+import { useAppConfig } from './appconfig';
 // import { useNavigate } from 'react-router-dom';
 
 export const NoticeBoard: FC = () => {
-  const [src] = useState(
-    'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/thanks_you.png?alt=media&token=336f7201-178a-40d2-8c39-e67b59a9475a'
-  );
+  const { data: appConfig } = useAppConfig();
+  const src = appConfig?.noticeBoard;
   // const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
