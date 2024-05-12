@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { SwipeableDrawer } from '@mui/material';
+import { Modal, SwipeableDrawer } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -607,11 +607,13 @@ const ApplyCoupon: FC<{
             </>
           )}
           {isApplied && (
-            <Box sx={{
-              display: 'flex',
-              gap: 1,
-              alignItems: 'center'
-            }}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1,
+                alignItems: 'center'
+              }}
+            >
               <DoneRounded />
               <Typography
                 variant="caption"
@@ -627,11 +629,79 @@ const ApplyCoupon: FC<{
     </Card>
   );
 };
+
+const AlertCouponInfo: FC<{
+  open: boolean;
+  handleClose: () => void;
+  openCoupon: () => void;
+  placeOrder: () => void;
+}> = ({ open, handleClose, openCoupon, placeOrder }) => {
+  return (
+    <Modal
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4
+        }}
+      >
+        <Typography id="modal-modal-title" variant="h3" component="h2">
+          Coupon Available
+        </Typography>
+        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+          Would you like to place Order without applying coupon?
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 2,
+            mt: 2
+          }}
+        >
+          <Button
+            onClick={() => {
+              handleClose();
+              placeOrder();
+            }}
+            variant="text"
+            color="info"
+            sx={{ mt: 2 }}
+          >
+            Yes, Place Order
+          </Button>
+          <Button
+            onClick={() => {
+              handleClose();
+              openCoupon();
+            }}
+            variant="contained"
+            color="success"
+            sx={{ mt: 2 }}
+          >
+            No, Apply Coupon
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
+  );
+};
 export const Checkout: FC = () => {
   const { cartDetails, removeAll, updateCoupon } = useCart();
   const { cartId, coupon = '' } = cartDetails;
   const { data: shops } = useShopQuery();
   const { data: appConfig } = useAppConfig();
+  const [shouldAlert, setShouldAlert] = useState(false);
   const [confetti, setConfetti] = useState({
     show: false,
     opacity: 0.5
@@ -691,6 +761,8 @@ export const Checkout: FC = () => {
     (old, item) => old + (item.product.parcelCharges ?? 0) * item.quantity,
     0
   );
+  const { get } = useCoupon();
+  const isCouponAvailable = !!get();
   if (!shops) {
     return null;
   }
@@ -722,9 +794,17 @@ export const Checkout: FC = () => {
     (itemsTotal + deliveryFee + platformFee + parcelChargesTotal).toFixed(2)
   );
 
-  const onPlaceOrder = () => {
+  const onPlaceOrder = (
+    { forcePlace }: { forcePlace?: boolean } = { forcePlace: false }
+  ) => {
     if (!user) {
       return triggerLogin();
+    }
+    if (!forcePlace) {
+      if (isCouponAvailable && !coupon) {
+        setShouldAlert(true);
+        return;
+      }
     }
     mutate(
       {
@@ -890,6 +970,16 @@ export const Checkout: FC = () => {
           <img src="https://media.tenor.com/aKPcD7T8KtUAAAAi/confetti-glitter.gif" />
         </div>
       )}
+      <AlertCouponInfo
+        open={shouldAlert}
+        handleClose={() => {
+          setShouldAlert(false);
+        }}
+        openCoupon={() => {
+          setModel(true);
+        }}
+        placeOrder={() => onPlaceOrder({ forcePlace: true })}
+      />
     </Box>
   );
 };

@@ -112,6 +112,26 @@ expressApp.post('/v1/fcm-register', async (req: Request, res: Response) => {
   return res.json({});
 });
 
+expressApp.post('/v1/invited-ack', async (req: Request, res: Response) => {
+  try {
+    const { coupon, deviceId } = req.body;
+    logger.log(`invited-ack started ${coupon} ${deviceId}`);
+    const snap = await firebaseDb.doc(`herCoupon/${coupon}`).get();
+    const oldInviteesData = snap.data()?.invited ?? {};
+    await firebaseDb.doc(`herCoupon/${coupon}`).update({
+      invited: {
+        ...oldInviteesData,
+        [deviceId as string]: FieldValue.serverTimestamp()
+      }
+    });
+    logger.log(`invited-ack done ${coupon} ${deviceId}`);
+    return res.send(200);
+  } catch (err) {
+    logger.error(`Error in invited-ack ${err}`);
+    return res.sendStatus(500);
+  }
+});
+
 expressApp.post('/v1/order', authMiddle, createOrder);
 expressApp.post('/v1/home-order', authMiddle, createHomeOrder);
 expressApp.post('/v1/referral', authMiddle, updateReferralCode);

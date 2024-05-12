@@ -13,23 +13,29 @@ const firebaseDb = getFirestore(app);
 const storage = getStorage(app);
 // 8056735175
 
-const availableCategory = ['XpozCHQdgE67lyWRAdax', 'hT0fz8Ke3z4LVwxFkQMR', 'D5P6q80F4LXiQVlu1wKA']
+// const availableCategory = ['XpozCHQdgE67lyWRAdax', 'hT0fz8Ke3z4LVwxFkQMR', 'D5P6q80F4LXiQVlu1wKA']
 const backupOrginalItem = async () => {
   const snap = await firebaseDb
     .collection('food')
-    .where('shopId', '==', 'BOmEbao75ZSfXusKIOhi')
+    .where('shopId', '==', 'VvfYoaI8uC3K5uJlak7z')
     .get();
   for (const doc of snap.docs) {
-    const id = doc.id;
-    const categoryId = doc.data().category.id;
-    if(!availableCategory.includes(categoryId)) {
-      console.log(id);
-      await firebaseDb.collection('food').doc(id).update({
-        isAvailable: false,
-      });
-    }else {
-      console.log(categoryId)
+    const data = doc.data();
+    if (data.itemPrice < 75) {
+      continue;
     }
+    console.log(doc.id);
+    const itemPrice = data.itemPrice - 10;
+    const updatedPrice = itemPrice + itemPrice * 0.05;
+    await firebaseDb
+      .collection('food')
+      .doc(doc.id)
+      .update({
+        itemPrice: updatedPrice + 10
+      });
+    await firebaseDb.collection('food-internal').doc(doc.id).update({
+      costPrice: updatedPrice
+    });
     // await firebaseDb.collection('food').doc(id).update({
     //   isAvailable: false,
     // });
