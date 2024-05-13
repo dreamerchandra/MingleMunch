@@ -613,7 +613,7 @@ const ApplyCoupon: FC<{
                   textTransform: 'initial'
                 }}
                 component="p"
-                color="#cbb328"
+                color="red"
               >
                 Expired By {expireBy.toDateString()}
               </Typography>
