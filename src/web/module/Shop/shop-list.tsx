@@ -209,7 +209,7 @@ export const Shops = () => {
             <Typography variant="caption" color="green" fontWeight={700}>
               1 Free Delivery Left
             </Typography>
-            <Typography variant="caption" color="#cbb328" fontWeight={700}>
+            <Typography variant="caption" color="red" fontWeight={700}>
               Expires By {expireBy.toDateString()}
             </Typography>
           </>
