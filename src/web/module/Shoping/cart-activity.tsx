@@ -248,6 +248,8 @@ export const useCart = () => {
 
 export const useCoupon = () => {
   const key = 'INVITE_COUPON_V1';
+  const oldKey = 'INVITE_COUPON';
+  const pushKey = 'INVITE_COUPON_V1_PUSH';
   const set = useCallback((coupon: string) => {
     const now = new Date();
     const data = {
@@ -256,17 +258,26 @@ export const useCoupon = () => {
     };
     localStorage.setItem(key, JSON.stringify(data));
     const deviceId = localStorage.getItem('analyticsId');
+    localStorage.setItem(pushKey, 'true');
     post('/v1/invited-ack', {
       coupon,
       deviceId
     });
   }, []);
   const get = useCallback(() => {
+    const oldKeyData = localStorage.getItem(oldKey);
+    if (oldKeyData) {
+      set(oldKeyData);
+      localStorage.removeItem(oldKey);
+    }
     const data = localStorage.getItem(key);
-    if (!data) return '';
-    const { coupon } = JSON.parse(data);
-    return coupon;
-  }, []);
+    if (!data) return {coupon: '', isExpired: true, expireBy: new Date()};
+    const { coupon, date } = JSON.parse(data);
+    const expireBy = new Date(date);
+    expireBy.setDate(expireBy.getDate() + 5);
+    const isExpired = new Date() > expireBy;
+    return { coupon, isExpired, expireBy };
+  }, [set]);
   const remove = useCallback(() => {
     localStorage.removeItem(key);
   }, []);

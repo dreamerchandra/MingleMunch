@@ -309,8 +309,9 @@ const ApplyCouponDrawer: FC<{
   coupon: string;
 }> = ({ model, setModel, setCoupon }) => {
   const { get } = useCoupon();
+  const { coupon, isExpired } = get();
   const [_coupon, _setCoupon] = useState({
-    coupon: get(),
+    coupon: isExpired ? '' : coupon,
     error: '',
     isLoading: false
   });
@@ -591,7 +592,7 @@ const ApplyCoupon: FC<{
   } = useUser();
   const navigate = useNavigate();
   const { get } = useCoupon();
-  const coupon = get();
+  const { coupon, isExpired, expireBy } = get();
   if (!user) {
     return (
       <Button
@@ -609,13 +610,13 @@ const ApplyCoupon: FC<{
   return (
     <Card
       onClick={() => {
-        if (!coupon) {
+        if (isExpired) {
           return;
         }
         setModel(true);
       }}
       sx={{
-        background: !coupon ? '#fff4f4' : '#f7fffa',
+        background: isExpired ? '#fff4f4' : '#f7fffa',
         boxShadow: '0px 0px 10px 0px #151B331f'
       }}
     >
@@ -631,18 +632,30 @@ const ApplyCoupon: FC<{
           }}
           disabled={!coupon}
         >
-          {!coupon && (
+          {isExpired && (
             <Typography variant="caption" sx={{ fontWeight: 800 }} color="red">
               No coupon found
             </Typography>
           )}
-          {coupon && !isApplied && (
+          {!isExpired && !isApplied && (
             <>
               <Typography variant="caption" sx={{ fontWeight: 800 }}>
                 Apply Now
               </Typography>
               <Typography variant="caption" color="success">
                 1 Coupon Found
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                  marginTop: 1,
+                  textTransform: 'initial'
+                }}
+                component="p"
+                color="#cbb328"
+              >
+                Expired By {expireBy.toDateString()}
               </Typography>
             </>
           )}
@@ -803,7 +816,8 @@ export const Checkout: FC = () => {
     0
   );
   const { get } = useCoupon();
-  const isCouponAvailable = !!get();
+  const { isExpired } = get();
+  const isCouponAvailable = !isExpired;
   if (!shops) {
     return null;
   }
