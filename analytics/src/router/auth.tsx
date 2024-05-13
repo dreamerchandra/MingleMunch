@@ -8,6 +8,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseAuth } from '../config';
+import { useInit } from './InitProvider';
 
 export const removeCountryCode = (phoneNumber: string) => {
   let phNo = phoneNumber;
@@ -35,13 +36,14 @@ export const useToSignIn = () => {
   const loginInstance = useRef<ConfirmationResult>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   useEffect(() => {
     appVerifier.current = new RecaptchaVerifier(
+      firebaseAuth,
       'recaptcha-container',
       {
         size: 'invisible'
-      },
-      firebaseAuth
+      }
     );
     appVerifier.current.render();
     firebaseAuth.useDeviceLanguage();
@@ -85,6 +87,7 @@ export const useToSignIn = () => {
       ?.confirm(otp)
       .then((result) => {
         console.log(result);
+        navigate('/');
       })
       .catch((err) => {
         setError('Invalid OTP');

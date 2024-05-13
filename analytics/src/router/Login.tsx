@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import { FormEvent, createRef, useRef } from 'react';
-import { useToSignIn, useUser } from '../../firebase/auth';
+import { useToSignIn, useUser } from './auth';
 import LoadingButton from '@mui/lab/LoadingButton';
 
 export function LoginPage() {

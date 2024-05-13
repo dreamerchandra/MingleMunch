@@ -18,9 +18,14 @@ const MenuProps = {
   }
 };
 
-export const ShopSelect = () => {
+export const ShopSelect = ({
+  selectShop,
+  setSelected
+}: {
+  selectShop: string[];
+  setSelected: (selected: string[]) => void;
+}) => {
   const { data: shops } = useShopQuery();
-  const [selectShop, setSelected] = useState<Array<string>>([]);
   const getNamesByIds = (ids: string[]) =>
     shops?.filter((s) => ids.includes(s.shopId)).map((s) => s.shopName);
   return (

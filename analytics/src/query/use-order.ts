@@ -5,7 +5,9 @@ import {
   SnapshotOptions,
   Timestamp,
   collection,
-  getDocs
+  getDocs,
+  orderBy,
+  query
 } from 'firebase/firestore';
 import { firebaseDb } from '../config';
 
@@ -120,7 +122,10 @@ const orderConverters = {
 
 const getOrders = async () => {
   const snap = await getDocs(
-    collection(firebaseDb, 'internal-orders').withConverter(orderConverters)
+    query(
+      collection(firebaseDb, 'internal-orders').withConverter(orderConverters),
+      orderBy('createdAt', 'asc')
+    )
   );
   return snap.docs.map((doc) => doc.data());
 };
