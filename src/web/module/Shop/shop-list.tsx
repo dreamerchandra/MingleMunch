@@ -158,7 +158,7 @@ export const Shops = () => {
   const { data: appConfig } = useAppConfig();
   const { data, isLoading } = useShopQuery();
   const { get } = useCoupon();
-  const coupon = get();
+  const { coupon, expireBy, isExpired } = get();
 
   if (isLoading) {
     return (
@@ -207,7 +207,16 @@ export const Shops = () => {
         >
           ALL RESTAURANTS
         </Typography>
-        {coupon && <Typography variant='caption' color='green' fontWeight={700}>1 Free Delivery Left</Typography>}
+        {coupon && !isExpired && (
+          <>
+            <Typography variant="caption" color="green" fontWeight={700}>
+              1 Free Delivery Left
+            </Typography>
+            <Typography variant="caption" color="#cbb328" fontWeight={700}>
+              Expires By {expireBy.toDateString()}
+            </Typography>
+          </>
+        )}
         {!appConfig?.isOpen && (
           <Typography variant="h6" color="darkorange" textAlign="center">
             {appConfig?.closeReason}
