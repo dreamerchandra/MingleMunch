@@ -9,7 +9,7 @@ import copy from 'copy-to-clipboard';
 export const HerCoupon = () => {
   const [loading, setLoading] = useState(true);
   const src =
-    'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/her_coupon_banner.jpeg?alt=media&token=5e0e5bdc-5075-4c34-a4c6-ee0f1c5cab13';
+    'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/her_coupon.png?alt=media&token=b033a1f5-71b2-4c74-899a-cafc24a091fc';
   const { data } = useHerCouponQuery();
   const {
     userDetails: { user }
@@ -22,12 +22,17 @@ export const HerCoupon = () => {
       return;
     }
     if (data?.coupon) {
+      const next5Days = new Date();
+      next5Days.setDate(next5Days.getDate() + 5);
       toast.dark('Copied to clipboard!');
-      copy(`🍔 Craving something delicious? 🍕\n
-      Order now from Go Burn at goburn.in and enjoy free delivery with code \n https://delivery.goburn.in/coupon/${data.coupon}`);
+      const text = `🍔🍔 Craving something delicious? 🍕\n
+      Order now from GoBurn and enjoy free delivery \n https://delivery.goburn.in/coupon/${
+        data.coupon
+      } \n
+      Valid till: ${next5Days.toDateString()} \n`;
+      copy(text);
       navigator.share?.({
-        text: `🍔🍔 Craving something delicious? 🍕\n
-        Order now from Go Burn at goburn.in and enjoy free delivery \n https://delivery.goburn.in/coupon/${data.coupon}`
+        text
       });
     }
   };
