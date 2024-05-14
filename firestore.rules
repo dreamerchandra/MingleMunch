@@ -48,5 +48,9 @@ service cloud.firestore {
       allow read: if request.auth.uid == userId;
       allow write: if request.auth.uid == userId;
     }
+    match /herCoupon/{couponId} {
+      allow read: if request.auth.token.role in ['admin'];
+      allow write: if request.auth.token.role in ['admin'];
+    }
   }
 }
