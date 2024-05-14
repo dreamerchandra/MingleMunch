@@ -25,6 +25,7 @@ import { NoticeBoard } from '../../module/notice--board';
 import { LocationDrawer } from '../../module/location/location-drawer';
 import { HerCoupon } from '../../module/her-coupon/her-coupon';
 import { useHerCouponQuery } from '../../module/her-coupon/her-coupon-query';
+import { NewHerCoupon } from '../../module/her-coupon/new-her-coupon';
 
 export const ShopPage = () => {
   const { userDetails } = useUser();
@@ -84,6 +85,7 @@ export const ShopPage = () => {
           }}
         ></div>
         {herCoupon ? <HerCoupon /> : <NoticeBoard />}
+        <NewHerCoupon />
         <Box marginTop={2}>
           <MasterControl />
           <Shops />

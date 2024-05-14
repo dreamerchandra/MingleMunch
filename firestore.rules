@@ -51,6 +51,9 @@ service cloud.firestore {
      match /location/{id} {
       allow read: if true;
       allow write: if false;
+    match /herCoupon/{couponId} {
+      allow read: if request.auth.token.role in ['admin'];
+      allow write: if request.auth.token.role in ['admin'];
     }
   }
 }
