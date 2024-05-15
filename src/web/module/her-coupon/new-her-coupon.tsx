@@ -64,7 +64,6 @@ export const NewHerCoupon = () => {
                   sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    width: '50%'
                   }}
                 >
                   <Typography key={coupon.coupon}>{coupon.coupon}</Typography>
