@@ -283,7 +283,8 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
               style={{ fontSize: '1.5rem' }}
               value={formData.name}
               onChange={(e) => {
-                setFormData({ ...formData, name: e.target.value });
+                const name = e.target.value;
+                setFormData({ ...formData, name: name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()});
               }}
             />
           </FormControl>
@@ -369,9 +370,9 @@ export const AddProducts: FC<{ shopId: string }> = ({ shopId }) => {
                 value={formData.itemPrice}
                 onChange={(e) => {
                   const itemPrice = Number(e.target.value);
-                  const displayParcelCharges = 0;
-                  const costParcelCharges = 0;
-                  const costPrice = itemPrice - 10;
+                  const displayParcelCharges = 5;
+                  const costParcelCharges = 5;
+                  const costPrice = (itemPrice - 10) * 0.88;
                   setFormData({
                     ...formData,
                     parcelCharges: displayParcelCharges.toString(),
