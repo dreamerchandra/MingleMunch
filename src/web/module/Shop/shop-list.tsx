@@ -75,7 +75,11 @@ export const Shop: FC<{ shop: IShop }> = ({ shop }) => {
             {shop.shopName}
           </Typography>
           <Typography component="h6" variant="h6" color="GrayText">
-            {shop.isOpen ? shop.description : 'Currently Closed'}
+            {shop.isOpen
+              ? shop.description
+              : shop.closeReason
+              ? shop.closeReason
+              : 'Currently Closed'}
           </Typography>
           {shop.deliveryFee === 0 &&
             shop.minOrderValue === 0 &&
