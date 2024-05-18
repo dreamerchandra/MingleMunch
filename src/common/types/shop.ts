@@ -13,4 +13,5 @@ export interface Shop {
   carousel?: { image: string; url?: string, isPublished: boolean }[];
   tag?: string;
   orderRank: number;
+  closeReason: string;
 }

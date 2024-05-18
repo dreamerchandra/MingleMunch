@@ -1,5 +1,5 @@
-import { Box, Container } from '@mui/material';
-import { useState } from 'react';
+import { Box, Button, Container, Input } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { useUser } from '../../firebase/auth';
 import { Header } from '../../module/Header/header';
 import { Products } from '../../module/Products/Products';
 import { AddProducts } from '../../module/Products/add-proudct';
-import { useShopQuery } from '../../module/Shop/shop-query';
+import { useShopMutation, useShopQuery } from '../../module/Shop/shop-query';
 import { AddCategory } from '../../module/category/add-category';
 
 export const MenuPage = () => {
@@ -19,9 +19,18 @@ export const MenuPage = () => {
   const isAdmin = ['admin', 'vendor'].includes(userDetails?.role) || false;
   const navigate = useNavigate();
   const [allowEdit, setAllowEdit] = useState(false);
+  const { mutate } = useShopMutation();
+  const [closeReason, setCloseReason] = useState('');
+  useEffect(() => {
+    setCloseReason(shop?.closeReason || '');
+  }, [shop?.closeReason]);
   return (
     <>
-      <Header onSearch={onSearch} search={search} title={`Menu - ${shop?.shopName}`}/>
+      <Header
+        onSearch={onSearch}
+        search={search}
+        title={`Menu - ${shop?.shopName}`}
+      />
       <Container
         component="main"
         sx={{
@@ -32,6 +41,39 @@ export const MenuPage = () => {
           mt: 2
         }}
       >
+        {isAdmin && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 2
+            }}
+          >
+            <Input
+              onChange={(e) => {
+                setCloseReason(e.target.value);
+              }}
+              value={closeReason}
+              placeholder="Close Reason"
+            />
+            <Button
+              variant="outlined"
+              color={shop?.isOpen ? 'info' : 'error'}
+              onClick={() => {
+                mutate({
+                  open: !shop?.isOpen,
+                  closeReason,
+                  shopId
+                });
+              }}
+            >
+              {shop?.isOpen ? 'Close' : 'Open'}
+            </Button>
+          </Box>
+        )}
+
         <Box marginTop={2}>
           <Carousel
             showThumbs={false}
