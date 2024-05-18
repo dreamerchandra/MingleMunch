@@ -1824,4 +1824,8 @@ export const sampleData = [
     date: '2021-12-31',
     level: 1
   }
-];
+].map(a => ({
+  ...a,
+  count: 0,
+  level: 0,
+}));

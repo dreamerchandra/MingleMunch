@@ -5,8 +5,8 @@ import ActivityCalendar, {
 } from 'react-activity-calendar';
 
 const explicitTheme: ThemeInput = {
-  light: ['#f0f0f0', '#c4edde', '#7ac7c4', '#f73859', '#384259'],
-  dark: ['#e9e9e9', '#4D455D', '#7DB9B6', '#F5E9CF', '#E96479']
+  light: ['#e9e9e9', '#d9c6ff', '#b28cff', '#915aff', '#5500ff'],
+  dark: ['#e9e9e9', '#d9c6ff', '#b28cff', '#915aff', '#5500ff']
 };
 
 export const ActivityCalender = ({ data }: { data: Array<Activity> }) => {
@@ -45,7 +45,7 @@ export const ActivityCalender = ({ data }: { data: Array<Activity> }) => {
       hideTotalCount={false}
       showWeekdayLabels
       renderBlock={(block, activity) => (
-        <MuiTooltip title={`${activity.count} activities on ${activity.date}`}>
+        <MuiTooltip title={`Rs. ${activity.count} spent on ${activity.date}`}>
           {block}
         </MuiTooltip>
       )}

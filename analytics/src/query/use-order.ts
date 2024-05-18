@@ -7,7 +7,8 @@ import {
   collection,
   getDocs,
   orderBy,
-  query
+  query,
+  where
 } from 'firebase/firestore';
 import { firebaseDb } from '../config';
 
@@ -124,6 +125,7 @@ const getOrders = async () => {
   const snap = await getDocs(
     query(
       collection(firebaseDb, 'internal-orders').withConverter(orderConverters),
+      where('status', '==', 'delivered'),
       orderBy('createdAt', 'asc')
     )
   );

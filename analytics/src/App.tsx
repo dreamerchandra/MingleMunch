@@ -1,15 +1,16 @@
 import {
   DataGrid,
   GridColDef,
-  GridColumnGroupingModel
+  GridColumnGroupingModel,
+  GridRowId
 } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
-import ActivityCalendar, { Activity } from 'react-activity-calendar';
+import { ActivityCalender } from './activity-calender';
 import { DateRangePicker } from 'rsuite';
-import { sampleData } from './demo';
 import { Shop } from './query/use-hotel';
 import { Order, useOrderQuery } from './query/use-order';
 import { ShopSelect } from './shop/shop-select';
+import { Activity } from 'react-activity-calendar';
 
 type OrderRow = {
   id: string;
@@ -26,11 +27,14 @@ type OrderRow = {
   drDelivery: number;
   revenue: number;
   drRevenue: number;
-  history: {
-    date: Date;
-    revenue: number;
-    orderId: string;
-  }[];
+  history: Map<
+    string,
+    {
+      date: Date;
+      revenue: number;
+      orderId: string[];
+    }
+  >;
   minRevenue: number;
   maxRevenue: number;
 };
@@ -187,14 +191,20 @@ const useCreateRow = ({
       }, 0);
       const gmv =
         Object.values(byShop).reduce((acc, v) => {
-          return acc + v.displaySubTotal;
+          return acc + v.displaySubTotal + v.parcelChargesTotal;
         }, 0) - order.bill.discountFee;
       const costPriceSubTotal = Object.values(byShop).reduce((acc, v) => {
-        return acc + v.costPriceSubTotal;
+        return acc + v.costPriceSubTotal + v.costPriceParcelChargesTotal;
       }, 0);
       const revenue = gmv - costPriceSubTotal;
 
       if (!result[order.userId]) {
+        const history = new Map();
+        history.set(order.createdAt.toDate().toDateString(), {
+          date: order.createdAt.toDate(),
+          orderId: [order.orderId],
+          revenue
+        });
         result[order.userId] = {
           id: order.userId,
           name: order.user.name ?? '',
@@ -210,11 +220,7 @@ const useCreateRow = ({
           drDelivery: isWithinRange ? deliveryCharges : 0,
           revenue: revenue,
           drRevenue: isWithinRange ? revenue : 0,
-          history: [{
-            date: order.createdAt.toDate(),
-            orderId: order.orderId,
-            revenue,
-          }],
+          history,
           minRevenue: revenue,
           maxRevenue: revenue
         };
@@ -225,6 +231,22 @@ const useCreateRow = ({
         .filter((v, i, a) => a.indexOf(v) === i);
       const minRevenue = Math.min(result[order.userId].minRevenue, revenue);
       const maxRevenue = Math.max(result[order.userId].maxRevenue, revenue);
+      const oldHistory = result[order.userId].history.get(
+        order.createdAt.toDate().toDateString()
+      );
+      if (oldHistory) {
+        oldHistory.revenue += revenue;
+        oldHistory.orderId.push(order.orderId);
+      } else {
+        result[order.userId].history.set(
+          order.createdAt.toDate().toDateString(),
+          {
+            date: order.createdAt.toDate(),
+            orderId: [order.orderId],
+            revenue
+          }
+        );
+      }
 
       result[order.userId] = {
         ...result[order.userId],
@@ -245,11 +267,6 @@ const useCreateRow = ({
           : result[order.userId].drDelivery,
         revenue: revenue,
         drRevenue: isWithinRange ? revenue : result[order.userId].drRevenue,
-        history: result[order.userId].history.concat({
-          date: order.createdAt.toDate(),
-          orderId: order.orderId,
-          revenue,
-        }),
         minRevenue,
         maxRevenue
       };
@@ -259,17 +276,46 @@ const useCreateRow = ({
   return rows;
 };
 
-const useCreateActivity = ({row}: {row: OrderRow[]}): Activity[] => {
-  const result: Activity[] = [];
-  for (const r of row) {
-    result.push({
-      date: r.firstOrder.toISOString().split('T')[0],
-      count: r.totalOrderCount,
-      level: 3
-    });
-  }
+const useCreateActivity = ({ row, selectedRow }: { row: OrderRow[], selectedRow: GridRowId[] }): Activity[] => {
+  const [result, setResult] = useState<Activity[]>([]);
+  useEffect(() => {
+    const result: Activity[] = [];
+    const maxRevenue = Math.max(...row.map((r) => r.maxRevenue));
+    const minRevenue = Math.max(...row.map((r) => r.minRevenue));
+    const maxLevel = 4;
+    const rows = row.filter((r) => selectedRow.includes(r.id));
+    const history = rows.flatMap((r) => Array.from(r.history.values()));
+    for (const record of history) {
+      const month =
+        record.date.getMonth() + 1 > 9
+          ? record.date.getMonth() + 1
+          : `0${record.date.getMonth() + 1}`;
+      const day =
+        record.date.getDate() > 9
+          ? record.date.getDate()
+          : `0${record.date.getDate()}`;
+      const date = `${record.date.getFullYear()}-${month}-${day}`;
+      // const data = sampleData.find((s) => s.date === date)!;
+      // data.count = record.revenue;
+      // data.level = level;
+      const level = Math.max(
+        Math.floor(
+          ((record.revenue - minRevenue) / (maxRevenue - minRevenue)) * maxLevel
+        ),
+        0
+      );
+      result.push({
+        date,
+        count: record.revenue,
+        level
+      });
+      console.log(record);
+      setResult(result);
+    }
+  }, [row, selectedRow]);
+
   return result;
-}
+};
 
 export function App() {
   const [dateRange, setDateRange] = useState<{
@@ -278,7 +324,12 @@ export function App() {
   } | null>(null);
   const { data: orders } = useOrderQuery();
   const [selectShop, setSelected] = useState<Array<string>>([]);
+  const [selectedRow, setSelectedRow] = useState<GridRowId[]>([]);
   const rows = useCreateRow({ orders, dateRange, selectShop });
+  const activity = useCreateActivity({
+    row: rows,
+    selectedRow,
+  });
 
   return (
     <div>
@@ -304,8 +355,12 @@ export function App() {
         pageSizeOptions={[5, 10]}
         checkboxSelection
         columnGroupingModel={columnGroup}
+        onRowSelectionModelChange={(e) => {
+          setSelectedRow(e);
+        }}
+        rowSelectionModel={selectedRow}
       />
-      <ActivityCalendar data={sampleData} />
+      <ActivityCalender data={activity} />
     </div>
   );
 }
