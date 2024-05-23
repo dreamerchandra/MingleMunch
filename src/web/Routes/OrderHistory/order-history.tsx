@@ -5,7 +5,18 @@ import { OrderHistory } from '../../module/OrderHistory/OrderHistory';
 import { Suspense, lazy } from 'react';
 import { SkeletonLoader } from '../../module/loading';
 
-const IncomingOrder = lazy(() => import('../../module/OrderHistory/incoming-order').then((m) => ({ default: m.IncomingOrder })));
+const IncomingOrder = lazy(() =>
+  import('../../module/OrderHistory/incoming-order').then((m) => ({
+    default: m.IncomingOrder
+  }))
+);
+
+const DeliveryIncomingOrder = lazy(() =>
+  import('../../module/OrderHistory/delivery-order').then((m) => ({
+    default: m.IncomingOrder
+  }))
+);
+
 export const OrderHistoryRoute = () => {
   useProtectedRoute();
   const {
@@ -23,9 +34,13 @@ export const OrderHistoryRoute = () => {
         }}
       >
         <Box marginTop={2}>
-          {['admin', 'vendor'].includes(role) ? (
+          {role === 'admin' ? (
             <Suspense fallback={<SkeletonLoader />}>
               <IncomingOrder />
+            </Suspense>
+          ) : role === 'delivery' ? (
+            <Suspense fallback={<SkeletonLoader />}>
+              <DeliveryIncomingOrder />
             </Suspense>
           ) : (
             <OrderHistory />

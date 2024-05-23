@@ -14,11 +14,11 @@ service cloud.firestore {
     }
     match /orders/{orderId} {
       allow read: if request.auth != null;
-      allow write: if request.auth.token.role in ['vendor', 'admin'];
+      allow write: if request.auth.token.role in ['vendor', 'admin', 'delivery'];
     }
     match /internal-orders/{orderId} {
       allow read: if request.auth.token.role in ['admin'];
-      allow write: if request.auth.token.role in ['admin'];
+      allow write: if request.auth.token.role in ['vendor', 'admin', 'delivery'];
     }
     match /stories/{storyId} {
       allow read: if true;
@@ -45,7 +45,7 @@ service cloud.firestore {
       allow write: if false;
     }
     match /nps/{userId} {
-      allow read: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId || request.auth.token.role in ['admin'];
       allow write: if request.auth.uid == userId;
     }
      match /location/{id} {

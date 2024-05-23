@@ -126,12 +126,14 @@ export const updateOrderStatus = async ({
   orderId,
   orderStatus,
   time,
-  delayReason
+  delayReason,
+  userId
 }: {
   orderId: string;
   orderStatus: OrderStatus;
   time: Date;
   delayReason: string[];
+  userId: string;
 }): Promise<void> => {
   const docRef = doc(firebaseDb, 'orders', orderId);
   const delay =
@@ -147,6 +149,8 @@ export const updateOrderStatus = async ({
     internalDocRef,
     {
       status: orderStatus,
+      deliveredBy: orderStatus === 'delivered' ? userId : '',
+      updatedBy: userId,
     },
     {
       merge: true
@@ -159,7 +163,9 @@ export const updateOrderStatus = async ({
       timeStamps: {
         [orderStatus]: Timestamp.fromDate(time)
       },
-      ...delay
+      ...delay,
+      deliveredBy: orderStatus === 'delivered' ? userId : '',
+      updatedBy: userId,
     },
     { merge: true }
   );
