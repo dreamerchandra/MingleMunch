@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Unsubscribe } from 'firebase/firestore';
+import { useEffect, useRef, useState } from 'react';
 import { Order, OrderStatus } from '../../../common/types/Order';
 import { useUser } from '../../firebase/auth';
 import {
-  incomingOrderSocketUupdate as incomingOrderSocketUpdate,
   getOrderHistoryWithRealTimeUpdate,
+  incomingOrderSocketUupdate as incomingOrderSocketUpdate,
   updateOrderStatus
 } from '../../firebase/order';
-import { useEffect, useRef, useState } from 'react';
-import { Unsubscribe } from 'firebase/firestore';
 
 const onAddedUtil = (thisOrder: Order, oldOrders: Order[]): Order[] => {
   console.log('added');
@@ -93,6 +93,7 @@ export const useOrderHistoryQuery = () => {
 
 export const useMutationOrderStatus = () => {
   const queryClient = useQueryClient();
+  const {userDetails: {user}} = useUser()
   return useMutation(
     async (param: {
       orderId: string;
@@ -100,7 +101,7 @@ export const useMutationOrderStatus = () => {
       time: Date,
       delayReason: string[]
     }) => {
-      return updateOrderStatus(param);
+      return updateOrderStatus({...param, userId: user!.uid});
     },
     {
       onSuccess: () => {
