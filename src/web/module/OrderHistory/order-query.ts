@@ -64,7 +64,7 @@ export const useOrderHistoryQuery = () => {
 
     const getLiveOrders = async () => {
       console.log('getLiveOrders');
-      if (['admin', 'vendor'].includes(role)) {
+      if (['admin', 'vendor', 'delivery'].includes(role)) {
         const { orders, unsubscribe: _unsub } = await incomingOrderSocketUpdate(
           onAdded,
           onChange

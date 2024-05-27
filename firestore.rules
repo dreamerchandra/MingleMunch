@@ -17,7 +17,7 @@ service cloud.firestore {
       allow write: if request.auth.token.role in ['vendor', 'admin', 'delivery'];
     }
     match /internal-orders/{orderId} {
-      allow read: if request.auth.token.role in ['admin'];
+      allow read: if request.auth.token.role in ['admin', 'delivery'];
       allow write: if request.auth.token.role in ['vendor', 'admin', 'delivery'];
     }
     match /stories/{storyId} {
