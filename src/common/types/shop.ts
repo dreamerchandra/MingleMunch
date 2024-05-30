@@ -6,6 +6,7 @@ export interface Shop {
   shopImage: string;
   description: string;
   isOpen: boolean;
+  isDeleted: boolean;
   deliveryFee: number;
   minOrderValue?: number;
   minOrderDeliveryFee?: number;

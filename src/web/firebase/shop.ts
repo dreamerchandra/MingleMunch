@@ -27,6 +27,6 @@ export const shopConverter = {
 export const getShops = async () => {
   const q = query(collection(firebaseDb, 'shop').withConverter(shopConverter), orderBy('orderRank', 'asc'));
   const querySnap = await getDocs(q);
-  const data = querySnap.docs.map((doc) => doc.data());
+  const data = querySnap.docs.map((doc) => doc.data()).filter((d) => !d.isDeleted);
   return data;
 };
