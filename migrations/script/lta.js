@@ -14,10 +14,10 @@ const storage = getStorage(app);
 
 const report = async () => {
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 3);
+  startDate.setDate(startDate.getDate() - 0);
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date();
-  endDate.setDate(endDate.getDate() - 1);
+  endDate.setDate(endDate.getDate() - 0);
   endDate.setHours(23, 59, 59, 999);
   const snap = await firebaseDb
     .collection('internal-orders')
@@ -50,10 +50,10 @@ const reportMonth = async () => {
   const startDate = new Date();
   startDate.setDate(8);
   startDate.setHours(0, 0, 0, 0);
-  startDate.setMonth(3);
+  startDate.setMonth(4);
   const endDate = new Date();
   endDate.setDate(7);
-  endDate.setMonth(4);
+  endDate.setMonth(5);
   endDate.setHours(23, 59, 59, 0);
   console.log(startDate.toLocaleString(), endDate.toLocaleString());
   const snap = await firebaseDb
@@ -136,7 +136,42 @@ const updateToSheet = async (data) => {
 };
 
 
-report().then(data => {
-  updateToSheet(data)
-  console.log(data)
+reportMonth().then(data => {
+  // updateToSheet(data)
+  console.log(data.byShop)
 })
+
+// const getTotalSalesPerDay = async () => {
+//   const salesPerDay = new Map()
+//   const snap = await firebaseDb
+//     .collection('internal-orders')
+//     .orderBy('createdAt')
+//     .get();
+//   const orders = snap.docs
+//     .map((doc) => doc.data())
+//     .filter((o) => !o.user.isInternal)
+//     .filter((o) => o.status !== 'rejected');
+
+//   orders.forEach(order => {
+//     const date = order.createdAt.toDate().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })
+//     if (!salesPerDay.get(date)) {
+//       salesPerDay.set(date, {
+//         total: 0,
+//         count: 0,
+//       })
+//     }
+//     salesPerDay.set(date, {
+//       total: salesPerDay.get(date).total + order.bill.grandTotal,
+//       count: salesPerDay.get(date).count + 1,
+//     })
+//   })
+//   return salesPerDay
+// }
+
+// getTotalSalesPerDay().then(data => {
+//   [...data.keys()].forEach(date => {
+//     console.log(`${date}, ${data.get(date).total}, ${data.get(date).count}`)
+//   })
+// }).catch((e) => {
+//   console.log(e)
+// })

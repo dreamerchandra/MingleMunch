@@ -22,7 +22,6 @@ import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
 //   '+911234512345'
 // ];
 
-
 const initialCongestion = {
   orderId: '',
   congestion: 0,

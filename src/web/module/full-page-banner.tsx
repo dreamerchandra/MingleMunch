@@ -13,7 +13,7 @@ const getFullPageBannerShown = (): Record<string, boolean> => {
   return {};
 };
 const banner =
-  'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/oyalo.jpeg?alt=media&token=4bb93e8e-f3ff-4b37-a173-27aae034e377';
+  'https://firebasestorage.googleapis.com/v0/b/mingle-munch.appspot.com/o/anbagam-poster.jpeg?alt=media&token=f4f8608e-0946-4d12-9d01-23d5bde43c21';
 
 export const FullPageBanner = () => {
   const [hasShown, _setHasShown] = useState(() => {
@@ -64,7 +64,7 @@ export const FullPageBanner = () => {
           }}
           onClick={() => {
             setShown();
-            navigate('/shop/k8cKLWihp00FkUu4pfZj');
+            navigate('/shop/Ruz72qIJQESEe2qe6GRo');
           }}
         />
       </Center>

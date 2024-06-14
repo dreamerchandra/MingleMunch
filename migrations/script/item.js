@@ -17,7 +17,7 @@ const storage = getStorage(app);
 const backupOrginalItem = async () => {
   const snap = await firebaseDb
     .collection('food')
-    .where('shopId', '==', 'VvfYoaI8uC3K5uJlak7z')
+    .where('shopId', '==', 'MZWXNkOyexhAvNlBG9l2')
     .get();
   for (const doc of snap.docs) {
     const data = doc.data();

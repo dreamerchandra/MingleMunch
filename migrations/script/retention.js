@@ -23,6 +23,7 @@ const getOrders = async () => {
     .collection('internal-orders')
     .where('createdAt', '>=', startDate)
     .where('createdAt', '<=', endDate)
+    .orderBy('createdAt', 'asc')
     .get();
   const orders = snap.docs
     .map((doc) => doc.data())
@@ -42,12 +43,11 @@ const getOrders = async () => {
       costPrice: order.bill.costPriceSubTotal,
       deliveryFee: order.bill.deliveryCharges,
       userId: order.userId,
-      createdAt: order.createdAt.toDate(),
+      createdAt: order.createdAt.toDate()
     };
   });
   return data;
 };
-
 
 const getAOV = async () => {
   const orders = await getOrders();
@@ -57,7 +57,7 @@ const getAOV = async () => {
   }, 0);
   console.log('Total', total);
   console.log('AOV', total / orders.length);
-}
+};
 const getUniqueOrders = async () => {
   const orders = await getOrders();
   const orderByUserId = orders.reduce((acc, order) => {
@@ -76,12 +76,17 @@ const getUniqueOrders = async () => {
     return acc;
   }, {});
   console.log('orderByUserId', Object.keys(orderByUserId).length);
-  
+  const monthWise = {};
   Object.keys(orderByUserId).forEach((userId) => {
     const orders = orderByUserId[userId];
-    if(orders.length < 2) return;
-    console.log(orders[0].name, orders.length, orders.map(o => o.grandTotal).join(','))
-  })
+    if (orders.length < 2) return;
+    if (!monthWise[orders[0].createdAt.getMonth()]) {
+      monthWise[orders[0].createdAt.getMonth()] = 0;
+    }
+    monthWise[orders[0].createdAt.getMonth()] =
+      monthWise[orders[0].createdAt.getMonth()] + 1;
+  });
+  console.log('monthWise', monthWise);
 };
 
 getUniqueOrders();
