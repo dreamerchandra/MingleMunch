@@ -8,16 +8,23 @@ import Select from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Order, OrderStatus } from '../../../common/types/Order';
 import { Product } from '../../../common/types/Product';
 import { updateCongestion } from '../../firebase/order';
 import { useCart } from '../Shoping/cart-activity';
 import { Time } from '../time';
-import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
+import {
+  useMutationOrderStatus,
+  useOrderHistoryQuery,
+  useMutationOrderAssignee
+} from './order-query';
 import { SkeletonLoader } from '../loading';
-
+import InputLabel from '@mui/material/InputLabel';
+import ListSubheader from '@mui/material/ListSubheader';
+import FormControl from '@mui/material/FormControl';
+import { usePartnerQuery } from './parner-query';
 // const internalOrder = [
 //   '8754791569',
 //   '8220080109',
@@ -41,7 +48,8 @@ const initialCongestion = {
   congestion: 0,
   time: null as Date | null,
   status: null as OrderStatus | null,
-  delayReason: [] as string[]
+  delayReason: [] as string[],
+  order: null as Order | null
 };
 
 const getBackgroundColor = (status: OrderStatus): string => {
@@ -53,8 +61,17 @@ const getBackgroundColor = (status: OrderStatus): string => {
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
-  const { addMultipleToCart, removeAll, updateCartId, updateCoupon } = useCart();
+  const { mutateAsync: mutateAssignee } = useMutationOrderAssignee();
+  const { addMultipleToCart, removeAll, updateCartId, updateCoupon } =
+    useCart();
   const navigate = useNavigate();
+  const [assigneeOrder, setAssigneeOrder] = useState<{
+    show: boolean;
+    order: Order | null;
+  }>({
+    show: false,
+    order: null
+  });
   const [showCongestion, setShowCongestion] = useState(initialCongestion);
   const onCongestion = async (congestion: number) => {
     await updateCongestion({ orderId: showCongestion.orderId, congestion });
@@ -102,6 +119,9 @@ export const IncomingOrder = () => {
               backgroundColor: getBackgroundColor(order.status)
             }}
           >
+            <Typography variant="body2">
+              Order Id. {order.orderRefId}
+            </Typography>
             <Container
               component="div"
               style={{
@@ -135,8 +155,8 @@ export const IncomingOrder = () => {
                   }}
                 >
                   <Typography variant="h6">{order?.user?.name}</Typography>
-                  <Typography variant="body2">
-                    Grand Total ₹. {order.bill.grandTotal}
+                  <Typography variant="h4">
+                    Total ₹. {order.bill.grandTotal}
                   </Typography>
                   {Object.keys(order.shopOrderValue).map((s) => (
                     <Typography variant="caption">
@@ -163,7 +183,8 @@ export const IncomingOrder = () => {
                           orderId: order.orderId,
                           orderStatus: 'rejected',
                           time: new Date(),
-                          delayReason: []
+                          delayReason: [],
+                          orderAmount: order.bill.grandTotal
                         });
                         return;
                       }
@@ -176,7 +197,8 @@ export const IncomingOrder = () => {
                         orderId: order.orderId,
                         congestion: order.congestion || 0,
                         time: oldTime,
-                        delayReason: order.delayReason?.[newStatus] ?? []
+                        delayReason: order.delayReason?.[newStatus] ?? [],
+                        order: order
                       });
                     }}
                     sx={{
@@ -228,16 +250,37 @@ export const IncomingOrder = () => {
                   >
                     Cart
                   </Button>
-                  <Button
-                    sx={{
-                      mt: 1
-                    }}
-                    variant="text"
-                    size="small"
-                    href={`tel:${order.user.phone}`}
-                  >
-                    Call
-                  </Button>
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: 2
+                  }}>
+                    <Button
+                      sx={{
+                        mt: 1
+                      }}
+                      variant="text"
+                      size="small"
+                      href={`tel:${order.user.phone}`}
+                    >
+                      Call
+                    </Button>
+                    <Button
+                      sx={{
+                        mt: 1
+                      }}
+                      variant="outlined"
+                      size="small"
+                      onClick={() => {
+                        setAssigneeOrder({
+                          show: true,
+                          order
+                        });
+                      }}
+                    >
+                      Assign To
+                    </Button>
+                  </Box>
                 </div>
               </Container>
             </Container>
@@ -259,176 +302,290 @@ export const IncomingOrder = () => {
           </CardContent>
         </Card>
       ))}
-      <Drawer
-        open={Boolean(showCongestion.orderId)}
-        anchor="bottom"
-        ModalProps={{
-          onBackdropClick: () => {
-            setShowCongestion({
-              orderId: '',
-              congestion: 0,
-              time: null,
-              status: null,
-              delayReason: []
+      <OrderStatusDrawer
+        showCongestion={showCongestion}
+        setShowCongestion={setShowCongestion}
+        onCongestion={onCongestion}
+        mutateAsync={mutateAsync}
+      />
+      <AssigneeDrawer
+        order={assigneeOrder.order}
+        onSave={(assignee) => {
+          if (assigneeOrder.order) {
+            mutateAssignee({
+              assignedTo: assignee,
+              orderId: assigneeOrder.order.orderId
+            });
+            setAssigneeOrder({
+              show: false,
+              order: null
             });
           }
         }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            p: 2
-          }}
-        >
-          <Typography variant="h3">
-            Update for {showCongestion.status}
-          </Typography>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Typography variant="caption">Pick the time</Typography>
-            <Time
-              value={showCongestion.time ?? new Date()}
-              onChange={async (newValue) => {
-                setShowCongestion({
-                  ...showCongestion,
-                  time: newValue
-                });
-              }}
-            />
-          </LocalizationProvider>
-          {showCongestion.status === 'picked_up' && (
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                p: 2
-              }}
-            >
-              <Typography variant="h6">How congested was the hotel?</Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  gap: 2,
-                  flexWrap: 'wrap'
-                }}
-              >
-                {['Not at all', 'Little', 'Moderate', 'High', 'Very High'].map(
-                  (c, i) => (
-                    <Button
-                      variant={
-                        showCongestion.congestion === i + 1
-                          ? 'contained'
-                          : 'outlined'
-                      }
-                      color={i < 2 ? 'error' : i === 2 ? 'warning' : 'success'}
-                      onClick={() => onCongestion(i + 1)}
-                    >
-                      {c}
-                    </Button>
-                  )
-                )}
-              </Box>
-            </Box>
-          )}
-          {showCongestion.status === 'picked_up' && (
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                p: 2
-              }}
-            >
-              <Typography variant="h6">Why was the delay</Typography>
-              <Select
-                labelId="Order Delay Reason"
-                id="delay_reason"
-                value={showCongestion.delayReason}
-                label="Delay reason"
-                multiple
-                onChange={(e) => {
-                  setShowCongestion({
-                    ...showCongestion,
-                    delayReason: e.target.value as string[]
-                  });
-                }}
-                renderValue={(selected) => selected.join(', ')}
-              >
-                {['Bill Pay', 'Packing Mistake', 'Delivery Guy Late'].map(
-                  (s) => (
-                    <MenuItem value={s}>
-                      <Checkbox
-                        checked={showCongestion.delayReason.includes(s)}
-                      />
-                      <ListItemText primary={s} />
-                    </MenuItem>
-                  )
-                )}
-              </Select>
-            </Box>
-          )}
-          {showCongestion.status === 'delivered' && (
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                p: 2
-              }}
-            >
-              <Typography variant="h6">Why was the delay</Typography>
-              <Select
-                labelId="Order Delay Reason"
-                id="delay_reason"
-                value={showCongestion.delayReason}
-                label="Delay reason"
-                multiple
-                onChange={(e) => {
-                  setShowCongestion({
-                    ...showCongestion,
-                    delayReason: e.target.value as string[]
-                  });
-                }}
-                renderValue={(selected) => selected.join(', ')}
-              >
-                {['Arrival Delay', 'Payment Delay'].map((s) => (
-                  <MenuItem value={s}>
-                    <Checkbox
-                      checked={showCongestion.delayReason.includes(s)}
-                    />
-                    <ListItemText primary={s} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-          )}
-          <Button
-            onClick={async () => {
-              if (showCongestion.status && showCongestion.time) {
-                await mutateAsync({
-                  orderId: showCongestion.orderId,
-                  orderStatus: showCongestion.status,
-                  time: showCongestion.time,
-                  delayReason: showCongestion.delayReason
-                });
-              }
-              setShowCongestion({
-                orderId: '',
-                congestion: 0,
-                time: null,
-                status: null,
-                delayReason: []
-              });
-            }}
-            color="info"
-          >
-            Save
-          </Button>
-        </Box>
-      </Drawer>
+        onClose={() => {
+          setAssigneeOrder({
+            show: false,
+            order: null
+          });
+        }}
+      />
     </Container>
   );
 };
+
+const AssigneeDrawer: FC<{
+  order: Order | null;
+  onSave: (assignee: string[]) => void;
+  onClose: () => void;
+}> = ({ order, onSave, onClose }) => {
+  const { data } = usePartnerQuery();
+  const [selected, setSelected] = useState<string[]>(order?.assignedTo ?? []);
+  useEffect(() => {
+    setSelected(order?.assignedTo ?? []);
+  }, [order?.assignedTo]);
+  return (
+    <Drawer open={!!order} anchor="bottom">
+      <FormControl sx={{ m: 1, minWidth: 120, pb: 4 }}>
+        <InputLabel htmlFor="grouped-select">Assign To</InputLabel>
+        <Select
+          label="Assign to"
+          multiple
+          value={selected}
+          onChange={(e) => {
+            setSelected(e.target.value as string[]);
+          }}
+          renderValue={(selected) =>
+            selected
+              .map((s) => data?.find((d) => d.userId === s)?.name)
+              .join(', ')
+          }
+        >
+          <ListSubheader>Delivery</ListSubheader>
+          {data
+            ?.filter((d) => d.role === 'delivery')
+            .map((d) => (
+              <MenuItem value={d.userId} key={d.userId}>
+                <Checkbox checked={selected.includes(d.userId)} />
+                <ListItemText primary={d.name} />
+              </MenuItem>
+            ))}
+          <ListSubheader>Distributor</ListSubheader>
+          {data
+            ?.filter((d) => d.role === 'distributor')
+            .map((d) => (
+              <MenuItem value={d.userId} key={d.userId}>
+                <Checkbox checked={selected.includes(d.userId)} />
+                <ListItemText primary={d.name} />
+              </MenuItem>
+            ))}
+        </Select>
+      </FormControl>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 2,
+          p: 2
+        }}
+      >
+        <Button
+          variant="text"
+          fullWidth
+          onClick={() => {
+            onClose();
+            setSelected([]);
+          }}
+        >
+          Close
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          fullWidth
+          onClick={() => {
+            onSave(selected);
+            setSelected([]);
+          }}
+        >
+          Save
+        </Button>
+      </Box>
+    </Drawer>
+  );
+};
+
+function OrderStatusDrawer({
+  showCongestion,
+  setShowCongestion,
+  onCongestion,
+  mutateAsync
+}: {
+  showCongestion: typeof initialCongestion;
+  setShowCongestion: (value: typeof initialCongestion) => void;
+  onCongestion: (congestion: number) => void;
+  mutateAsync: (data: {
+    orderId: string;
+    orderStatus: OrderStatus;
+    time: Date;
+    delayReason: string[];
+    orderAmount: number;
+  }) => Promise<void>;
+}) {
+  return (
+    <Drawer
+      open={Boolean(showCongestion.orderId)}
+      anchor="bottom"
+      ModalProps={{
+        onBackdropClick: () => {
+          setShowCongestion(initialCongestion);
+        }
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          p: 2
+        }}
+      >
+        <Typography variant="h3">Update for {showCongestion.status}</Typography>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Typography variant="caption">Pick the time</Typography>
+          <Time
+            value={showCongestion.time ?? new Date()}
+            onChange={async (newValue) => {
+              setShowCongestion({
+                ...showCongestion,
+                time: newValue
+              });
+            }}
+          />
+        </LocalizationProvider>
+        {showCongestion.status === 'picked_up' && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              p: 2
+            }}
+          >
+            <Typography variant="h6">How congested was the hotel?</Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 2,
+                flexWrap: 'wrap'
+              }}
+            >
+              {['Not at all', 'Little', 'Moderate', 'High', 'Very High'].map(
+                (c, i) => (
+                  <Button
+                    variant={
+                      showCongestion.congestion === i + 1
+                        ? 'contained'
+                        : 'outlined'
+                    }
+                    color={i < 2 ? 'error' : i === 2 ? 'warning' : 'success'}
+                    onClick={() => onCongestion(i + 1)}
+                  >
+                    {c}
+                  </Button>
+                )
+              )}
+            </Box>
+          </Box>
+        )}
+        {showCongestion.status === 'picked_up' && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              p: 2
+            }}
+          >
+            <Typography variant="h6">Why was the delay</Typography>
+            <Select
+              labelId="Order Delay Reason"
+              id="delay_reason"
+              value={showCongestion.delayReason}
+              label="Delay reason"
+              multiple
+              onChange={(e) => {
+                setShowCongestion({
+                  ...showCongestion,
+                  delayReason: e.target.value as string[]
+                });
+              }}
+              renderValue={(selected) => selected.join(', ')}
+            >
+              {['Bill Pay', 'Packing Mistake', 'Delivery Guy Late'].map((s) => (
+                <MenuItem value={s}>
+                  <Checkbox checked={showCongestion.delayReason.includes(s)} />
+                  <ListItemText primary={s} />
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+        )}
+        {showCongestion.status === 'delivered' && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              p: 2
+            }}
+          >
+            <Typography variant="h6">Why was the delay</Typography>
+            <Select
+              labelId="Order Delay Reason"
+              id="delay_reason"
+              value={showCongestion.delayReason}
+              label="Delay reason"
+              multiple
+              onChange={(e) => {
+                setShowCongestion({
+                  ...showCongestion,
+                  delayReason: e.target.value as string[]
+                });
+              }}
+              renderValue={(selected) => selected.join(', ')}
+            >
+              {['Arrival Delay', 'Payment Delay'].map((s) => (
+                <MenuItem value={s}>
+                  <Checkbox checked={showCongestion.delayReason.includes(s)} />
+                  <ListItemText primary={s} />
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+        )}
+        <Button
+          onClick={async () => {
+            if (
+              showCongestion.status &&
+              showCongestion.time &&
+              showCongestion.order
+            ) {
+              await mutateAsync({
+                orderId: showCongestion.orderId,
+                orderStatus: showCongestion.status,
+                time: showCongestion.time,
+                delayReason: showCongestion.delayReason,
+                orderAmount: showCongestion.order.bill.grandTotal
+              });
+            }
+            setShowCongestion(initialCongestion);
+          }}
+          color="info"
+        >
+          Save
+        </Button>
+      </Box>
+    </Drawer>
+  );
+}

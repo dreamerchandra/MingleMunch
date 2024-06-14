@@ -63,15 +63,17 @@ export const getAppConfig = async () => {
 };
 
 export const setAppOpenForBusiness = async ({
-  isOpen
+  isOpen,
+  closeReason
 }: {
   isOpen: boolean;
+  closeReason: string;
 }) => {
   const ref = doc(
     collection(firebaseDb, 'appConfig').withConverter(appConfigConverter),
     'public'
   );
-  return setDoc(ref, { isOpen }, { merge: true });
+  return setDoc(ref, { isOpen, closeReason }, { merge: true });
 };
 
 export const useAppConfig = () => {

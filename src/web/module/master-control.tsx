@@ -1,6 +1,7 @@
-import { Box, Button } from '@mui/material';
+import { Box, Button, Input } from '@mui/material';
 import { useUser } from '../firebase/auth';
 import { useAppConfig, useMutateAppConfig } from './appconfig';
+import { useState } from 'react';
 
 export const MasterControl = () => {
   const { data } = useAppConfig();
@@ -8,6 +9,7 @@ export const MasterControl = () => {
   const {
     userDetails: { role }
   } = useUser();
+  const [closeReason, setCloseReason] = useState('');
   if (role !== 'admin') {
     return null;
   }
@@ -25,27 +27,20 @@ export const MasterControl = () => {
         variant="contained"
         onClick={() => {
           mutate({
-            isOpen: !data?.isOpen
+            isOpen: !data?.isOpen,
+            closeReason
           });
         }}
         color={data?.isOpen ? 'error' : 'success'}
       >
         {data?.isOpen ? 'Close App' : 'Open App'}
       </Button>
-      {/* <Button
-        disabled={isLoading}
-        variant="contained"
-        onClick={async () => {
-          await generateReport();
-          setReportGenerated(true);
-          setTimeout(() => {
-            setReportGenerated(false);
-          }, 3000);
+      <Input
+        value={closeReason}
+        onChange={(e) => {
+          setCloseReason(e.target.value);
         }}
-        color="secondary"
-      >
-        {reportGenerated ? 'Report Generated' : 'Generate Report'}
-      </Button> */}
+      />
     </Box>
   );
 };

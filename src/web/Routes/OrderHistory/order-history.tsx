@@ -1,7 +1,6 @@
 import { Box, Container } from '@mui/material';
 import { useProtectedRoute, useUser } from '../../firebase/auth';
 import { Header } from '../../module/Header/header';
-import { OrderHistory } from '../../module/OrderHistory/OrderHistory';
 import { Suspense, lazy } from 'react';
 import { SkeletonLoader } from '../../module/loading';
 
@@ -17,11 +16,32 @@ const DeliveryIncomingOrder = lazy(() =>
   }))
 );
 
+const DistributorIncomingOrder = lazy(() =>
+  import('../../module/OrderHistory/distributor-order').then((m) => ({
+    default: m.IncomingOrder
+  }))
+);
+
+const OrderHistory = lazy(() =>
+  import('../../module/OrderHistory/OrderHistory').then((m) => ({
+    default: m.OrderHistory
+  }))
+);
+
 export const OrderHistoryRoute = () => {
   useProtectedRoute();
   const {
     userDetails: { role }
   } = useUser();
+  console.log({role})
+  let Component = OrderHistory;
+  if (role === 'admin') {
+    Component = IncomingOrder;
+  } else if (role === 'delivery') {
+    Component = DeliveryIncomingOrder;
+  } else if (role === 'distributor') {
+    Component = DistributorIncomingOrder;
+  }
   return (
     <div>
       <Header title="Order History" />
@@ -34,17 +54,9 @@ export const OrderHistoryRoute = () => {
         }}
       >
         <Box marginTop={2}>
-          {role === 'admin' ? (
-            <Suspense fallback={<SkeletonLoader />}>
-              <IncomingOrder />
-            </Suspense>
-          ) : role === 'delivery' ? (
-            <Suspense fallback={<SkeletonLoader />}>
-              <DeliveryIncomingOrder />
-            </Suspense>
-          ) : (
-            <OrderHistory />
-          )}
+          <Suspense fallback={<SkeletonLoader />}>
+            <Component />
+          </Suspense>
         </Box>
       </Container>
     </div>

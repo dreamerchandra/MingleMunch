@@ -58,7 +58,7 @@ export const createOrderInDb = async (
 ) => {
   const ref = firebaseDb.collection('orders');
   const id = orderId || ref.doc().id;
-  const orderRefId = Math.floor(Math.random() * 1000);
+  const orderRefId = Math.floor(Math.random() * 10000);
   const orderDetails: Omit<OrderDb, 'user' | 'userId'> = {
     orderId: id,
     orderRefId: orderRefId.toString(),

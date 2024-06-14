@@ -14,6 +14,7 @@ import { updateCongestion } from '../../firebase/order';
 import { SkeletonLoader } from '../loading';
 import { Time } from '../time';
 import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
+import { useDistributorPaymentQuery } from './parner-query';
 
 // const internalOrder = [
 //   '8754791569',
@@ -28,7 +29,7 @@ const initialCongestion = {
   time: null as Date | null,
   status: null as OrderStatus | null,
   delayReason: [] as string[],
-  order: null as Order | null,
+  order: null as Order | null
 };
 
 const getBackgroundColor = (status: OrderStatus): string => {
@@ -40,6 +41,7 @@ const getBackgroundColor = (status: OrderStatus): string => {
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
+  const { data: pendingPayment } = useDistributorPaymentQuery();
   const [showCongestion, setShowCongestion] = useState(initialCongestion);
   const onCongestion = async (congestion: number) => {
     await updateCongestion({ orderId: showCongestion.orderId, congestion });
@@ -64,6 +66,9 @@ export const IncomingOrder = () => {
       }}
     >
       History
+      {pendingPayment?.amount && (
+        <Typography>Payment Collected: ₹. {pendingPayment?.amount}</Typography>
+      )}
       {orders?.map((order) => (
         <Card
           sx={{
@@ -156,7 +161,7 @@ export const IncomingOrder = () => {
                         congestion: order.congestion || 0,
                         time: oldTime,
                         delayReason: order.delayReason?.[newStatus] ?? [],
-                        order,
+                        order
                       });
                     }}
                     sx={{
@@ -169,9 +174,13 @@ export const IncomingOrder = () => {
                     <MenuItem value={'ack_from_hotel'} disabled>
                       Hotel Acknowledged
                     </MenuItem>
-                    <MenuItem value={'prepared'}>Prepared</MenuItem>
-                    <MenuItem value={'picked_up'}>Out For Delivery</MenuItem>
-                    <MenuItem value={'reached_location'}>
+                    <MenuItem value={'prepared'} disabled>
+                      Prepared
+                    </MenuItem>
+                    <MenuItem value={'picked_up'} disabled>
+                      Out For Delivery
+                    </MenuItem>
+                    <MenuItem value={'reached_location'} disabled>
                       Reached Customer Place
                     </MenuItem>
                     <MenuItem value={'delivered'}>Delivered</MenuItem>
@@ -349,7 +358,11 @@ export const IncomingOrder = () => {
           )}
           <Button
             onClick={async () => {
-              if (showCongestion.status && showCongestion.time && showCongestion.order) {
+              if (
+                showCongestion.status &&
+                showCongestion.time &&
+                showCongestion.order
+              ) {
                 await mutateAsync({
                   orderId: showCongestion.orderId,
                   orderStatus: showCongestion.status,

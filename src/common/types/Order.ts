@@ -51,4 +51,5 @@ export interface Order {
   congestionReportTiming?: Timestamp;
   timeStamps?: Record<OrderStatus, Timestamp>;
   delayReason: Record<OrderStatus, string[]>;
+  assignedTo?: string[];
 }

@@ -6,8 +6,11 @@ import { useUser } from '../../firebase/auth';
 import {
   getOrderHistoryWithRealTimeUpdate,
   incomingOrderSocketUupdate as incomingOrderSocketUpdate,
+  incomingOrderSocketUupdateForDelivery,
+  updateAssigneeForOrder,
   updateOrderStatus
 } from '../../firebase/order';
+import { updateDistributorAmount } from './distributor';
 
 const onAddedUtil = (thisOrder: Order, oldOrders: Order[]): Order[] => {
   console.log('added');
@@ -64,11 +67,20 @@ export const useOrderHistoryQuery = () => {
 
     const getLiveOrders = async () => {
       console.log('getLiveOrders');
-      if (['admin', 'vendor', 'delivery'].includes(role)) {
+      if (['admin', 'vendor'].includes(role)) {
         const { orders, unsubscribe: _unsub } = await incomingOrderSocketUpdate(
           onAdded,
           onChange
         );
+        unsubscribeRef.current?.push(_unsub);
+        setOrder({ loading: false, orders });
+      } else if (['delivery', 'distributor'].includes(role)) {
+        const { orders, unsubscribe: _unsub } =
+          await incomingOrderSocketUupdateForDelivery(
+            onAdded,
+            onChange,
+            userId
+          );
         unsubscribeRef.current?.push(_unsub);
         setOrder({ loading: false, orders });
       } else {
@@ -93,15 +105,38 @@ export const useOrderHistoryQuery = () => {
 
 export const useMutationOrderStatus = () => {
   const queryClient = useQueryClient();
-  const {userDetails: {user}} = useUser()
+  const {
+    userDetails: { user, role }
+  } = useUser();
   return useMutation(
     async (param: {
       orderId: string;
       orderStatus: OrderStatus;
-      time: Date,
-      delayReason: string[]
+      time: Date;
+      delayReason: string[];
+      orderAmount: number;
     }) => {
-      return updateOrderStatus({...param, userId: user!.uid});
+      if (role === 'distributor' && param.orderStatus === 'delivered') {
+        await updateDistributorAmount({
+          userId: user!.uid,
+          amount: param.orderAmount
+        });
+      }
+      return updateOrderStatus({ ...param, userId: user!.uid });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['orderHistory'] });
+      }
+    }
+  );
+};
+
+export const useMutationOrderAssignee = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    async (param: { orderId: string; assignedTo: string[] }) => {
+      return updateAssigneeForOrder(param);
     },
     {
       onSuccess: () => {
