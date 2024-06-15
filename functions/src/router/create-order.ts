@@ -35,6 +35,14 @@ export const publicOrderConverter = {
   }
 };
 
+const generateRandom4DigitNumber = () => {
+  const random =  Math.floor(Math.random() * 9000);
+  if(random < 1000) {
+    return random + 1000;
+  }
+  return random;
+}
+
 export const createOrderInDb = async (
   user: Request['user'],
   {
@@ -58,7 +66,7 @@ export const createOrderInDb = async (
 ) => {
   const ref = firebaseDb.collection('orders');
   const id = orderId || ref.doc().id;
-  const orderRefId = Math.floor(Math.random() * 10000);
+  const orderRefId = generateRandom4DigitNumber();
   const orderDetails: Omit<OrderDb, 'user' | 'userId'> = {
     orderId: id,
     orderRefId: orderRefId.toString(),
