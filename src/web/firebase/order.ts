@@ -167,19 +167,74 @@ export const incomingOrderSocketUupdateForDelivery = async (
   return { orders: getResult(orders), unsubscribe };
 };
 
+export const incomingOrderSocketUupdateForDistributor = async (
+  onAdded: (order: Order) => void,
+  onChange: (order: Order) => void,
+  userId: string
+): Promise<{ orders: Order[]; unsubscribe: Unsubscribe }> => {
+  const internalOrderQuery = query(
+    collection(firebaseDb, 'internal-orders').withConverter(orderConverters),
+    where('paymentCollector', '==', userId),
+    orderBy('createdAt', 'desc'),
+    limit(15)
+  );
+  const orderQuery = query(
+    collection(firebaseDb, 'orders').withConverter(orderConverters),
+    where('paymentCollector', '==', userId),
+    orderBy('createdAt', 'desc'),
+    limit(15)
+  );
+
+  const internalOrderData = await getDocs(internalOrderQuery);
+  const orderData = await getDocs(orderQuery);
+  const internalOrder = internalOrderData.docs.map((doc) => doc.data());
+  const orders = orderData.docs.map((doc) => doc.data());
+  const getResult = (orders: Order[]) =>
+    orders.map((o) => ({
+      ...o,
+      bill:
+        internalOrder.find((order) => order.orderId === o.orderId)?.bill ??
+        o.bill,
+      shopOrderValue:
+        internalOrder.find((order) => order.orderId === o.orderId)
+          ?.shopOrderValue ?? o.shopOrderValue
+    }));
+  const unsubscribe = onSnapshot(orderQuery, (querySnapshot) => {
+    querySnapshot.docChanges().forEach((change) => {
+      if (change.type === 'added') {
+        onAdded(getResult([change.doc.data()])[0]);
+      }
+      if (change.type === 'modified') {
+        onChange(getResult([change.doc.data()])[0]);
+      }
+    });
+    return querySnapshot.docs.map((doc) => doc.data());
+  });
+  return { orders: getResult(orders), unsubscribe };
+};
+
 export const updateAssigneeForOrder = async ({
   orderId,
   assignedTo,
+  paymentCollector,
+  assigneeName,
+  paymentCollectorName,
 }: {
   orderId: string;
   assignedTo: string[];
+  paymentCollector: string;
+  assigneeName: string;
+  paymentCollectorName: string;
 }): Promise<void> => {
   const docRef = doc(firebaseDb, 'orders', orderId);
   const internalDocRef = doc(firebaseDb, 'internal-orders', orderId);
   await setDoc(
     docRef,
     {
-      assignedTo: assignedTo
+      assignedTo: assignedTo,
+      paymentCollector,
+      paymentCollectorName,
+      assigneeName,
     },
     {
       merge: true
@@ -188,7 +243,8 @@ export const updateAssigneeForOrder = async ({
   return setDoc(
     internalDocRef,
     {
-      assignedTo: assignedTo
+      assignedTo: assignedTo,
+      paymentCollector,
     },
     {
       merge: true

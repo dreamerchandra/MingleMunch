@@ -7,6 +7,7 @@ import {
   getOrderHistoryWithRealTimeUpdate,
   incomingOrderSocketUupdate as incomingOrderSocketUpdate,
   incomingOrderSocketUupdateForDelivery,
+  incomingOrderSocketUupdateForDistributor,
   updateAssigneeForOrder,
   updateOrderStatus
 } from '../../firebase/order';
@@ -74,9 +75,18 @@ export const useOrderHistoryQuery = () => {
         );
         unsubscribeRef.current?.push(_unsub);
         setOrder({ loading: false, orders });
-      } else if (['delivery', 'distributor'].includes(role)) {
+      } else if (role === 'delivery') {
         const { orders, unsubscribe: _unsub } =
           await incomingOrderSocketUupdateForDelivery(
+            onAdded,
+            onChange,
+            userId
+          );
+        unsubscribeRef.current?.push(_unsub);
+        setOrder({ loading: false, orders });
+      } else if (role === 'distributor') {
+        const { orders, unsubscribe: _unsub } =
+          await incomingOrderSocketUupdateForDistributor(
             onAdded,
             onChange,
             userId
@@ -135,7 +145,13 @@ export const useMutationOrderStatus = () => {
 export const useMutationOrderAssignee = () => {
   const queryClient = useQueryClient();
   return useMutation(
-    async (param: { orderId: string; assignedTo: string[] }) => {
+    async (param: {
+      orderId: string;
+      assignedTo: string[];
+      paymentCollector: string;
+      paymentCollectorName: string;
+      assigneeName: string;
+    }) => {
       return updateAssigneeForOrder(param);
     },
     {

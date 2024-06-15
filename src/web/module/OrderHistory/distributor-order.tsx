@@ -38,6 +38,16 @@ const getBackgroundColor = (status: OrderStatus): string => {
   return '';
 };
 
+const getPaymentContext = (order: Order) => {
+  if(!order.paymentCollector) {
+    return "Already Paid"
+  }
+  if(order.assignedTo?.includes(order.paymentCollector)) {
+    return "Get Payment from Customer"
+  }
+  return `Collect Order from ${order.assigneeName} and get Payment from Customer`
+}
+
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
@@ -89,6 +99,9 @@ export const IncomingOrder = () => {
               backgroundColor: getBackgroundColor(order.status)
             }}
           >
+            <Typography variant='caption'>
+              {getPaymentContext(order)}
+            </Typography>
             <Container
               component="div"
               style={{
@@ -174,13 +187,13 @@ export const IncomingOrder = () => {
                     <MenuItem value={'ack_from_hotel'} disabled>
                       Hotel Acknowledged
                     </MenuItem>
-                    <MenuItem value={'prepared'} disabled>
+                    <MenuItem value={'prepared'}>
                       Prepared
                     </MenuItem>
-                    <MenuItem value={'picked_up'} disabled>
+                    <MenuItem value={'picked_up'}>
                       Out For Delivery
                     </MenuItem>
-                    <MenuItem value={'reached_location'} disabled>
+                    <MenuItem value={'reached_location'}>
                       Reached Customer Place
                     </MenuItem>
                     <MenuItem value={'delivered'}>Delivered</MenuItem>

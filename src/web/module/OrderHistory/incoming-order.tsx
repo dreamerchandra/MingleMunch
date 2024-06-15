@@ -250,11 +250,13 @@ export const IncomingOrder = () => {
                   >
                     Cart
                   </Button>
-                  <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: 2
-                  }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      gap: 2
+                    }}
+                  >
                     <Button
                       sx={{
                         mt: 1
@@ -310,11 +312,19 @@ export const IncomingOrder = () => {
       />
       <AssigneeDrawer
         order={assigneeOrder.order}
-        onSave={(assignee) => {
+        onSave={(
+          assignee,
+          paymentCollector,
+          assigneeName,
+          paymentCollectorName
+        ) => {
           if (assigneeOrder.order) {
             mutateAssignee({
               assignedTo: assignee,
-              orderId: assigneeOrder.order.orderId
+              orderId: assigneeOrder.order.orderId,
+              paymentCollector,
+              assigneeName,
+              paymentCollectorName
             });
             setAssigneeOrder({
               show: false,
@@ -335,24 +345,46 @@ export const IncomingOrder = () => {
 
 const AssigneeDrawer: FC<{
   order: Order | null;
-  onSave: (assignee: string[]) => void;
+  onSave: (
+    assignee: string[],
+    paymentCollector: string,
+    assigneeName: string,
+    paymentCollectorName: string
+  ) => void;
   onClose: () => void;
 }> = ({ order, onSave, onClose }) => {
   const { data } = usePartnerQuery();
-  const [selected, setSelected] = useState<string[]>(order?.assignedTo ?? []);
+  const [selected, setSelected] = useState(order?.assignedTo ?? []);
+  const [paymentCollector, setPaymentCollector] = useState(
+    order?.paymentCollector ?? ''
+  );
+  const [paymentCollectorName, setPaymentCollectorName] = useState(
+    order?.paymentCollectorName ?? ''
+  );
+  const [assigneeName, setAssigneeName] = useState(order?.assigneeName ?? '');
   useEffect(() => {
     setSelected(order?.assignedTo ?? []);
-  }, [order?.assignedTo]);
+    setAssigneeName(order?.assigneeName ?? '');
+  }, [order?.assignedTo, order?.assigneeName]);
+  useEffect(() => {
+    setPaymentCollector(order?.paymentCollector ?? '');
+    setPaymentCollectorName(order?.paymentCollectorName ?? '');
+  }, [order?.paymentCollector, order?.paymentCollectorName]);
   return (
     <Drawer open={!!order} anchor="bottom">
       <FormControl sx={{ m: 1, minWidth: 120, pb: 4 }}>
-        <InputLabel htmlFor="grouped-select">Assign To</InputLabel>
+        <InputLabel htmlFor="delivery-select">Delivery</InputLabel>
         <Select
-          label="Assign to"
-          multiple
+          label="Delivery"
           value={selected}
+          id="delivery-select"
+          multiple
           onChange={(e) => {
             setSelected(e.target.value as string[]);
+            const name = data?.find(
+              (d) => d.userId === e.target.value[0]
+            )?.name;
+            setAssigneeName(name ?? '');
           }}
           renderValue={(selected) =>
             selected
@@ -369,12 +401,30 @@ const AssigneeDrawer: FC<{
                 <ListItemText primary={d.name} />
               </MenuItem>
             ))}
-          <ListSubheader>Distributor</ListSubheader>
+        </Select>
+      </FormControl>
+      <FormControl>
+        <InputLabel htmlFor="Distributor-select">Payment Collector</InputLabel>
+        <Select
+          label="Distributor"
+          id="Distributor-select"
+          value={paymentCollector}
+          onChange={(e) => {
+            setPaymentCollector(e.target.value);
+            console.log(e.target.value);
+            const name = data?.find((d) => d.userId === e.target.value)?.name;
+            setPaymentCollectorName(name ?? '');
+          }}
+          renderValue={(selected) =>
+            data?.find((d) => d.userId === selected)?.name
+          }
+        >
+          <ListSubheader>Payment Collector</ListSubheader>
           {data
             ?.filter((d) => d.role === 'distributor')
             .map((d) => (
               <MenuItem value={d.userId} key={d.userId}>
-                <Checkbox checked={selected.includes(d.userId)} />
+                <Checkbox checked={paymentCollector === d.userId} />
                 <ListItemText primary={d.name} />
               </MenuItem>
             ))}
@@ -394,6 +444,9 @@ const AssigneeDrawer: FC<{
           onClick={() => {
             onClose();
             setSelected([]);
+            setPaymentCollectorName('');
+            setPaymentCollector('');
+            setAssigneeName('');
           }}
         >
           Close
@@ -403,8 +456,16 @@ const AssigneeDrawer: FC<{
           color="secondary"
           fullWidth
           onClick={() => {
-            onSave(selected);
+            onSave(
+              selected,
+              paymentCollector,
+              assigneeName,
+              paymentCollectorName
+            );
             setSelected([]);
+            setPaymentCollectorName('');
+            setPaymentCollector('');
+            setAssigneeName('');
           }}
         >
           Save

@@ -37,6 +37,17 @@ const getBackgroundColor = (status: OrderStatus): string => {
   return '';
 };
 
+const getPaymentContext = (order: Order) => {
+  if(!order.paymentCollector) {
+    return "Already Paid"
+  }
+  if(order.assignedTo?.includes(order.paymentCollector)) {
+    return "Get Payment from Customer"
+  }
+  return `Handover the order to ${order.paymentCollectorName}`
+}
+
+
 export const IncomingOrder = () => {
   const { loading, orders } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
@@ -84,6 +95,9 @@ export const IncomingOrder = () => {
               backgroundColor: getBackgroundColor(order.status)
             }}
           >
+             <Typography variant='caption'>
+              {getPaymentContext(order)}
+            </Typography>
             <Container
               component="div"
               style={{

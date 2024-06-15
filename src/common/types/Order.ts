@@ -52,4 +52,7 @@ export interface Order {
   timeStamps?: Record<OrderStatus, Timestamp>;
   delayReason: Record<OrderStatus, string[]>;
   assignedTo?: string[];
+  paymentCollector: string;
+  paymentCollectorName: string;
+  assigneeName: string;
 }
