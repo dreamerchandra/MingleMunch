@@ -1,4 +1,4 @@
-import { Box, Checkbox, Drawer, ListItemText } from '@mui/material';
+import { Alert, Box, Checkbox, Drawer, ListItemText } from '@mui/material';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -39,17 +39,17 @@ const getBackgroundColor = (status: OrderStatus): string => {
 };
 
 const getPaymentContext = (order: Order) => {
-  if(!order.paymentCollector) {
-    return "Already Paid"
+  if (!order.paymentCollector) {
+    return 'Already Paid';
   }
-  if(order.assignedTo?.includes(order.paymentCollector)) {
-    return "Get Payment from Customer"
+  if (order.assignedTo?.includes(order.paymentCollector)) {
+    return 'Get Payment from Customer';
   }
-  return `Collect Order from ${order.assigneeName} and get Payment from Customer`
-}
+  return `Collect Order from ${order.assigneeName} and get Payment from Customer`;
+};
 
 export const IncomingOrder = () => {
-  const { loading, orders } = useOrderHistoryQuery();
+  const { loading, orders, newlyAdded } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
   const { data: pendingPayment } = useDistributorPaymentQuery();
   const [showCongestion, setShowCongestion] = useState(initialCongestion);
@@ -76,6 +76,32 @@ export const IncomingOrder = () => {
       }}
     >
       History
+      {newlyAdded.length && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 70,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 100
+          }}
+        >
+          <Alert severity="warning">
+            {newlyAdded.length} New Order
+            <br />
+            <Button
+              variant="contained"
+              color="warning"
+              size='small'
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              Reload
+            </Button>
+          </Alert>
+        </Box>
+      )}
       {pendingPayment?.amount && (
         <Typography>Payment Collected: ₹. {pendingPayment?.amount}</Typography>
       )}
@@ -99,7 +125,7 @@ export const IncomingOrder = () => {
               backgroundColor: getBackgroundColor(order.status)
             }}
           >
-            <Typography variant='caption'>
+            <Typography variant="caption">
               {getPaymentContext(order)}
             </Typography>
             <Container
@@ -187,12 +213,8 @@ export const IncomingOrder = () => {
                     <MenuItem value={'ack_from_hotel'} disabled>
                       Hotel Acknowledged
                     </MenuItem>
-                    <MenuItem value={'prepared'}>
-                      Prepared
-                    </MenuItem>
-                    <MenuItem value={'picked_up'}>
-                      Out For Delivery
-                    </MenuItem>
+                    <MenuItem value={'prepared'}>Prepared</MenuItem>
+                    <MenuItem value={'picked_up'}>Out For Delivery</MenuItem>
                     <MenuItem value={'reached_location'}>
                       Reached Customer Place
                     </MenuItem>

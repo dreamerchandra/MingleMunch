@@ -55,4 +55,5 @@ export interface Order {
   paymentCollector: string;
   paymentCollectorName: string;
   assigneeName: string;
+  orderHandlers: string[];
 }

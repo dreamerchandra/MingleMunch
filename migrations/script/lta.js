@@ -14,10 +14,10 @@ const storage = getStorage(app);
 
 const report = async () => {
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 0);
+  startDate.setDate(startDate.getDate() - 9);
   startDate.setHours(0, 0, 0, 0);
   const endDate = new Date();
-  endDate.setDate(endDate.getDate() - 0);
+  endDate.setDate(endDate.getDate() - 1);
   endDate.setHours(23, 59, 59, 999);
   const snap = await firebaseDb
     .collection('internal-orders')
@@ -136,9 +136,9 @@ const updateToSheet = async (data) => {
 };
 
 
-reportMonth().then(data => {
-  // updateToSheet(data)
-  console.log(data.byShop)
+report().then(data => {
+  updateToSheet(data)
+  console.log(data)
 })
 
 // const getTotalSalesPerDay = async () => {

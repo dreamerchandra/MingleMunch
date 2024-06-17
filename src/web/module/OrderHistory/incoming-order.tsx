@@ -1,4 +1,4 @@
-import { Box, Checkbox, Drawer, ListItemText } from '@mui/material';
+import { Alert, Box, Checkbox, Drawer, ListItemText } from '@mui/material';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -59,7 +59,7 @@ const getBackgroundColor = (status: OrderStatus): string => {
 };
 
 export const IncomingOrder = () => {
-  const { loading, orders } = useOrderHistoryQuery();
+  const { loading, orders, newlyAdded } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
   const { mutateAsync: mutateAssignee } = useMutationOrderAssignee();
   const { addMultipleToCart, removeAll, updateCartId, updateCoupon } =
@@ -99,6 +99,32 @@ export const IncomingOrder = () => {
       }}
     >
       History
+      {newlyAdded.length ? (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 70,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 100
+          }}
+        >
+          <Alert severity="warning">
+            {newlyAdded.length} New Order
+            <br />
+            <Button
+              variant="contained"
+              color="warning"
+              size="small"
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              Reload
+            </Button>
+          </Alert>
+        </Box>
+      ) : null}
       {orders?.map((order) => (
         <Card
           sx={{

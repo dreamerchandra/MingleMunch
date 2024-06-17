@@ -1,4 +1,4 @@
-import { Box, Checkbox, Drawer, ListItemText } from '@mui/material';
+import { Alert, Box, Checkbox, Drawer, ListItemText } from '@mui/material';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -14,6 +14,8 @@ import { updateCongestion } from '../../firebase/order';
 import { SkeletonLoader } from '../loading';
 import { Time } from '../time';
 import { useMutationOrderStatus, useOrderHistoryQuery } from './order-query';
+import { useDistributorPaymentQuery } from './parner-query';
+import { useUser } from '../../firebase/auth';
 
 // const internalOrder = [
 //   '8754791569',
@@ -28,7 +30,7 @@ const initialCongestion = {
   time: null as Date | null,
   status: null as OrderStatus | null,
   delayReason: [] as string[],
-  order: null as Order | null,
+  order: null as Order | null
 };
 
 const getBackgroundColor = (status: OrderStatus): string => {
@@ -37,20 +39,33 @@ const getBackgroundColor = (status: OrderStatus): string => {
   return '';
 };
 
-const getPaymentContext = (order: Order) => {
-  if(!order.paymentCollector) {
-    return "Already Paid"
+const getPaymentContext = (order: Order, myId: string) => {
+  if (order.assignedTo) {
+    if (order.assignedTo?.includes(myId)) {
+      if (order.assignedTo.includes(order.paymentCollector)) {
+        return 'Delivery and get payment from customer';
+      }
+      if (!order.paymentCollector) {
+        return 'Customer Already paid. Just Deliver';
+      }
+      if(order.paymentCollector !== myId && order.assignedTo.includes(myId)) {
+        return `Handover the order to ${order.paymentCollectorName}`
+      }
+    }
+    if (order.paymentCollector === myId) {
+      return `Collect order from ${order.assigneeName} and get payment from customer`;
+    }
   }
-  if(order.assignedTo?.includes(order.paymentCollector)) {
-    return "Get Payment from Customer"
-  }
-  return `Handover the order to ${order.paymentCollectorName}`
-}
-
+  return 'Collect payment from customer';
+};
 
 export const IncomingOrder = () => {
-  const { loading, orders } = useOrderHistoryQuery();
+  const { loading, orders, newlyAdded } = useOrderHistoryQuery();
   const { mutateAsync } = useMutationOrderStatus();
+  const {
+    userDetails: { user }
+  } = useUser();
+  const { data: pendingPayment } = useDistributorPaymentQuery();
   const [showCongestion, setShowCongestion] = useState(initialCongestion);
   const onCongestion = async (congestion: number) => {
     await updateCongestion({ orderId: showCongestion.orderId, congestion });
@@ -75,7 +90,37 @@ export const IncomingOrder = () => {
       }}
     >
       History
-      {orders?.map((order) => (
+      {newlyAdded.length ? (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 70,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 100
+          }}
+        >
+          <Alert severity="warning">
+            {newlyAdded.length} New Order
+            <br />
+            <Button
+              variant="contained"
+              color="warning"
+              size="small"
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              Reload
+            </Button>
+          </Alert>
+        </Box>
+      ) : null}
+      {pendingPayment?.amount && (
+        <Typography>Payment Collected: ₹. {pendingPayment?.amount}</Typography>
+      )}
+      {orders?.map((order) => {
+        return (
         <Card
           sx={{
             display: 'flex',
@@ -95,8 +140,8 @@ export const IncomingOrder = () => {
               backgroundColor: getBackgroundColor(order.status)
             }}
           >
-             <Typography variant='caption'>
-              {getPaymentContext(order)}
+            <Typography variant="caption">
+              {getPaymentContext(order, user!.uid)}
             </Typography>
             <Container
               component="div"
@@ -170,7 +215,7 @@ export const IncomingOrder = () => {
                         congestion: order.congestion || 0,
                         time: oldTime,
                         delayReason: order.delayReason?.[newStatus] ?? [],
-                        order,
+                        order
                       });
                     }}
                     sx={{
@@ -188,7 +233,16 @@ export const IncomingOrder = () => {
                     <MenuItem value={'reached_location'}>
                       Reached Customer Place
                     </MenuItem>
-                    <MenuItem value={'delivered'}>Delivered</MenuItem>
+                    <MenuItem
+                      value={'delivered'}
+                      disabled={
+                        order.paymentCollector
+                          ? order.paymentCollector !== user?.uid
+                          : false
+                      }
+                    >
+                      Delivered
+                    </MenuItem>
                   </Select>
                   <Button
                     sx={{
@@ -220,7 +274,7 @@ export const IncomingOrder = () => {
             ))}
           </CardContent>
         </Card>
-      ))}
+      )})}
       <Drawer
         open={Boolean(showCongestion.orderId)}
         anchor="bottom"
@@ -363,7 +417,11 @@ export const IncomingOrder = () => {
           )}
           <Button
             onClick={async () => {
-              if (showCongestion.status && showCongestion.time && showCongestion.order) {
+              if (
+                showCongestion.status &&
+                showCongestion.time &&
+                showCongestion.order
+              ) {
                 await mutateAsync({
                   orderId: showCongestion.orderId,
                   orderStatus: showCongestion.status,

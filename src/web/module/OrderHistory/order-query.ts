@@ -7,14 +7,12 @@ import {
   getOrderHistoryWithRealTimeUpdate,
   incomingOrderSocketUupdate as incomingOrderSocketUpdate,
   incomingOrderSocketUupdateForDelivery,
-  incomingOrderSocketUupdateForDistributor,
   updateAssigneeForOrder,
   updateOrderStatus
 } from '../../firebase/order';
 import { updateDistributorAmount } from './distributor';
 
 const onAddedUtil = (thisOrder: Order, oldOrders: Order[]): Order[] => {
-  console.log('added');
   if (oldOrders.find((order) => order.orderId === thisOrder.orderId))
     return oldOrders;
   return [thisOrder, ...oldOrders];
@@ -40,6 +38,7 @@ export const useOrderHistoryQuery = () => {
     loading: true,
     orders: []
   });
+  const [newlyAdded, setNewlyAdded] = useState<string[]>([]);
   const userId = user?.uid;
   const unsubscribeRef = useRef<Unsubscribe[]>([]);
   useEffect(() => {
@@ -47,13 +46,17 @@ export const useOrderHistoryQuery = () => {
     if (!userId) return;
     const onAdded = (newOrder: Order) => {
       console.log('onAdded');
-      setOrder((prev) => {
-        const newState = onAddedUtil(newOrder, prev.orders);
-        return {
-          loading: false,
-          orders: newState
-        };
-      });
+      if (newOrder.shopOrderValue == undefined) {
+        setNewlyAdded((prev) => [...new Set([...prev, newOrder.orderId])]);
+      } else {
+        setOrder((prev) => {
+          const newState = onAddedUtil(newOrder, prev.orders);
+          return {
+            loading: false,
+            orders: newState
+          };
+        });
+      }
     };
     const onChange = (changedOrder: Order) => {
       console.log('onChange');
@@ -75,18 +78,9 @@ export const useOrderHistoryQuery = () => {
         );
         unsubscribeRef.current?.push(_unsub);
         setOrder({ loading: false, orders });
-      } else if (role === 'delivery') {
+      } else if (['delivery', 'distributor'].includes(role)) {
         const { orders, unsubscribe: _unsub } =
           await incomingOrderSocketUupdateForDelivery(
-            onAdded,
-            onChange,
-            userId
-          );
-        unsubscribeRef.current?.push(_unsub);
-        setOrder({ loading: false, orders });
-      } else if (role === 'distributor') {
-        const { orders, unsubscribe: _unsub } =
-          await incomingOrderSocketUupdateForDistributor(
             onAdded,
             onChange,
             userId
@@ -110,7 +104,7 @@ export const useOrderHistoryQuery = () => {
     };
   }, [loading, role, userId]);
 
-  return { loading: oder.loading, orders: oder.orders };
+  return { loading: oder.loading, orders: oder.orders, newlyAdded };
 };
 
 export const useMutationOrderStatus = () => {
@@ -137,6 +131,7 @@ export const useMutationOrderStatus = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['orderHistory'] });
+        queryClient.invalidateQueries({ queryKey: ['distributor-payment'] });
       }
     }
   );

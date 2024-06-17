@@ -17,7 +17,7 @@ const DeliveryIncomingOrder = lazy(() =>
 );
 
 const DistributorIncomingOrder = lazy(() =>
-  import('../../module/OrderHistory/distributor-order').then((m) => ({
+  import('../../module/OrderHistory/delivery-order').then((m) => ({
     default: m.IncomingOrder
   }))
 );
@@ -33,7 +33,6 @@ export const OrderHistoryRoute = () => {
   const {
     userDetails: { role }
   } = useUser();
-  console.log({role})
   let Component = OrderHistory;
   if (role === 'admin') {
     Component = IncomingOrder;

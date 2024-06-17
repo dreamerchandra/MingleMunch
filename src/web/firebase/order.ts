@@ -128,13 +128,13 @@ export const incomingOrderSocketUupdateForDelivery = async (
 ): Promise<{ orders: Order[]; unsubscribe: Unsubscribe }> => {
   const internalOrderQuery = query(
     collection(firebaseDb, 'internal-orders').withConverter(orderConverters),
-    where('assignedTo', 'array-contains', userId),
+    where('orderHandlers', 'array-contains', userId),
     orderBy('createdAt', 'desc'),
     limit(15)
   );
   const orderQuery = query(
     collection(firebaseDb, 'orders').withConverter(orderConverters),
-    where('assignedTo', 'array-contains', userId),
+    where('orderHandlers', 'array-contains', userId),
     orderBy('createdAt', 'desc'),
     limit(15)
   );
@@ -218,7 +218,7 @@ export const updateAssigneeForOrder = async ({
   assignedTo,
   paymentCollector,
   assigneeName,
-  paymentCollectorName,
+  paymentCollectorName
 }: {
   orderId: string;
   assignedTo: string[];
@@ -228,13 +228,17 @@ export const updateAssigneeForOrder = async ({
 }): Promise<void> => {
   const docRef = doc(firebaseDb, 'orders', orderId);
   const internalDocRef = doc(firebaseDb, 'internal-orders', orderId);
+  const updatedAssignedTo = paymentCollector
+    ? [...new Set([...assignedTo, paymentCollector])]
+    : assignedTo;
   await setDoc(
     docRef,
     {
       assignedTo: assignedTo,
+      orderHandlers: updatedAssignedTo,
       paymentCollector,
       paymentCollectorName,
-      assigneeName,
+      assigneeName
     },
     {
       merge: true
@@ -244,13 +248,16 @@ export const updateAssigneeForOrder = async ({
     internalDocRef,
     {
       assignedTo: assignedTo,
+      orderHandlers: updatedAssignedTo,
       paymentCollector,
+      paymentCollectorName,
+      assigneeName
     },
     {
       merge: true
     }
   );
-}
+};
 
 export const updateOrderStatus = async ({
   orderId,
@@ -280,12 +287,12 @@ export const updateOrderStatus = async ({
     {
       status: orderStatus,
       deliveredBy: orderStatus === 'delivered' ? userId : '',
-      updatedBy: userId,
+      updatedBy: userId
     },
     {
       merge: true
     }
-  )
+  );
   return setDoc(
     docRef,
     {
@@ -295,7 +302,7 @@ export const updateOrderStatus = async ({
       },
       ...delay,
       deliveredBy: orderStatus === 'delivered' ? userId : '',
-      updatedBy: userId,
+      updatedBy: userId
     },
     { merge: true }
   );
