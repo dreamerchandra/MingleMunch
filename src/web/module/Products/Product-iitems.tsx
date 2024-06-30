@@ -19,10 +19,13 @@ const FooterActions: FC<{
   onAdd: () => void;
   isSuggestion: boolean;
   allowEdit: boolean;
-}> = ({ product, onAdd, allowEdit }) => {
+  parentProductId?: string;
+}> = ({ product, onAdd, allowEdit, parentProductId }) => {
   const { addToCart, cartDetails } = useCart();
-  const inCart = cartDetails.cart.filter(
-    (item) => item.itemId === product.itemId
+  const inCart = cartDetails.cart.filter((item) =>
+    parentProductId
+      ? item.itemId === product.itemId && parentProductId === item.parentItemId
+      : item.itemId === product.itemId
   );
   const { mutateAsync, isLoading } = useMutationProductEdit();
   const navigator = useNavigate();
@@ -40,7 +43,11 @@ const FooterActions: FC<{
     >
       <div>
         {inCart.length ? (
-          <AddItem product={product} onAdd={onAdd} />
+          <AddItem
+            product={product}
+            onAdd={onAdd}
+            parentItemId={parentProductId}
+          />
         ) : (
           <Container
             style={{
@@ -96,7 +103,7 @@ const FooterActions: FC<{
                 onClick={() => {
                   setTimeout(() => {
                     onAdd();
-                    addToCart(product);
+                    addToCart({ ...product, parentItemId: parentProductId });
                   }, 100); // little animation
                 }}
                 variant="outlined"
@@ -144,11 +151,21 @@ const FooterActions: FC<{
   );
 };
 
-const SuggestionProductItem: FC<{ productId: string }> = ({ productId }) => {
+const SuggestionProductItem: FC<{
+  productId: string;
+  parentProductId: string;
+}> = ({ productId, parentProductId }) => {
   const { data: product } = useProductQuery(productId);
   if (!product) return null;
   if (!product.isAvailable) return null;
-  return <ProductItem product={product} isSuggestion allowEdit={false} />;
+  return (
+    <ProductItem
+      product={product}
+      isSuggestion
+      allowEdit={false}
+      parentProductId={parentProductId}
+    />
+  );
 };
 
 const ItemDescription: FC<{ description: string }> = ({ description }) => {
@@ -185,7 +202,8 @@ export const ProductItem: FC<{
   product: Product;
   isSuggestion?: boolean;
   allowEdit: boolean;
-}> = ({ product, isSuggestion = false, allowEdit }) => {
+  parentProductId?: string;
+}> = ({ product, isSuggestion = false, allowEdit, parentProductId }) => {
   const { itemDescription, itemName, itemPrice: itemPrice } = product;
   const [open, setOpen] = useState(false);
 
@@ -226,6 +244,7 @@ export const ProductItem: FC<{
               }
             }}
             allowEdit={allowEdit}
+            parentProductId={parentProductId}
           />
         </div>
       </div>
@@ -246,7 +265,11 @@ export const ProductItem: FC<{
             Customization
           </Typography>
           {product.suggestionIds?.map((id) => (
-            <SuggestionProductItem productId={id} key={id} />
+            <SuggestionProductItem
+              productId={id}
+              key={id}
+              parentProductId={product.itemId}
+            />
           ))}
         </Box>
       </Drawer>
@@ -256,14 +279,18 @@ export const ProductItem: FC<{
 
 export function AddItem({
   product,
-  onAdd
+  onAdd,
+  parentItemId
 }: {
   product: Product;
   onAdd?: () => void;
+  parentItemId?: string;
 }) {
   const { addToCart, removeFromCart, cartDetails } = useCart();
-  const inCart = cartDetails.cart.filter(
-    (item) => item.itemId === product.itemId
+  const inCart = cartDetails.cart.filter((item) =>
+    parentItemId
+      ? item.itemId === product.itemId && item.parentItemId === parentItemId
+      : item.itemId === product.itemId
   );
   return (
     <Container
@@ -282,7 +309,7 @@ export function AddItem({
           paddingRight: '16px',
           minWidth: '0px'
         }}
-        onClick={() => removeFromCart(product)}
+        onClick={() => removeFromCart({ ...product, parentItemId })}
       >
         <Remove fontSize="small" />
       </Button>
@@ -298,7 +325,7 @@ export function AddItem({
         }}
         onClick={() => {
           onAdd?.();
-          addToCart(product);
+          addToCart({ ...product, parentItemId });
         }}
       >
         <Add fontSize="small" />

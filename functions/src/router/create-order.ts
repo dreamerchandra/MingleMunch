@@ -16,6 +16,24 @@ type PublicOrder = Omit<OrderDb, 'items' | 'shopOrderValue' | 'bill'> & {
   };
 };
 
+interface OrderItem {
+  itemId: string;
+  quantity: number;
+}
+
+export interface OrderBody {
+  details: [
+    {
+      itemId: string;
+      quantity: number;
+      subProducts: OrderItem[];
+      parentItemId?: string;
+    }
+  ];
+  appliedCoupon?: string;
+  orderId?: string;
+}
+
 export const publicOrderConverter = {
   toFirestore: (order: OrderDb) => {
     const result: PublicOrder = JSON.parse(JSON.stringify(order));
@@ -36,12 +54,12 @@ export const publicOrderConverter = {
 };
 
 const generateRandom4DigitNumber = () => {
-  const random =  Math.floor(Math.random() * 9000);
-  if(random < 1000) {
+  const random = Math.floor(Math.random() * 9000);
+  if (random < 1000) {
     return random + 1000;
   }
   return random;
-}
+};
 
 export const createOrderInDb = async (
   user: Request['user'],
@@ -52,7 +70,8 @@ export const createOrderInDb = async (
     shops,
     bill,
     shopOrderValue,
-    orderId
+    orderId,
+    details
   }: {
     products: Product[];
     itemToQuantity: { [key: string]: number };
@@ -62,6 +81,7 @@ export const createOrderInDb = async (
     bill: OrderDb['bill'];
     shopOrderValue: OrderDb['shopOrderValue'];
     orderId?: string;
+    details: OrderBody['details'];
   }
 ) => {
   const ref = firebaseDb.collection('orders');
@@ -77,7 +97,8 @@ export const createOrderInDb = async (
     itemToQuantity,
     shops,
     shopOrderValue: shopOrderValue,
-    createdAt: Timestamp.now()
+    createdAt: Timestamp.now(),
+    details
   };
   const isInternal =
     user.role === 'admin' || user.role === 'vendor' || user.internal === true;

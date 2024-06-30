@@ -11,10 +11,17 @@ export type OrderStatus =
   | 'rejected'
   | 'delivered';
 
+export type CartProduct = Product & { parentItemId?: string };
+
+interface OrderItem {
+  itemId: string;
+  quantity: number;
+}
+
 export interface Order {
   orderId: string;
   userId: string;
-  items: Product[];
+  items: CartProduct[];
   shops: Shop[];
   orderRefId: string;
   status: OrderStatus;
@@ -56,4 +63,12 @@ export interface Order {
   paymentCollectorName: string;
   assigneeName: string;
   orderHandlers: string[];
+  details: [
+    {
+      itemId: string;
+      quantity: number;
+      subProducts: OrderItem[];
+      parentItemId?: string;
+    }
+  ];
 }

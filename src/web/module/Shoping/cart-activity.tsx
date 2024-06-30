@@ -7,11 +7,11 @@ import {
   useReducer
 } from 'react';
 import { Analytics } from '../../../common/analytics';
-import { Product } from '../../../common/types/Product';
 import { post } from '../../firebase/fetch';
+import { CartProduct } from '../../../common/types/Order';
 
 type CartState = {
-  cart: Product[];
+  cart: CartProduct[];
   total: number;
   totalItems: number;
   cartId?: string;
@@ -28,13 +28,14 @@ const initialState: CartState = {
 
 interface AddToCartAction {
   type: 'ADD_TO_CART';
-  payload: Product;
+  payload: CartProduct;
 }
 
 interface RemoveFromCartAction {
   type: 'REMOVE_FROM_CART';
   payload: {
     itemId: string;
+    parentItemId?: string;
   };
 }
 interface RemoveAllFromCartAction {
@@ -72,8 +73,11 @@ const cartActivityReducer = (state: CartState, action: Actions) => {
         totalItems: state.totalItems + 1
       };
     case 'REMOVE_FROM_CART': {
-      const itemIndex = state.cart.findIndex(
-        (item) => item.itemId === action.payload.itemId
+      const itemIndex = state.cart.findIndex((item) =>
+        action.payload.parentItemId
+          ? item.itemId === action.payload.itemId &&
+            item.parentItemId === action.payload.parentItemId
+          : item.itemId === action.payload.itemId
       );
       const product = state.cart[itemIndex];
       if (!product) return state;
@@ -129,7 +133,7 @@ const useCartActivity = () => {
     localStorage.setItem(LOCAL_STORAGE, JSON.stringify(cartDetails));
   }, [cartDetails]);
 
-  const addToCart = useCallback((product: Product) => {
+  const addToCart = useCallback((product: CartProduct) => {
     dispatch({ type: 'ADD_TO_CART', payload: product });
     Analytics.pushEvent('cart-added', {
       productCategory: 'Food',
@@ -138,28 +142,32 @@ const useCartActivity = () => {
   }, []);
 
   const addMultipleToCart = useCallback(
-    (products: Product, quality: number) => {
+    (products: CartProduct, quality: number) => {
       for (let i = 0; i < quality; i++) {
         addToCart(products);
       }
     },
     [addToCart]
   );
-  const removeFromCart = useCallback((product: Product) => {
-    product.suggestionIds?.map((suggestion) => {
-      dispatch({
-        type: 'REMOVE_FROM_CART',
-        payload: {
-          itemId: suggestion
-        }
+  const removeFromCart = useCallback(
+    (product: CartProduct) => {
+      product.suggestionIds?.map((suggestion) => {
+        dispatch({
+          type: 'REMOVE_FROM_CART',
+          payload: {
+            itemId: suggestion,
+            parentItemId: product.parentItemId,
+          }
+        });
       });
-    });
-    dispatch({ type: 'REMOVE_FROM_CART', payload: product });
-    Analytics.pushEvent('cart-removed', {
-      productCategory: 'Food',
-      productSku: product.itemId
-    });
-  }, []);
+      dispatch({ type: 'REMOVE_FROM_CART', payload: product });
+      Analytics.pushEvent('cart-removed', {
+        productCategory: 'Food',
+        productSku: product.itemId
+      });
+    },
+    []
+  );
   const removeAll = useCallback(() => {
     dispatch({ type: 'REMOVE_ALL' });
     Analytics.pushEvent('cart-removed_all');
@@ -230,7 +238,7 @@ export const useCoupon = () => {
       localStorage.removeItem(oldKey);
     }
     const data = localStorage.getItem(key);
-    if (!data) return {coupon: '', isExpired: true, expireBy: new Date()};
+    if (!data) return { coupon: '', isExpired: true, expireBy: new Date() };
     const { coupon, date } = JSON.parse(data);
     const expireBy = new Date(date);
     expireBy.setDate(expireBy.getDate() + 5);

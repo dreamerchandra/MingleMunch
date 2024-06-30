@@ -20,7 +20,6 @@ import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Analytics } from '../../../common/analytics';
-import { Product } from '../../../common/types/Product';
 import { useToLogin, useUser } from '../../firebase/auth';
 import { post } from '../../firebase/fetch';
 import { LastOrder } from '../LastOrder/LastOrder';
@@ -29,6 +28,7 @@ import { useShopQuery } from '../Shop/shop-query';
 import { AppConfig, useAppConfig } from '../appconfig';
 import { useCart, useCoupon } from './cart-activity';
 import { useMutationCreateOrder } from './checkout-query';
+import { CartProduct } from '../../../common/types/Order';
 
 const StyledProduct = styled('div')<{ error: boolean; spacing?: number }>(
   ({ theme, error, spacing = 2 }) => ({
@@ -76,7 +76,7 @@ const SubSection = styled('div')(({ theme }) => ({
 }));
 
 const CheckoutCard: FC<{
-  items: { quantity: number; product: Product }[];
+  items: { quantity: number; product: CartProduct }[];
   error: any;
 }> = ({ items, error }) => {
   return (
@@ -91,39 +91,67 @@ const CheckoutCard: FC<{
     >
       {items
         .sort((a, b) => a.product.itemName.localeCompare(b.product.itemName))
-        .map((item) => (
-          <>
-            <StyledProduct
-              key={item.product.itemId}
-              error={error.products.includes(item.product.itemId)}
-              spacing={item.product.parcelCharges > 0 ? 0 : 2}
-            >
-              <div>
-                <Typography component="h6">{item.product.itemName}</Typography>
-                <Typography component="h6">
-                  ₹{item.product.itemPrice}
-                </Typography>
-              </div>
-              <div>
-                <AddItem product={item.product} />
-              </div>
-            </StyledProduct>
-            {item.product.parcelCharges > 0 && (
-              <div>
-                <Typography variant="h6" color="blue" lineHeight={0.5}>
-                  +
-                </Typography>
-                <Typography variant="body2">
-                  Parcel Charges {item.product.parcelCharges * item.quantity}
-                </Typography>
-              </div>
-            )}
-          </>
-        ))}
+        .filter((i) => !i.product.parentItemId)
+        .map((item) => {
+          const subItems = items.filter(
+            (i) => i.product.parentItemId === item.product.itemId
+          );
+          return (
+            <>
+              <ProductCard item={item} error={error} />
+              {subItems.length ? (
+                <Box
+                  sx={{
+                    pl: 2
+                  }}
+                >
+                  {subItems.map((i) => (
+                    <ProductCard item={i} error={error} />
+                  ))}
+                </Box>
+              ) : null}
+            </>
+          );
+        })}
     </Card>
   );
 };
 
+const ProductCard: FC<{
+  item: { quantity: number; product: CartProduct };
+  error: any;
+}> = ({ item, error }) => {
+  return (
+    <>
+      <StyledProduct
+        key={item.product.itemId}
+        error={error.products.includes(item.product.itemId)}
+        spacing={item.product.parcelCharges > 0 ? 0 : 2}
+      >
+        <div>
+          <Typography component="h6">{item.product.itemName}</Typography>
+          <Typography component="h6">₹{item.product.itemPrice}</Typography>
+        </div>
+        <div>
+          <AddItem
+            product={item.product}
+            parentItemId={item.product.parentItemId}
+          />
+        </div>
+      </StyledProduct>
+      {item.product.parcelCharges > 0 && (
+        <div>
+          <Typography variant="h6" color="blue" lineHeight={0.5}>
+            +
+          </Typography>
+          <Typography variant="body2">
+            Parcel Charges {item.product.parcelCharges * item.quantity}
+          </Typography>
+        </div>
+      )}
+    </>
+  );
+};
 const CompetitorBanner: FC<{ grandTotal: number }> = ({ grandTotal }) => {
   return (
     <Card
@@ -481,8 +509,9 @@ const Footer: FC<{
 }) => {
   const { removeAll } = useCart();
   const {
-    userDetails: { user }
+    userDetails: { user, role }
   } = useUser();
+  const isAdmin = role === 'admin';
   return (
     <>
       {error.message ? (
@@ -512,7 +541,7 @@ const Footer: FC<{
             loadingPosition="start"
             startIcon={<ShoppingCartCheckoutIcon />}
             variant="contained"
-            disabled={isLoading || !appConfig.isOpen}
+            disabled={isAdmin ? isLoading : isLoading || !appConfig.isOpen}
             onClick={onPlaceOrder}
             color="secondary"
             disableElevation
@@ -734,6 +763,19 @@ export const Checkout: FC = () => {
     Analytics.pushEvent('coupon-applied', { coupon });
   };
   const items = cartDetails.cart.reduce((old, cartItem) => {
+    if (cartItem.parentItemId) {
+      const item = old.find(
+        (item) =>
+          item.product.itemId === cartItem.itemId &&
+          item.product.parentItemId === cartItem.parentItemId
+      );
+      if (item) {
+        item.quantity += 1;
+      } else {
+        old.push({ product: cartItem, quantity: 1 });
+      }
+      return old;
+    }
     const item = old.find((item) => item.product.itemId === cartItem.itemId);
     if (item) {
       item.quantity += 1;
@@ -741,7 +783,7 @@ export const Checkout: FC = () => {
       old.push({ product: cartItem, quantity: 1 });
     }
     return old;
-  }, [] as { product: Product; quantity: number }[]);
+  }, [] as { product: CartProduct; quantity: number }[]);
   const navigate = useNavigate();
   const { triggerLogin } = useToLogin();
   const { mutate, isLoading } = useMutationCreateOrder();
@@ -822,10 +864,20 @@ export const Checkout: FC = () => {
     }
     mutate(
       {
-        details: items.map((item) => ({
-          itemId: item.product.itemId,
-          quantity: item.quantity
-        })),
+        details: items.map((item) => {
+          const subProduct = items.filter(
+            (i) => i.product.parentItemId === item.product.itemId
+          );
+          return {
+            itemId: item.product.itemId,
+            quantity: item.quantity,
+            parentItemId: item.product.parentItemId,
+            subProducts: subProduct.map((p) => ({
+              itemId: p.product.itemId,
+              quantity: p.quantity
+            }))
+          };
+        }),
         appliedCoupon: coupon || '',
         orderId: cartId
       },

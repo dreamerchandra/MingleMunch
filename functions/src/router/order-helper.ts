@@ -1,6 +1,7 @@
 import {  Timestamp } from 'firebase-admin/firestore';
 import { Product } from '../types/Product.js';
 import { Shop } from '../types/Shop.js';
+import { OrderBody } from './create-order.js';
 export interface OrderDb {
   orderId: string;
   userId: string;
@@ -37,4 +38,5 @@ export interface OrderDb {
     costPriceSubTotal: number;
     deliveryCharges: number;
   };
+  details: OrderBody['details'];
 }

@@ -13,23 +13,19 @@ import { Shop } from '../types/Shop.js';
 import { OrderDb } from './order-helper.js';
 import { updateWhatsapp } from './twilio.js';
 import { removeCoupon, updateFreeDeliveryForInvitedUser } from './user.js';
-import { createOrderInDb } from './create-order.js';
+import { OrderBody, createOrderInDb } from './create-order.js';
 import {
   applyHerCoupon,
   canProceedToApply,
   canUseHerCoupon
 } from './her-coupon.js';
 
-interface OrderBody {
-  details: [{ itemId: string; quantity: number }];
-  appliedCoupon?: string;
-  orderId?: string;
-}
 
-const getAllData = async (productIds: string[]) => {
+
+const getAllData = async (productIds: string[], isAdmin: boolean) => {
   const products = await getProducts(productIds);
   const isAllAvailable = products.every((p) => p.isAvailable);
-  if (!isAllAvailable) {
+  if (isAdmin ? false : !isAllAvailable) {
     const nonAvailableItems = products.filter((p) => !p.isAvailable);
     logger.warn(
       'some items are not available',
@@ -45,7 +41,7 @@ const getAllData = async (productIds: string[]) => {
     await getShops(uniqueShopIds),
     await getConfig()
   ]);
-  if (!appConfig.isOpen) {
+  if (isAdmin ? false : !appConfig.isOpen) {
     logger.warn(`Ordering is closed. Open by 10Am`);
     throw new HttpError(400, `Ordering is closed`, {
       appConfig
@@ -186,6 +182,7 @@ const getBill = ({
 export const createOrder = async (req: Request, res: Response) => {
   const time = Date.now();
   const { details, appliedCoupon, orderId } = req.body as OrderBody;
+  const isAdmin = req.userRole === 'admin';
   logger.log(`incoming request payload, ${JSON.stringify(details)}`);
   logger.log(`started ${Date.now() - time}`);
   const productIds = details.map((d) => d.itemId);
@@ -197,13 +194,14 @@ export const createOrder = async (req: Request, res: Response) => {
       );
       if (!herCouponData.canProceed) {
         throw new HttpError(400, herCouponData.error ?? 'Invalid Coupon', {
-          removeCoupon: true,
+          removeCoupon: true
         });
       }
       await applyHerCoupon(appliedCoupon, req.user.uid);
     }
     const { products, shops, appConfig, shopCommission } = await getAllData(
-      productIds
+      productIds,
+      isAdmin
     );
     const { platformFee } = appConfig;
     const { detailsToQuantity } = getDetailsToQuantity(details);
@@ -240,7 +238,8 @@ export const createOrder = async (req: Request, res: Response) => {
         shopOrderValue,
         shops,
         appliedCoupon,
-        orderId
+        orderId,
+        details
       }
     );
     logger.log(`order created ${JSON.stringify(orderDetails)}`);
@@ -254,7 +253,7 @@ export const createOrder = async (req: Request, res: Response) => {
       return res.status(400).json({
         error: 'Invalid order',
         message: err.message,
-        ...err.extra,
+        ...err.extra
       });
     }
     logger.error(`error while creating order ${err}`);
